@@ -151,11 +151,11 @@ You: Add WCAG 2.1 AA requirement to PRD
 ✅ **DO**: One worktree per feature
 ```bash
 # Feature A (main repo)
-cd ~/watchora
+cd ~/acmecorp
 /code-prd  # Creates feat/PRD-003
 
 # Feature B (worktree)
-cd ~/watchora-rss
+cd ~/acmecorp-rss
 /code-prd  # Creates feat/PRD-008
 
 # Work in parallel with no conflicts!
@@ -237,8 +237,8 @@ gh pr create
 ✅ **DO**: Remove worktree when feature complete
 ```bash
 # After PR merged
-cd ~/watchora  # Main repo
-git worktree remove ../watchora-design-system
+cd ~/acmecorp  # Main repo
+git worktree remove ../acmecorp-design-system
 git branch -d feat/PRD-003-design-system
 git pull origin main
 ```
@@ -257,9 +257,9 @@ git worktree list  # Shows 10 directories!
 
 ✅ **DO**: Descriptive names
 ```
-../watchora-design-system/    # Clear what this is
-../watchora-rss-monitoring/
-../watchora-auth/
+../acmecorp-design-system/    # Clear what this is
+../acmecorp-rss-monitoring/
+../acmecorp-auth/
 ```
 
 ❌ **DON'T**: Generic names
@@ -277,7 +277,7 @@ git worktree list  # Shows 10 directories!
 
 ✅ **DO**: Rebase regularly
 ```bash
-cd ../watchora-design-system
+cd ../acmecorp-design-system
 git fetch origin
 git rebase origin/main
 ```

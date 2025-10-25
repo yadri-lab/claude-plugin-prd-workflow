@@ -29,17 +29,7 @@ Most development teams struggle with:
 💡 Idea → 📝 PRD → ✅ Review → 💻 Code → 🔒 Quality → 🚀 Ship
 ```
 
-With **AI-powered agents**, **automated quality gates**, and **Git worktree orchestration**, you ship features **60% faster** while maintaining **production-grade quality**.
-
-### The Results 📈
-
-Teams using PRD Workflow Manager report:
-
-- ⚡ **-60% cycle time** - From PRD to production in half the time
-- 🎯 **-80% scope creep** - AI review catches ambiguity before coding starts
-- 🚀 **+300% parallel work** - Git worktrees enable true parallel development
-- ✅ **-95% failed PRs** - Automated quality checks catch issues early
-- 🧠 **-70% context switching** - Everything lives in one workflow
+With **AI-powered agents**, **automated quality gates**, and **Git worktree orchestration**, you ship features **faster** while maintaining **production-grade quality**.
 
 ---
 
@@ -48,26 +38,26 @@ Teams using PRD Workflow Manager report:
 ### 🔍 **AI-Powered PRD Review**
 7-dimension analysis with **automatic grading (A-F)** and **calibration questions** that expose gaps you didn't know existed.
 
-**Before**: 2 hours of manual review, still miss critical issues
-**After**: 15 minutes, catches 10x more gaps with actionable questions
+**Before**: Hours of manual review, still miss critical issues
+**After**: Quick AI-powered analysis catches more gaps with actionable questions
 
 ### 🌳 **Git Worktree Orchestration**
 Work on **5+ features in parallel** without branch switching. Each PRD gets its own isolated workspace.
 
-**Before**: Context switching costs 2-3 hours/day
-**After**: Zero context switching, instant feature switching
+**Before**: Context switching costs hours every day
+**After**: Minimal context switching, instant feature switching
 
 ### 👨‍💻 **Guided Implementation**
-AI breaks your PRD into **40+ granular tasks** with acceptance criteria, file paths, and code examples.
+AI breaks your PRD into granular tasks with acceptance criteria, file paths, and code examples.
 
-**Before**: Developers spend 30% of time figuring out "what's next"
+**Before**: Developers spend significant time figuring out "what's next"
 **After**: AI tells you exactly what to build, step by step
 
 ### 🔒 **Automated Security & Quality**
 **Zero-config** security scans (OWASP Top 10, dependency vulnerabilities, secrets detection) and quality checks (coverage, complexity, linting).
 
-**Before**: Manual security reviews find 60% of issues
-**After**: Automated scans find 99% of issues in 30 seconds
+**Before**: Manual security reviews miss many issues
+**After**: Automated scans find more issues in seconds
 
 ### 🎼 **Multi-PRD Orchestration**
 **Smart dependency resolution** and **resource allocation** across multiple features. Know exactly what's blocked, what's ready, and where to focus.
@@ -279,40 +269,6 @@ flowchart LR
 
 ---
 
-## 📊 Real-World Impact
-
-### Before vs After
-
-| Metric | Before Plugin | After Plugin | Improvement |
-|--------|--------------|--------------|-------------|
-| **PRD to Production** | 12 days | 5 days | **-58%** ⚡ |
-| **PRD Review Time** | 2 hours | 15 min | **-87%** 🎯 |
-| **Failed PRs** | 40% | 2% | **-95%** ✅ |
-| **Context Switching** | 15x/week | 3x/week | **-80%** 🧠 |
-| **Parallel Features** | 1 | 5+ | **+400%** 🚀 |
-| **Security Issues Found** | 60% | 99% | **+65%** 🔒 |
-
-### Case Studies
-
-**🏢 MarketHub (E-commerce, 12 devs)**
-- **Problem**: 8-week feature cycle, 40% of PRs needed rework
-- **Solution**: Enterprise preset + automated quality gates
-- **Results**: 3-week cycle (-62%), 0% failed PRs, $2.3M additional revenue
-
-**⚡ InvoiceFlow (SaaS Startup, 3 devs)**
-- **Problem**: Manual PRD review took 3 hours, scope creep on 80% of features
-- **Solution**: Startup preset + lenient grading (C minimum)
-- **Results**: Launched MVP in 8 weeks (vs 12 planned), 71% test coverage, 0 critical bugs
-
-**🌐 CloudScale (Microservices, 20 devs)**
-- **Problem**: 3 teams, complex dependencies, merge conflicts daily
-- **Solution**: Multi-PRD orchestration + Git worktrees
-- **Results**: 10 features in parallel, 0 merge conflicts, -77% checkout latency
-
-[See more examples →](docs/examples/)
-
----
-
 ## ⚙️ Configuration Presets
 
 Choose the preset that matches your project type:
@@ -417,7 +373,7 @@ cp config/presets/startup.json .claude/config.json
 - 📊 [Workflow Diagrams](docs/workflow-diagrams.md) - Visual guides with Mermaid
 
 ### Real-World Examples
-- 🏗️ [Watchora Setup](docs/examples/watchora-setup.md) - Multi-tenant SaaS with design system
+- 🏗️ [AcmeCorp Setup](docs/examples/acmecorp-setup.md) - Multi-tenant SaaS with design system
 - ⚡ [SaaS Startup](docs/examples/saas-startup.md) - InvoiceFlow MVP in 8 weeks
 - 🛒 [E-commerce](docs/examples/ecommerce.md) - MarketHub with Stripe Connect
 - 🌐 [Microservices](docs/examples/microservices.md) - 3-service extraction from monolith
@@ -545,7 +501,6 @@ npm install  # if you're adding JS/TS features
 ### Get Help
 - 💬 [GitHub Discussions](https://github.com/Yassinello/claude-prd-workflow/discussions) - Ask questions
 - 🐛 [GitHub Issues](https://github.com/Yassinello/claude-prd-workflow/issues) - Report bugs
-- 🐦 Twitter: [@Yassinello](https://twitter.com/Yassinello)
 
 ### Report Issues
 Use our issue templates:
@@ -621,7 +576,6 @@ Special thanks to the Claude Code team for creating an amazing platform!
 If PRD Workflow Manager helps you ship faster, please:
 
 - ⭐ **Star this repo**
-- 🐦 **Share on Twitter**
 - 📝 **Write a blog post**
 - 💬 **Tell your team**
 

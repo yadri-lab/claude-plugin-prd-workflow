@@ -206,8 +206,8 @@ app.use(cors({ origin: '*' }));
 
 // ✅ Whitelist specific origins
 const allowedOrigins = [
-  'https://watchora.com',
-  'https://app.watchora.com'
+  'https://acmecorp.com',
+  'https://app.acmecorp.com'
 ];
 app.use(cors({ origin: allowedOrigins }));
 ```

@@ -148,7 +148,7 @@ function processOrder(order: Order) {
 **SonarQube Integration**:
 ```yaml
 # sonar-project.properties
-sonar.projectKey=watchora
+sonar.projectKey=acmecorp
 sonar.sources=src
 sonar.exclusions=**/*.test.ts,**/*.spec.ts
 sonar.typescript.lcov.reportPaths=coverage/lcov.info

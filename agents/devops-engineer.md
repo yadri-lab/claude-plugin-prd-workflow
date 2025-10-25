@@ -121,7 +121,7 @@ terraform {
 }
 
 resource "aws_s3_bucket" "static_assets" {
-  bucket = "watchora-static-assets"
+  bucket = "acmecorp-static-assets"
   acl    = "private"
 
   versioning {
@@ -139,14 +139,14 @@ resource "aws_s3_bucket" "static_assets" {
 resource "aws_cloudfront_distribution" "cdn" {
   origin {
     domain_name = aws_s3_bucket.static_assets.bucket_regional_domain_name
-    origin_id   = "S3-watchora"
+    origin_id   = "S3-acmecorp"
   }
 
   enabled = true
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD"]
     cached_methods   = ["GET", "HEAD"]
-    target_origin_id = "S3-watchora"
+    target_origin_id = "S3-acmecorp"
 
     forwarded_values {
       query_string = false
@@ -261,7 +261,7 @@ kubectl apply -f k8s/green-deployment.yml
 kubectl wait --for=condition=available --timeout=300s deployment/green
 
 # Switch traffic to green
-kubectl patch service watchora-web -p '{"spec":{"selector":{"version":"green"}}}'
+kubectl patch service acmecorp-web -p '{"spec":{"selector":{"version":"green"}}}'
 
 # Wait 5 minutes for monitoring
 sleep 300
@@ -269,7 +269,7 @@ sleep 300
 # Check error rate
 if [ $(get_error_rate) -gt 5 ]; then
   echo "Rollback: High error rate detected"
-  kubectl patch service watchora-web -p '{"spec":{"selector":{"version":"blue"}}}'
+  kubectl patch service acmecorp-web -p '{"spec":{"selector":{"version":"blue"}}}'
   exit 1
 fi
 
@@ -285,10 +285,10 @@ kubectl scale deployment/blue --replicas=0
 apiVersion: v1
 kind: Service
 metadata:
-  name: watchora-web
+  name: acmecorp-web
 spec:
   selector:
-    app: watchora-web
+    app: acmecorp-web
   ports:
     - port: 80
       targetPort: 3000
@@ -297,24 +297,24 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: watchora-web-stable
+  name: acmecorp-web-stable
 spec:
   replicas: 9
   selector:
     matchLabels:
-      app: watchora-web
+      app: acmecorp-web
       version: stable
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: watchora-web-canary
+  name: acmecorp-web-canary
 spec:
   replicas: 1  # 10% traffic
   selector:
     matchLabels:
-      app: watchora-web
+      app: acmecorp-web
       version: canary
 ```
 

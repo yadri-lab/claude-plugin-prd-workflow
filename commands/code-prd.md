@@ -64,7 +64,7 @@ If `config.prd_workflow.worktree.enabled`:
 
 Example:
 ```bash
-git worktree add ../watchora-design-system feat/PRD-003-design-system
+git worktree add ../acmecorp-design-system feat/PRD-003-design-system
 git worktree list
 ```
 
@@ -80,7 +80,7 @@ git worktree list
 **Important**: Navigate to worktree directory first!
 
 ```bash
-cd ../watchora-design-system
+cd ../acmecorp-design-system
 mv product/prds/03-ready/251024-design-system-v1.md \
    product/prds/04-in-progress/251024-design-system-v1.md
 ```
@@ -90,7 +90,7 @@ Update PRD header metadata:
 **Status**: In Progress
 **Started**: 2025-10-25
 **Branch**: feat/PRD-003-design-system
-**Worktree**: ../watchora-design-system/
+**Worktree**: ../acmecorp-design-system/
 ```
 
 ### Step 6: Update WORK_PLAN.md
@@ -107,7 +107,7 @@ git commit -m "feat(PRD-003): Start development in worktree
 
 - Moved PRD to 04-in-progress/
 - Updated WORK_PLAN.md status
-- Created worktree: ../watchora-design-system/
+- Created worktree: ../acmecorp-design-system/
 
 🤖 Generated with Claude Code"
 

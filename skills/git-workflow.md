@@ -63,10 +63,10 @@ git push origin --delete feat/old-feature
 **Create Worktree**:
 ```bash
 # Create worktree in parallel directory
-git worktree add ../watchora-design-system feat/PRD-003-design-system
+git worktree add ../acmecorp-design-system feat/PRD-003-design-system
 
 # Or create new branch in worktree
-git worktree add ../watchora-new-feature -b feat/new-feature
+git worktree add ../acmecorp-new-feature -b feat/new-feature
 ```
 
 **List Worktrees**:
@@ -74,15 +74,15 @@ git worktree add ../watchora-new-feature -b feat/new-feature
 git worktree list
 
 # Output:
-# /c/Users/user/watchora         abc123 [main]
-# /c/Users/user/watchora-design  def456 [feat/PRD-003-design-system]
-# /c/Users/user/watchora-rss     ghi789 [feat/PRD-008-rss-monitoring]
+# /c/Users/user/acmecorp         abc123 [main]
+# /c/Users/user/acmecorp-design  def456 [feat/PRD-003-design-system]
+# /c/Users/user/acmecorp-rss     ghi789 [feat/PRD-008-rss-monitoring]
 ```
 
 **Remove Worktree**:
 ```bash
 # After merging PR, clean up worktree
-git worktree remove ../watchora-design-system
+git worktree remove ../acmecorp-design-system
 
 # Or if directory deleted manually
 git worktree prune
@@ -91,10 +91,10 @@ git worktree prune
 **Navigate Between Worktrees**:
 ```bash
 # Each worktree is independent
-cd ../watchora-design-system
+cd ../acmecorp-design-system
 git status  # Shows feat/PRD-003-design-system branch
 
-cd ../watchora-rss
+cd ../acmecorp-rss
 git status  # Shows feat/PRD-008-rss-monitoring branch
 ```
 

@@ -128,7 +128,7 @@ Validate:
 
 ```typescript
 // ❌ Current (line 12)
-const API_URL = "https://internal-api.watchora.com/v1";
+const API_URL = "https://internal-api.acmecorp.com/v1";
 
 // ✅ Recommended
 const API_URL = process.env.NEXT_PUBLIC_API_URL;

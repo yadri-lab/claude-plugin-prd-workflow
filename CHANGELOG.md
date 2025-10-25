@@ -71,7 +71,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Skills reference
 - Best practices
 - Troubleshooting guide
-- 4 real-world examples (Watchora, SaaS, e-commerce, microservices)
+- 4 real-world examples (AcmeCorp, SaaS, e-commerce, microservices)
 
 ### Technical Details
 - Compatible with Claude Code v2.0.0+

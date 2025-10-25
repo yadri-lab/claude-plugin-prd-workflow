@@ -251,7 +251,7 @@ git add . && git commit && git push
 ### Get Help
 - [Troubleshooting Guide](troubleshooting.md)
 - [GitHub Discussions](https://github.com/Yassinello/claude-prd-workflow/discussions)
-- Email: yassine@watchora.com
+- Email: yassine@acmecorp.com
 
 ---
 

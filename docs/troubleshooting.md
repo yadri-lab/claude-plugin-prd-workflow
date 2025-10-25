@@ -551,7 +551,7 @@ Include:
 
 - **GitHub Discussions**: [Ask questions](https://github.com/Yassinello/claude-prd-workflow/discussions)
 - **GitHub Issues**: [Report bugs](https://github.com/Yassinello/claude-prd-workflow/issues)
-- **Email**: yassine@watchora.com
+- **Email**: yassine@acmecorp.com
 
 ---
 

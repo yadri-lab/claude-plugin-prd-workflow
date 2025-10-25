@@ -1,4 +1,4 @@
-# Watchora Project - Complete Setup Example
+# SaaS Platform - Complete Setup Example
 
 **Project Type**: Multi-tenant SaaS with Design System
 **Team Size**: Small (1-3 developers)
@@ -9,7 +9,7 @@
 
 ## Overview
 
-This example shows how Watchora (a real project) uses the PRD Workflow Manager plugin to build a complete SaaS platform with a design system.
+This example shows how a typical SaaS platform uses the PRD Workflow Manager plugin to build a complete application with a design system.
 
 **Key Features**:
 - Design system as a separate Turborepo package
@@ -44,7 +44,7 @@ This example shows how Watchora (a real project) uses the PRD Workflow Manager p
     "worktree": {
       "enabled": true,
       "parent_directory": "..",
-      "naming_pattern": "watchora-{feature}",
+      "naming_pattern": "acmecorp-{feature}",
       "auto_install_dependencies": true,
       "auto_open_editor": false
     },
@@ -118,7 +118,7 @@ This example shows how Watchora (a real project) uses the PRD Workflow Manager p
 ## Directory Structure
 
 ```
-watchora/
+acmecorp/
 ├── apps/
 │   ├── web/                  # Main Next.js app
 │   └── docs/                 # Documentation site
@@ -166,7 +166,7 @@ watchora/
 - **Feature Name**: Design System Package
 - **Priority**: P0 (must have)
 - **PRD ID**: PRD-003
-- **Executive Summary**: "Create a reusable design system package (@watchora/ui) with shadcn/ui components, custom hooks, and utilities to ensure visual consistency across all Watchora apps."
+- **Executive Summary**: "Create a reusable design system package (@acme/ui) with shadcn/ui components, custom hooks, and utilities to ensure visual consistency across all AcmeCorp apps."
 
 **Output**: `product/prds/01-draft/251015-design-system-v1.md`
 
@@ -189,7 +189,7 @@ watchora/
 7. Approves and moves to `03-ready/`
 8. Creates GitHub issue #12
 
-**Output**: Issue created at `https://github.com/watchora/watchora/issues/12`
+**Output**: Issue created at `https://github.com/acmecorp/acmecorp/issues/12`
 
 #### Step 3: Start Development
 
@@ -202,14 +202,14 @@ watchora/
 2. Creates branch `feat/PRD-003-design-system`
 3. Creates worktree:
    ```bash
-   git worktree add ../watchora-design-system feat/PRD-003-design-system
-   cd ../watchora-design-system
+   git worktree add ../acmecorp-design-system feat/PRD-003-design-system
+   cd ../acmecorp-design-system
    npm install
    ```
 4. Moves PRD to `04-in-progress/`
 5. Provides implementation context
 
-**You're now working in**: `../watchora-design-system/`
+**You're now working in**: `../acmecorp-design-system/`
 
 #### Step 4: Guided Implementation
 
@@ -377,7 +377,7 @@ Implements PRD-003: Design System Package with reusable UI components.
 ## Changes
 
 ### Added
-- `@watchora/ui` package with shadcn/ui integration
+- `@acme/ui` package with shadcn/ui integration
 - 5 core components: Button, Card, Input, Select, Dialog
 - Custom hooks: `useToast`, `useMediaQuery`
 - Tailwind config with design tokens
@@ -404,7 +404,7 @@ EOF
 )"
 ```
 
-**PR Link**: `https://github.com/watchora/watchora/pull/13`
+**PR Link**: `https://github.com/acmecorp/acmecorp/pull/13`
 
 #### Step 7: Merge & Cleanup
 
@@ -412,12 +412,12 @@ After review and approval:
 
 ```bash
 # Switch back to main repo
-cd ../watchora
+cd ../acmecorp
 
 # Merge (done via GitHub UI with squash merge)
 
 # Cleanup worktree
-git worktree remove ../watchora-design-system
+git worktree remove ../acmecorp-design-system
 git branch -d feat/PRD-003-design-system
 git pull origin main
 
@@ -438,17 +438,17 @@ mv product/prds/04-in-progress/251015-design-system-v1.md product/prds/05-comple
 
 ## Parallel Development Example
 
-Watchora often develops multiple features simultaneously using worktrees.
+AcmeCorp often develops multiple features simultaneously using worktrees.
 
 ### Scenario: 3 Features in Parallel
 
 **Active Worktrees**:
 ```bash
 git worktree list
-# /c/Users/user/watchora                  abc1234 [main]
-# /c/Users/user/watchora-design-system    def5678 [feat/PRD-003-design-system]
-# /c/Users/user/watchora-auth             ghi9012 [feat/PRD-004-auth-system]
-# /c/Users/user/watchora-dashboard        jkl3456 [feat/PRD-005-dashboard]
+# /c/Users/user/acmecorp                  abc1234 [main]
+# /c/Users/user/acmecorp-design-system    def5678 [feat/PRD-003-design-system]
+# /c/Users/user/acmecorp-auth             ghi9012 [feat/PRD-004-auth-system]
+# /c/Users/user/acmecorp-dashboard        jkl3456 [feat/PRD-005-dashboard]
 ```
 
 **Orchestration**:
@@ -462,17 +462,17 @@ git worktree list
 
 1. **PRD-003**: Design System (40% complete)
    - Branch: feat/PRD-003-design-system
-   - Worktree: ../watchora-design-system
+   - Worktree: ../acmecorp-design-system
    - Status: On track
 
 2. **PRD-004**: Authentication (15% complete)
    - Branch: feat/PRD-004-auth-system
-   - Worktree: ../watchora-auth
+   - Worktree: ../acmecorp-auth
    - Status: Blocked (waiting for PRD-003)
 
 3. **PRD-005**: Dashboard (0% complete)
    - Branch: feat/PRD-005-dashboard
-   - Worktree: ../watchora-dashboard
+   - Worktree: ../acmecorp-dashboard
    - Status: Not started (depends on PRD-003, PRD-004)
 
 ## Dependency Graph
@@ -490,7 +490,7 @@ Focus on completing PRD-003 to unblock PRD-004 and PRD-005.
 
 ### Vercel Deployment
 
-Watchora uses Vercel for deployment. PRs automatically trigger preview deployments.
+AcmeCorp uses Vercel for deployment. PRs automatically trigger preview deployments.
 
 **GitHub Actions** (`.github/workflows/pr-checks.yml`):
 ```yaml
@@ -584,7 +584,7 @@ If using Linear for project management:
 
 ---
 
-## Next Steps for Watchora
+## Next Steps for AcmeCorp
 
 **Upcoming PRDs**:
 - **PRD-006**: Multi-tenant Architecture (P0, depends on PRD-003, PRD-004)

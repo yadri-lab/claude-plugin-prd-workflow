@@ -43,7 +43,7 @@ Extract metadata:
 ### Step 3: Display Summary Dashboard
 
 ```markdown
-📋 **PRD Overview - Watchora Project**
+📋 **PRD Overview - AcmeCorp Project**
 
 ## Pipeline Summary
 - 📝 Draft: 3 PRDs

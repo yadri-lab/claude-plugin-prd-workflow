@@ -598,7 +598,7 @@ Review config quarterly:
 ## Examples
 
 See [examples/](examples/) for full configurations:
-- [Watchora Setup](examples/watchora-setup.md)
+- [AcmeCorp Setup](examples/acmecorp-setup.md)
 - [SaaS Startup](examples/saas-startup.md)
 - [Enterprise](examples/enterprise.md)
 

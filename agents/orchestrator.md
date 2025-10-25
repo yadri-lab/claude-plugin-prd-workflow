@@ -175,7 +175,7 @@ Assign PRDs to worktrees to minimize conflicts:
 - **ETA**: 2 days
 - **Conflicts**: None with others
 
-**Worktree 2** (../watchora-rss): PRD-008 (RSS Monitoring)
+**Worktree 2** (../acmecorp-rss): PRD-008 (RSS Monitoring)
 - **Status**: In progress (45%)
 - **ETA**: 3 days
 - **Conflicts**: None with PRD-003 ✅
@@ -306,7 +306,7 @@ When blocking PRD merges:
 # PRD-003 merged → rebase PRD-004, PRD-007, PRD-009
 
 for prd in PRD-004 PRD-007 PRD-009; do
-  cd ../watchora-$prd
+  cd ../acmecorp-$prd
   git fetch origin
   git rebase origin/main
   git push --force-with-lease

@@ -124,11 +124,11 @@ Classify conflicts:
 
 ```bash
 # Worktree 1 (main repo): PRD-003
-cd watchora/
+cd acmecorp/
 git worktree list  # feat/PRD-003-design-system
 
 # Worktree 2: PRD-008
-cd ../watchora-rss/
+cd ../acmecorp-rss/
 git worktree list  # feat/PRD-008-rss-monitoring
 ```
 
@@ -146,11 +146,11 @@ git worktree list  # feat/PRD-008-rss-monitoring
 
 1. ✅ Merge PRD-008 first (no dependencies)
    - `gh pr merge #XX --squash`
-   - Clean up worktree: `git worktree remove ../watchora-rss`
+   - Clean up worktree: `git worktree remove ../acmecorp-rss`
 
 2. ✅ Merge PRD-003 second (unblocks 3 PRDs)
    - `gh pr merge #YY --squash`
-   - Clean up worktree: `git worktree remove ../watchora-design-system`
+   - Clean up worktree: `git worktree remove ../acmecorp-design-system`
 
 ---
 

@@ -272,7 +272,7 @@ Please be respectful and constructive:
 ## Questions?
 
 - Open a discussion on GitHub
-- Email: yassine@watchora.com
+- Email: yassine@acmecorp.com
 - Join our Discord (link TBD)
 
 ---
