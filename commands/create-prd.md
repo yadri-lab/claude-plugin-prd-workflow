@@ -1,220 +1,178 @@
 ---
 name: create-prd
-description: Create new PRD from template with guided prompts
+description: Create new PRD with interactive refinement and AI assistance
 category: PRD Management
 ---
 
 # Create PRD Command
 
-Create a new Product Requirements Document from template with AI-assisted content generation.
+Create a new Product Requirements Document with interactive questions to refine scope before generation.
 
 ## Purpose
 
-Scaffold a new PRD with:
+Generate well-scoped PRDs through:
+- Interactive clarifying questions
+- AI-assisted content generation
 - Standardized structure
-- Guided prompts for each section
-- Best practices embedded
 - Automatic ID assignment
-- Initial placement in draft folder
+- Draft mode by default (review later on feature branch)
 
 ## Workflow
 
-### Step 1: Gather Basic Information
+### Step 1: Gather Feature Description
 
-Ask user for:
-1. **Feature name** (e.g., "Design System v1.0")
-2. **One-line description** (e.g., "Reusable component library")
-3. **Priority** (P0/P1/P2/P3)
-4. **Target date** (optional)
-
-### Step 2: Generate PRD ID
-
-**IMPORTANT: Read PRD ID configuration from user's project**
-
-1. **Check if `.claude/config.json` exists in project root**:
-   ```bash
-   # Use Read tool to read .claude/config.json
-   # If file doesn't exist, use defaults
-   ```
-
-2. **Parse config and extract prd_id settings**:
-   ```javascript
-   // If .claude/config.json exists and has prd_workflow.prd_id:
-   const prd_id_config = {
-     prefix: config.prd_workflow.prd_id.prefix,           // e.g., "WTC-PRD", "PRD"
-     separator: config.prd_workflow.prd_id.separator,     // e.g., "-", "_"
-     number_padding: config.prd_workflow.prd_id.number_padding  // e.g., 3, 4
-   }
-
-   // Otherwise use defaults:
-   const prd_id_config = {
-     prefix: "PRD",
-     separator: "-",
-     number_padding: 3
-   }
-   ```
-
-3. **Scan existing PRDs to find next number**:
-   ```bash
-   # Use Glob tool to find all PRD files
-   glob pattern: "product/prds/**/*.md"
-
-   # Extract PRD IDs from filenames and content
-   # Look for patterns like: PRD-001, WTC-PRD-003, FEAT_0012, etc.
-   # Extract the numeric part
-   # Find the highest number
-   ```
-
-4. **Generate new PRD ID**:
-   ```javascript
-   // Example calculation:
-   // If highest existing = 6, next = 7
-
-   const next_number = highest_number + 1;  // e.g., 7
-
-   // Pad with zeros based on number_padding
-   const padded = String(next_number).padStart(prd_id_config.number_padding, '0');
-   // e.g., 7 → "007" (if padding=3), or "0007" (if padding=4)
-
-   // Combine to form PRD ID
-   const prd_id = `${prd_id_config.prefix}${prd_id_config.separator}${padded}`;
-   // e.g., "WTC-PRD-007" or "PRD-007" or "FEAT_0007"
-   ```
-
-**Examples with different configs**:
-- Config: `{ prefix: "PRD", separator: "-", number_padding: 3 }` → `PRD-007`
-- Config: `{ prefix: "WTC-PRD", separator: "-", number_padding: 3 }` → `WTC-PRD-007`
-- Config: `{ prefix: "ACME-PRD", separator: "-", number_padding: 3 }` → `ACME-PRD-007`
-- Config: `{ prefix: "FEAT", separator: "_", number_padding: 4 }` → `FEAT_0007`
-
-**Error Handling**:
-- If `.claude/config.json` is malformed → Use defaults + warn user
-- If `number_padding` < 1 or > 6 → Use 3 + warn user
-- If `prefix` is empty → Use "PRD" + warn user
-
-### Step 3: Load Template
-
-Read from `templates/prd-template.md` and populate:
-- PRD ID
-- Feature name
-- Description
-- Priority
-- Created date
-- Author (from git config)
-- Initial status: "Draft"
-
-### Step 4: AI-Assisted Section Fill (Optional)
-
-Offer to help fill sections using AI:
-
-For each major section, ask:
+Ask user for brief feature description:
 ```markdown
-Would you like help drafting this section?
-1. Problem Statement
-2. Proposed Solution
-3. Technical Approach
-4. Acceptance Criteria
+What feature do you want to build?
 
-(Enter section numbers or 'skip' to fill manually later)
+Example: "Add OAuth2 authentication with Google and GitHub"
+
+> [User input]
 ```
 
-If user selects sections, use conversational prompts:
-- **Problem**: "What problem does this solve? Who has this problem?"
-- **Solution**: "How will this feature solve the problem?"
-- **Technical**: "What tech stack? Any architecture decisions?"
-- **Criteria**: "How will you know it's done? What must work?"
+### Step 2: Interactive Refinement Questions
 
-Generate initial content based on answers.
+**CRITICAL**: Ask 4-6 targeted questions to refine scope BEFORE generating full PRD.
 
-### Step 5: Create File
+Question Selection Strategy:
+- Choose questions based on feature type
+- Focus on scope boundaries and key decisions  
+- Avoid obvious questions
+- Keep it conversational
 
-Filename format: `YYMMDD-{feature-slug}-v1.md`
-Example: `251025-design-system-v1.md`
-
-Save to: `{config.directories.draft}/251025-design-system-v1.md`
-
-### Step 6: Update WORK_PLAN.md (if enabled)
-
-Add new entry to PRD pipeline table:
+Example Question Flow:
 ```markdown
-| Design System v1.0 | 📝 01-draft | - | P0 | Finish writing |
+Great! Let me ask a few questions to refine the scope...
+
+Question 1: Target Users
+Who will use this feature?
+Options:
+- All users (B2C)
+- Enterprise/B2B users only
+- Internal team/developers
+- Specific user segment
+
+> [User answers]
+
+Question 2: Core Requirements
+What are the 2-3 must-have capabilities for v1?
+(Focus on minimum viable scope)
+
+> [User lists core requirements]
+
+Question 3: Out of Scope
+What are you explicitly NOT doing in v1?
+(This prevents scope creep - be specific!)
+
+> [User defines boundaries]
+
+Question 4: Integration Points (if applicable)
+Does this integrate with existing systems?
+- Which systems/services?
+- Data flow between systems?
+
+> [User answers]
+
+Question 5: Success Criteria
+How will you measure success?
+Pick 1-2 key metrics.
+
+> [User defines metrics]
+
+Question 6: Technical Constraints (if applicable)
+Any technical decisions already made?
+- Tech stack?
+- Performance targets?
+
+> [User answers or "none"]
 ```
 
-### Step 7: Provide Next Steps
+### Step 3: Generate PRD ID
+
+Read PRD ID configuration from .claude/config.json or use defaults (PRD-XXX format)
+
+Scan existing PRDs to find next number
+
+Generate new ID: PRD-007
+
+### Step 4: Generate PRD Content
+
+Using answers from Step 2, generate comprehensive PRD with all required sections
+
+### Step 5: Quick Self-Review
+
+Automatically perform lightweight review and assign grade
+
+### Step 6: Create File with New Naming Format
+
+NEW NAMING FORMAT: PRD-{ID}-{feature-slug}.md
+
+Examples:
+- PRD-003-oauth2-integration.md
+- PRD-007-dark-mode-support.md
+
+Benefits:
+- ID directly in filename (grep-able)
+- No date confusion (Git tracks history)
+- Cleaner, more professional
+
+Save to: product/prds/01-draft/PRD-{ID}-{feature-slug}.md
+
+### Step 7: Update WORK_PLAN.md
+
+Add new entry to PRD pipeline table
+
+### Step 8: Provide Next Steps with Options
 
 ```markdown
-✅ **PRD Created: PRD-018 - Design System v1.0**
+PRD Created: PRD-007 - OAuth2 Integration
 
-**Location**: `product/prds/01-draft/251025-design-system-v1.md`
-**Status**: Draft
-**Priority**: P0
+File: product/prds/01-draft/PRD-007-oauth2-integration.md
+Status: Draft
+Quick Review: B+ (Good scope)
 
-## Next Steps
+Next Steps - Choose Your Path:
 
-1. **Fill in remaining sections**:
-   - Dependencies
-   - Risk Assessment
-   - Timeline & Milestones
+1. Approve Now (Quick path)
+   Move to approved, start coding
+   
+2. Review Later (Recommended for parallel workflow)
+   Keep in draft, create feature branch now
+   Allows Main branch to stay free
+   
+3. Refine First
+   Stay on Main, improve PRD now
 
-2. **Add acceptance criteria**: Be specific and measurable
-
-3. **When ready for review**: Run `/review-prd`
-
-## Quick Tips
-
-- Keep scope tight for v1.0 (ship 50% of vision)
-- Define clear IN vs OUT scope
-- Add wireframes/mockups if UX-heavy
-- List all dependencies and blockers
-- Make acceptance criteria testable
-
-**Open PRD**:
-- In editor: `code product/prds/01-draft/251025-design-system-v1.md`
-- In Claude: Say "open the new PRD"
+What would you like to do? (1/2/3)
 ```
 
-## Template Structure
-
-The PRD template includes:
-- Metadata header (ID, status, priority, dates)
-- Executive Summary
-- Problem Statement
-- Proposed Solution
-- Technical Approach
-- Scope (IN vs OUT)
-- Dependencies & Blockers
-- Acceptance Criteria (P0/P1/P2)
-- Risk Assessment
-- Timeline & Milestones
-- Success Metrics
-- Open Questions
+Handle user choice appropriately
 
 ## Configuration
 
-Uses these config settings:
-```json
-{
-  "prd_workflow": {
-    "directories": {
-      "draft": "product/prds/01-draft"
-    },
-    "branch_naming": {
-      "prd_id_format": "PRD-{number}"
-    }
-  }
-}
+Respects prd_workflow configuration in .claude/config.json
+
+## Options
+
+```bash
+/create-prd
+/create-prd "Add OAuth2 authentication"
+/create-prd "Simple bug fix" --quick
+/create-prd "New feature" --auto-approve
 ```
 
-## Success Criteria
+## Best Practices
 
-- PRD file created with valid structure
-- PRD ID is unique and sequential
-- File saved in draft directory
-- WORK_PLAN.md updated (if enabled)
-- User knows next steps
+- Ask clarifying questions - Don't assume!
+- Define OUT OF SCOPE - Critical to prevent creep
+- Stay in draft by default - Review on feature branch
+- One feature per PRD
+- Be specific
+- Include success metrics
 
-## Related
+---
 
-- Template: `templates/prd-template.md`
-- Next Command: `/review-prd` (when ready for review)
-- Skill: `documentation`
+Plugin: claude-prd-workflow
+Category: PRD Management
+Version: 2.2.0
+Requires: Git 2.0+

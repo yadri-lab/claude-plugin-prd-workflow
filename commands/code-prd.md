@@ -1,193 +1,280 @@
 ---
 name: code-prd
-description: Start feature development with Git worktree setup
+description: Create feature branch and worktree for PRD development
 category: PRD Management
 ---
 
 # Code PRD Command
 
-Start development on an approved PRD with Git worktree isolation.
+Start development on a PRD by creating a feature branch and optional Git worktree.
 
 ## Purpose
 
-Create feature branch, set up isolated worktree, and prepare development environment for parallel feature work.
+Create isolated development environment for PRD:
+- Create feature branch
+- Set up Git worktree (optional)
+- Move PRD to in-progress
+- Update WORK_PLAN.md
+- **Accept draft PRDs** (with warning) for parallel workflow
 
 ## Workflow
 
-### Step 1: List Ready PRDs
+### Step 1: List Available PRDs
 
-Scan `product/prds/03-ready/` for approved PRDs.
+Scan PRD directories for available PRDs:
+```bash
+# Check these directories:
+- product/prds/01-draft/
+- product/prds/02-approved/
+- product/prds/03-in-progress/ (to show what's already being worked on)
+```
 
 Display table:
 ```markdown
-📋 **PRDs Ready for Development (03-ready/)**
+📋 **PRDs Available**
 
-| # | PRD ID | Feature | Priority | Grade |
-|---|--------|---------|----------|-------|
-| 1 | PRD-003 | Design System | P0 | A- |
-| 2 | PRD-004 | Landing Page | P0 | B+ |
-| 3 | PRD-008 | RSS Monitoring | P0 | A |
+**Draft** (Review later on feature branch):
+| # | PRD ID | Feature | Created |
+|---|--------|---------|---------|
+| 1 | PRD-007 | OAuth2 Integration | 2025-10-26 |
+| 2 | PRD-008 | Dark Mode Support | 2025-10-26 |
 
-Which PRD are you working on? (1-3 or PRD-XXX)
+**Approved** (Ready to code):
+| # | PRD ID | Feature | Grade |
+|---|--------|---------|-------|
+| 3 | PRD-003 | Design System | A- |
+| 4 | PRD-004 | Landing Page | B+ |
+
+**In Progress** (Already being developed):
+| # | PRD ID | Feature | Branch |
+|---|--------|---------|--------|
+| 5 | PRD-005 | API v2 | feature/PRD-005-api-v2 |
+
+Which PRD? (number, PRD-XXX, or filename)
 ```
 
-### Step 2: Verify PRD Status
+### Step 2: Validate and Warn if Draft
 
-Read selected PRD and validate:
-- ✅ Status = "Ready for Development" or "Approved"
-- ✅ PRD ID exists and follows format
-- ✅ Acceptance criteria defined
-- ✅ No hard blockers
+If selected PRD is in draft:
+```markdown
+⚠️ **PRD-007 is still in DRAFT**
 
-If validation fails, warn user but allow proceeding.
+This PRD hasn't been reviewed or approved yet.
 
-### Step 3: Create Feature Branch
+**Recommended Workflow**:
+1. Create feature branch now (parallel workflow)
+2. Review and refine PRD on feature branch
+3. Start coding after review
 
-**Read branch naming configuration**:
+**Benefits**:
+- Keeps your Main branch free
+- Can review in separate Cursor instance
+- Multiple PRDs can be prepped in parallel
 
-1. **Check `.claude/config.json` for branch_naming settings**:
-   ```javascript
-   // If config exists:
-   const branch_config = {
-     prefix: config.prd_workflow.branch_naming.prefix || "feat",
-     separator: config.prd_workflow.branch_naming.separator || "-",
-     pattern: config.prd_workflow.branch_naming.pattern || "{prefix}/{prd_id}{separator}{feature_name}"
-   }
-   ```
+**Continue anyway?** (y/n or more info)
+> y
 
-2. **Generate branch name** using pattern and PRD ID from selected PRD:
-   ```javascript
-   // Extract PRD ID and feature name from selected PRD
-   const prd_id = "WTC-PRD-003";  // From PRD metadata
-   const feature_name = "design-system";  // Slugified from feature name
+✅ Proceeding with draft PRD
+💡 Remember to /review-prd PRD-007 on the feature branch!
+```
 
-   // Apply pattern
-   let branch_name = branch_config.pattern;
-   branch_name = branch_name.replace("{prefix}", branch_config.prefix);
-   branch_name = branch_name.replace("{prd_id}", prd_id);
-   branch_name = branch_name.replace("{separator}", branch_config.separator);
-   branch_name = branch_name.replace("{feature_name}", feature_name);
+If user says "no", cancel gracefully.
 
-   // Result: "feat/WTC-PRD-003-design-system" (if using WTC-PRD prefix)
-   // Or: "feat/PRD-003-design-system" (if using default PRD prefix)
-   ```
+### Step 3: Generate Feature Branch Name
 
-**Examples with different configs**:
-- Default: `feat/PRD-003-design-system`
-- Watchora: `feat/WTC-PRD-003-design-system`
-- AcmeCorp: `feat/ACME-PRD-003-design-system`
-- Custom: `feature/PRD-003/design-system` (if pattern changed)
+Read branch naming configuration from .claude/config.json or use defaults
 
-Create branch WITHOUT checking out (important for worktree):
+Default pattern: feature/PRD-{ID}-{slug}
+
+Examples:
+- feature/PRD-007-oauth2-integration
+- feature/PRD-008-dark-mode-support
+
+Extract slug from PRD filename:
+```javascript
+// From: PRD-007-oauth2-integration.md
+// Extract: oauth2-integration
+const slug = filename.replace(/^PRD-\d+-/, '').replace('.md', '');
+```
+
+### Step 4: Create Feature Branch
+
 ```bash
+# Ensure on main and up to date
 git checkout main
 git pull origin main
-git branch feat/WTC-PRD-003-design-system
+
+# Create branch
+git branch feature/PRD-007-oauth2-integration
+
+# Don't checkout yet (worktree will do that if enabled)
 ```
 
-### Step 4: Create Git Worktree (if enabled)
+### Step 5: Create Git Worktree (Optional)
 
-If `config.prd_workflow.worktree.enabled`:
-
-1. Determine worktree path using config pattern
-2. Create worktree: `git worktree add <path> <branch>`
-3. List all worktrees for confirmation
-
-Example:
+If worktree enabled in config:
 ```bash
-git worktree add ../acmecorp-design-system feat/PRD-003-design-system
-git worktree list
+# Worktree path based on config or default
+# Default: worktrees/prd-007-oauth2-integration/
+
+git worktree add worktrees/prd-007-oauth2-integration feature/PRD-007-oauth2-integration
+
+✅ Created worktree: worktrees/prd-007-oauth2-integration/
 ```
 
-**Benefits of Worktrees**:
-- Work on multiple features in parallel
-- No branch switching required
-- Isolated dependencies per feature
-- Independent dev servers
-- Clean Cursor contexts
+If worktree disabled:
+```bash
+# Just checkout the branch
+git checkout feature/PRD-007-oauth2-integration
 
-### Step 5: Move PRD to In Progress
+✅ Switched to branch: feature/PRD-007-oauth2-integration
+```
 
-**Important**: Navigate to worktree directory first!
+### Step 6: Move PRD to In-Progress
 
 ```bash
-cd ../acmecorp-design-system
-mv product/prds/03-ready/251024-design-system-v1.md \
-   product/prds/04-in-progress/251024-design-system-v1.md
+# Move from draft or approved to in-progress
+mv product/prds/01-draft/PRD-007-oauth2-integration.md \
+   product/prds/03-in-progress/PRD-007-oauth2-integration.md
+
+# Or from approved:
+mv product/prds/02-approved/PRD-007-oauth2-integration.md \
+   product/prds/03-in-progress/PRD-007-oauth2-integration.md
 ```
 
-Update PRD header metadata:
+Update PRD status field:
 ```markdown
 **Status**: In Progress
-**Started**: 2025-10-25
-**Branch**: feat/PRD-003-design-system
-**Worktree**: ../acmecorp-design-system/
+**Started**: 2025-10-26
+**Branch**: feature/PRD-007-oauth2-integration
 ```
 
-### Step 6: Update WORK_PLAN.md
+### Step 7: Update WORK_PLAN.md
 
-If enabled, update the PRD pipeline status table to reflect in-progress status.
-
-### Step 7: Commit & Push (from worktree)
-
-Create initial commit from worktree:
-```bash
-git add product/prds/
-git add product/WORK_PLAN.md
-git commit -m "feat(PRD-003): Start development in worktree
-
-- Moved PRD to 04-in-progress/
-- Updated WORK_PLAN.md status
-- Created worktree: ../acmecorp-design-system/
-
-🤖 Generated with Claude Code"
-
-git push -u origin feat/PRD-003-design-system
+Move PRD from draft/approved to in-progress section:
+```markdown
+## In Progress (1 PRD)
+| PRD ID | Feature | Owner | Started | Branch |
+|--------|---------|-------|---------|--------|
+| PRD-007 | OAuth2 Integration | @alice | 2025-10-26 | feature/PRD-007-oauth2-integration |
 ```
 
-### Step 8: Provide Development Context
+### Step 8: Provide Next Steps
 
-Output comprehensive context summary including:
-- PRD details (ID, file path, priority, branch, worktree)
-- Instructions for opening new editor instance
-- Scope summary from PRD
-- Tech stack overview
-- Acceptance criteria checklist
-- Dependencies and blockers
-- Next steps for implementation
-- Worktree cleanup instructions
+```markdown
+🌳 **Development Environment Ready**
+
+📂 Worktree: worktrees/prd-007-oauth2-integration/
+🌿 Branch: feature/PRD-007-oauth2-integration
+📄 PRD: product/prds/03-in-progress/PRD-007-oauth2-integration.md
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**If PRD was DRAFT**:
+⚠️ Remember to review first: /review-prd PRD-007
+
+**Next Steps**:
+1. cd worktrees/prd-007-oauth2-integration/
+2. /review-prd PRD-007 (if still draft)
+3. /work-prd PRD-007 (guided implementation)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**Your Main branch is now free** for other work!
+
+💡 **Parallel Workflow Tip**:
+Open a new Cursor window in the worktree directory:
+  code worktrees/prd-007-oauth2-integration/
+
+This allows you to:
+- Work on PRD-007 in one Cursor instance
+- Continue other work on Main in another instance
+```
 
 ## Configuration
 
-Uses these config settings:
+Respects prd_workflow configuration:
 ```json
 {
   "prd_workflow": {
     "branch_naming": {
-      "prefix": "feat",
-      "prd_id_format": "PRD-{number}",
-      "pattern": "{prefix}/{prd_id}-{feature_name}"
+      "prefix": "feature",
+      "separator": "/",
+      "pattern": "{prefix}/{prd_id_prefix}-{prd_number}-{slug}"
     },
     "worktree": {
       "enabled": true,
-      "parent_directory": "..",
-      "naming_pattern": "{project}-{feature}",
-      "auto_install_dependencies": true
-    }
+      "base_path": "worktrees"
+    },
+    "allow_draft_checkout": true
   }
 }
 ```
 
-## Success Criteria
+## Options
 
-- Feature branch created successfully
-- Worktree directory exists and is functional
-- PRD moved to in-progress state
-- Initial commit pushed to remote
-- Clear development context provided to user
+```bash
+# Interactive
+/code-prd
 
-## Related
+# Specify PRD
+/code-prd PRD-007
 
-- Next Command: `/work-prd` (guided implementation)
-- Skill: `git-workflow`
-- Cleanup: `git worktree remove <path>` when done
+# Skip worktree creation
+/code-prd PRD-007 --no-worktree
+
+# Force draft (skip warning)
+/code-prd PRD-007 --force
+```
+
+## Error Handling
+
+**PRD already in progress**:
+```markdown
+⚠️ PRD-007 is already in progress
+
+Branch: feature/PRD-007-oauth2-integration
+Worktree: worktrees/prd-007-oauth2-integration/
+
+Options:
+1. Switch to existing branch
+2. Create new branch (PRD-007-v2)
+3. Cancel
+
+Choose: (1-3)
+```
+
+**Git not clean**:
+```markdown
+❌ Git working directory not clean
+
+Uncommitted changes detected. Please:
+1. Commit changes
+2. Stash changes
+3. Or resolve conflicts
+
+Then try again.
+```
+
+## Best Practices
+
+- ✅ **Create branch even for drafts** - Enables parallel workflow
+- ✅ **Use worktrees** - Isolate features, no branch switching
+- ✅ **Review on feature branch** - Keeps Main free
+- ✅ **Open separate Cursor** - One instance per feature
+- ⚠️ **Don't forget to review** - If starting from draft
+
+## Integration
+
+Works seamlessly with:
+- /create-prd - Creates draft PRDs
+- /review-prd - Review on feature branch
+- /work-prd - Guided development
+- Git worktrees - Parallel feature development
+
+---
+
+Plugin: claude-prd-workflow
+Category: PRD Management  
+Version: 2.2.0
+Requires: Git 2.25+
