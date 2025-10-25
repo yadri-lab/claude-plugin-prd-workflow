@@ -76,6 +76,75 @@ Real-time progress on every PRD with **automatic status updates**, **WORK_PLAN.m
 
 ---
 
+## 🎯 How It Works: Two Workflow Modes
+
+Choose the right workflow for your feature size:
+
+### Mode 1️⃣: Full PRD Workflow (Substantial Features)
+
+**Use for**: Features taking >1 day, multiple developers, customer-facing changes
+
+```bash
+# Step 1: Create PRD with interactive questions (Main branch)
+/create-prd "Add OAuth2 authentication"
+→ AI asks clarifying questions
+→ Generates comprehensive PRD
+→ Stays in DRAFT by default
+
+# Step 2: Create feature branch (enables parallel work!)
+/code-prd PRD-007
+→ Creates feature/PRD-007-oauth2-integration
+→ Your Main branch stays FREE
+
+# Step 3: Review & refine (on feature branch, separate Cursor window)
+/review-prd PRD-007
+→ 7-dimension analysis
+→ Refine until Grade A/B
+
+# Step 4: Guided development
+/work-prd PRD-007
+→ AI breaks into tasks
+→ Step-by-step guidance
+
+# Step 5: Complete & auto-merge
+/complete-prd PRD-007
+→ AI code review vs PRD
+→ Auto-merge if tests pass
+→ Auto-cleanup branches
+```
+
+**🎯 Key Benefit**: Main branch never blocked. Create PRD on Main, review/dev on feature branch in parallel.
+
+---
+
+### Mode 2️⃣: Quick Ship Workflow (Small Changes)
+
+**Use for**: Bug fixes, small tweaks, <4 hour changes
+
+```bash
+/quick-ship "Fix dark mode toggle on iOS Safari"
+→ No PRD created
+→ Minimal tracking log
+→ Auto-merge on tests pass
+→ Complete in <1 hour
+```
+
+**🎯 Key Benefit**: Zero overhead for small changes. Ship fixes in minutes, not hours.
+
+---
+
+### 📊 Which Mode to Choose?
+
+| Criteria | Full PRD | Quick Ship |
+|----------|----------|------------|
+| **Duration** | >1 day | <4 hours |
+| **Developers** | Multiple | Single |
+| **Scope clarity** | Needs definition | Crystal clear |
+| **Risk** | Medium-High | Low |
+| **Examples** | New feature, Refactor, Integration | Bug fix, UI tweak, Dependency update |
+
+---
+
 ## 🚀 Installation (2 minutes)
 
 ### Prerequisites
