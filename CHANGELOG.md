@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-10-25
+
+### Added
+- **Configurable PRD ID format**: Support for custom prefixes, separators, and number padding
+  - New `prd_id` config section with `prefix`, `separator`, and `number_padding` options
+  - Examples: `PRD-001`, `WTC-PRD-001`, `ACME-PRD-001`, `FEAT_0001`
+- Enhanced configuration schema with detailed descriptions for all options
+- Alternative configuration example in AcmeCorp docs showing custom prefix usage
+- Pattern variables documentation for branch and worktree naming
+
+### Changed
+- **BREAKING**: Replaced `branch_naming.prd_id_format` with new `prd_id` configuration section
+  - Old: `"prd_id_format": "PRD-{number}"`
+  - New: `"prd_id": { "prefix": "PRD", "separator": "-", "number_padding": 3 }`
+- Updated all presets (startup, enterprise, open-source) to use new config format
+- Updated AcmeCorp example with new configuration structure
+- Enhanced configuration documentation with more examples and use cases
+- Improved `/create-prd` command documentation with detailed PRD ID generation logic
+
+### Migration Guide
+For existing projects, update your `.claude/config.json`:
+```json
+// Before
+"branch_naming": {
+  "prd_id_format": "PRD-{number}"
+}
+
+// After
+"prd_id": {
+  "prefix": "PRD",
+  "separator": "-",
+  "number_padding": 3
+}
+```
+
 ## [1.0.4] - 2025-10-25
 
 ### Added

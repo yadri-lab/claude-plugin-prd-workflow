@@ -29,13 +29,30 @@ Ask user for:
 
 ### Step 2: Generate PRD ID
 
-Format: `{prefix}-{number}` (e.g., PRD-018)
+**Read configuration** from `.claude/config.json`:
+```javascript
+const config = {
+  prd_id: {
+    prefix: "PRD",        // e.g., "PRD", "WTC-PRD", "FEAT"
+    separator: "-",       // e.g., "-", "_"
+    number_padding: 3     // e.g., 3 → "001", 4 → "0001"
+  }
+}
+```
 
-Logic:
-1. Scan all PRD directories
-2. Find highest existing number
-3. Increment by 1
-4. Format with prefix from config
+**Generate ID**:
+1. Scan all PRD directories (`product/prds/**/*.md`)
+2. Extract numbers from existing PRD IDs
+3. Find highest number (e.g., if WTC-PRD-006 exists, highest = 6)
+4. Increment by 1 (next = 7)
+5. Format: `{prefix}{separator}{number}`
+   - Pad number with zeros (e.g., 7 → "007" if padding=3)
+   - Result: `WTC-PRD-007` or `PRD-007` or `FEAT-007`
+
+**Examples**:
+- Config: `{ prefix: "PRD", separator: "-", padding: 3 }` → `PRD-007`
+- Config: `{ prefix: "WTC-PRD", separator: "-", padding: 3 }` → `WTC-PRD-007`
+- Config: `{ prefix: "FEAT", separator: "_", padding: 4 }` → `FEAT_0007`
 
 ### Step 3: Load Template
 

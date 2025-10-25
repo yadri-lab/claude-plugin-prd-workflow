@@ -11,9 +11,13 @@
       "complete": "product/prds/05-complete",
       "archived": "product/prds/99-archived"
     },
+    "prd_id": {
+      "prefix": "PRD",
+      "separator": "-",
+      "number_padding": 3
+    },
     "branch_naming": {
       "prefix": "feat",
-      "prd_id_format": "PRD-{number}",
       "separator": "-",
       "pattern": "{prefix}/{prd_id}{separator}{feature_name}"
     },

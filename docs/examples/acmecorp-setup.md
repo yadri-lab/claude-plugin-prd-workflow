@@ -35,9 +35,13 @@ This example shows how a typical SaaS platform uses the PRD Workflow Manager plu
       "complete": "product/prds/05-complete",
       "archived": "product/prds/99-archived"
     },
+    "prd_id": {
+      "prefix": "PRD",
+      "separator": "-",
+      "number_padding": 3
+    },
     "branch_naming": {
       "prefix": "feat",
-      "prd_id_format": "PRD-{number}",
       "separator": "-",
       "pattern": "{prefix}/{prd_id}{separator}{feature_name}"
     },
@@ -112,6 +116,48 @@ This example shows how a typical SaaS platform uses the PRD Workflow Manager plu
   }
 }
 ```
+
+---
+
+## Alternative Configuration: Custom PRD Prefix
+
+Some projects prefer using a company-specific PRD prefix for better identification across multiple projects.
+
+### Option: Use `ACME-PRD-XXX` Format
+
+```json
+{
+  "prd_workflow": {
+    "prd_id": {
+      "prefix": "ACME-PRD",
+      "separator": "-",
+      "number_padding": 3
+    },
+    "branch_naming": {
+      "prefix": "feat",
+      "separator": "-",
+      "pattern": "{prefix}/{prd_id}{separator}{feature_name}"
+    },
+    "worktree": {
+      "naming_pattern": "acmecorp-{feature}"
+    }
+  }
+}
+```
+
+**Result**:
+- PRD IDs: `ACME-PRD-001`, `ACME-PRD-002`, `ACME-PRD-003`
+- Branches: `feat/ACME-PRD-003-design-system`
+- Worktrees: `../acmecorp-design-system`
+
+**Benefits**:
+- Clear project identification (useful if working on multiple projects)
+- Consistent with company branding
+- Easy to grep across all repos: `grep -r "ACME-PRD"`
+
+**Trade-offs**:
+- Slightly longer IDs
+- More characters in branch names
 
 ---
 

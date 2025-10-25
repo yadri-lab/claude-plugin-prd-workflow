@@ -81,6 +81,69 @@ Edit `.claude/config.json` and override specific settings:
 
 ---
 
+#### PRD ID Format
+
+**Purpose**: Define how PRD IDs are generated and formatted
+
+```json
+{
+  "prd_workflow": {
+    "prd_id": {
+      "prefix": "PRD",
+      "separator": "-",
+      "number_padding": 3
+    }
+  }
+}
+```
+
+**Result**: `PRD-001`, `PRD-002`, `PRD-003`, ...
+
+**Options**:
+
+| Option | Type | Default | Description | Examples |
+|--------|------|---------|-------------|----------|
+| `prefix` | string | `"PRD"` | Identifier prefix | `"PRD"`, `"WTC-PRD"`, `"FEAT"`, `"ACME-PRD"` |
+| `separator` | string | `"-"` | Character between prefix and number | `"-"`, `"_"`, `""` |
+| `number_padding` | integer | `3` | Number of digits (zero-padded) | `3` → `"001"`, `4` → `"0001"` |
+
+**Examples**:
+```json
+// Standard format (default)
+{
+  "prefix": "PRD",
+  "separator": "-",
+  "number_padding": 3
+}
+// Result: PRD-001, PRD-002, PRD-003
+
+// Company-specific format
+{
+  "prefix": "ACME-PRD",
+  "separator": "-",
+  "number_padding": 3
+}
+// Result: ACME-PRD-001, ACME-PRD-002, ACME-PRD-003
+
+// Short format
+{
+  "prefix": "F",
+  "separator": "",
+  "number_padding": 2
+}
+// Result: F01, F02, F03
+
+// Underscore format
+{
+  "prefix": "FEAT",
+  "separator": "_",
+  "number_padding": 4
+}
+// Result: FEAT_0001, FEAT_0002, FEAT_0003
+```
+
+---
+
 #### Branch Naming
 
 **Purpose**: Control Git branch naming convention
@@ -90,7 +153,6 @@ Edit `.claude/config.json` and override specific settings:
   "prd_workflow": {
     "branch_naming": {
       "prefix": "feat",
-      "prd_id_format": "PRD-{number}",
       "separator": "-",
       "pattern": "{prefix}/{prd_id}{separator}{feature_name}"
     }
@@ -102,22 +164,43 @@ Edit `.claude/config.json` and override specific settings:
 
 **Options**:
 - **prefix**: `feat`, `feature`, `task`, `story`
-- **prd_id_format**: `PRD-{number}`, `WTC-{number}`, `PROJ-{number}`
 - **separator**: `-`, `_`, `/`
-- **pattern**: Custom template
+- **pattern**: Custom template using variables
+
+**Pattern Variables**:
+- `{prefix}` - Branch prefix from config
+- `{prd_id}` - Full PRD ID (e.g., `PRD-003`, `ACME-PRD-003`)
+- `{separator}` - Separator from config
+- `{feature_name}` - Feature name (slugified)
 
 **Examples**:
 ```json
+// Standard (default)
+{
+  "prefix": "feat",
+  "pattern": "{prefix}/{prd_id}{separator}{feature_name}"
+}
+// Result: feat/PRD-003-design-system
+
 // GitHub Flow style
-{ "pattern": "{prd_id}-{feature_name}" }
+{
+  "prefix": "",
+  "pattern": "{prd_id}{separator}{feature_name}"
+}
 // Result: PRD-003-design-system
 
 // GitLab style
-{ "pattern": "{prefix}/{number}-{feature_name}" }
-// Result: feat/003-design-system
+{
+  "prefix": "feature",
+  "pattern": "{prefix}/{feature_name}"
+}
+// Result: feature/design-system
 
-// Custom
-{ "pattern": "feature/{prd_id}/{feature_name}" }
+// Custom with PRD ID in path
+{
+  "prefix": "feature",
+  "pattern": "{prefix}/{prd_id}/{feature_name}"
+}
 // Result: feature/PRD-003/design-system
 ```
 

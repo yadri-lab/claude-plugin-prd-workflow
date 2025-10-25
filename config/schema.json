@@ -23,23 +23,65 @@
             "archived": { "type": "string" }
           }
         },
+        "prd_id": {
+          "type": "object",
+          "properties": {
+            "prefix": {
+              "type": "string",
+              "description": "PRD ID prefix (e.g., 'PRD', 'WTC-PRD', 'FEAT')"
+            },
+            "separator": {
+              "type": "string",
+              "description": "Separator between prefix and number (e.g., '-', '_')"
+            },
+            "number_padding": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 6,
+              "description": "Number of digits for padding (e.g., 3 for '001')"
+            }
+          }
+        },
         "branch_naming": {
           "type": "object",
           "properties": {
-            "prefix": { "type": "string" },
-            "prd_id_format": { "type": "string" },
-            "separator": { "type": "string" },
-            "pattern": { "type": "string" }
+            "prefix": {
+              "type": "string",
+              "description": "Branch prefix (e.g., 'feat', 'feature', 'task')"
+            },
+            "separator": {
+              "type": "string",
+              "description": "Separator in branch name (e.g., '-', '/', '_')"
+            },
+            "pattern": {
+              "type": "string",
+              "description": "Branch naming pattern with variables: {prefix}, {prd_id}, {separator}, {feature_name}"
+            }
           }
         },
         "worktree": {
           "type": "object",
           "properties": {
-            "enabled": { "type": "boolean" },
-            "parent_directory": { "type": "string" },
-            "naming_pattern": { "type": "string" },
-            "auto_install_dependencies": { "type": "boolean" },
-            "auto_open_editor": { "type": "boolean" }
+            "enabled": {
+              "type": "boolean",
+              "description": "Enable Git worktree creation for parallel development"
+            },
+            "parent_directory": {
+              "type": "string",
+              "description": "Parent directory for worktrees (relative to project root)"
+            },
+            "naming_pattern": {
+              "type": "string",
+              "description": "Worktree naming pattern. Variables: {project}, {feature}, {prd_id}, {branch}"
+            },
+            "auto_install_dependencies": {
+              "type": "boolean",
+              "description": "Automatically run dependency installation in new worktrees"
+            },
+            "auto_open_editor": {
+              "type": "boolean",
+              "description": "Automatically open editor in new worktree"
+            }
           }
         }
       }
