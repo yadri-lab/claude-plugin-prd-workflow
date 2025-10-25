@@ -1,7 +1,8 @@
 # 📋 PRD Workflow Manager
 
 > **The complete Claude Code plugin for Product-Driven Development**
-> Transform PRDs from ideas to shipped features with AI-powered review, guided implementation, and automated quality gates.
+>
+> Transform PRDs from ideas to shipped features with AI-powered review, guided implementation, and automated quality gates. Never ship unclear requirements again.
 
 [![npm version](https://img.shields.io/npm/v/claude-prd-workflow.svg)](https://www.npmjs.com/package/claude-prd-workflow)
 [![npm downloads](https://img.shields.io/npm/dm/claude-prd-workflow.svg)](https://www.npmjs.com/package/claude-prd-workflow)
