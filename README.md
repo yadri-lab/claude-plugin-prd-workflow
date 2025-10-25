@@ -98,7 +98,23 @@ npm install -g claude-prd-workflow
 # Restart Claude Code
 ```
 
-**Option B: Git Clone** (Manual Installation)
+**Option B: Claude Code Marketplace** (Native Plugin System)
+```bash
+# In Claude Code, add the marketplace:
+/plugin marketplace add Yassinello/claude-prd-workflow
+
+# Then install the plugin:
+/plugin install claude-prd-workflow
+
+# ✅ Direct integration with Claude Code
+# ✅ Automatic updates via marketplace
+# ✅ Discover all available plugins
+# ✅ No npm required
+
+# Restart Claude Code
+```
+
+**Option C: Git Clone** (Manual Installation)
 ```bash
 # Clone to a temporary location
 git clone https://github.com/Yassinello/claude-prd-workflow.git
@@ -114,7 +130,7 @@ node install.js
 # Restart Claude Code
 ```
 
-**Option C: From Claude Code** (Interactive)
+**Option D: From Claude Code** (Interactive)
 ```bash
 # In Claude Code, type:
 /help plugins
@@ -683,6 +699,47 @@ Built with:
 - Inspired by [Shape Up](https://basecamp.com/shapeup) methodology
 
 Special thanks to the Claude Code team for creating an amazing platform!
+
+---
+
+## 🏪 Plugin Distribution & Marketplaces
+
+This plugin is available through multiple distribution channels:
+
+### Official Distribution Channels
+
+**1. npm Registry** (Recommended for automation)
+```bash
+npm install -g claude-prd-workflow
+```
+- ✅ Automatic updates with `npm update -g`
+- ✅ Version pinning support
+- ✅ Works with CI/CD pipelines
+
+**2. Claude Code Marketplace** (Native integration)
+```bash
+/plugin marketplace add Yassinello/claude-prd-workflow
+/plugin install claude-prd-workflow
+```
+- ✅ Direct Claude Code integration
+- ✅ Discover updates within Claude Code
+- ✅ Marketplace-based distribution
+
+**3. Community Marketplaces**
+
+Submit this plugin to popular Claude Code marketplaces:
+- [claudecodemarketplace.com](https://claudecodemarketplace.com/) - Largest community marketplace
+- [claudemarketplaces.com](https://claudemarketplaces.com/) - Marketplace directory
+
+### For Developers: Creating Your Own Marketplace
+
+This repository includes a `.claude-plugin/marketplace.json` file that makes it a valid Claude Code marketplace. You can:
+
+1. **Fork this repo** to customize for your organization
+2. **Add it as a marketplace**: `/plugin marketplace add your-org/your-fork`
+3. **Share with your team** via company documentation
+
+See the [Plugin Marketplaces documentation](https://docs.claude.com/en/docs/claude-code/plugin-marketplaces) for more details.
 
 ---
 
