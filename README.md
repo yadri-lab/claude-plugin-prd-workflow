@@ -82,79 +82,93 @@ Real-time progress on every PRD with **automatic status updates**, **WORK_PLAN.m
 
 - [Claude Code](https://claude.com/claude-code) v2.0 or higher
 - [Git](https://git-scm.com/) v2.25+ (for worktree support)
-- Node.js v18+ (if working with JS/TS projects)
+- Node.js v18+ (for the installation script)
 
-### Step 1: Install the Plugin
+### Step 1: Install the Plugin Globally (One Time)
 
-**Option A: npm** (Recommended - Automatic)
+> 💡 **Key Concept**: Install once globally → Available in ALL your projects automatically!
+
+**Option A: npm** (Recommended - Fully Automatic)
 ```bash
 npm install -g claude-prd-workflow
-# ✅ Auto-installs commands, agents, and skills to ~/.claude-code/
-# ✅ Available globally across all projects
+# ✅ Auto-installs to ~/.claude-code/
+# ✅ Commands, agents, and skills copied to the right places
+# ✅ Ready to use in ALL projects
 
-# Then restart Claude Code
+# Restart Claude Code
 ```
 
-**Option B: Git Clone** (For development)
+**Option B: Git Clone** (Manual Installation)
 ```bash
-# Clone the repository
+# Clone to a temporary location
 git clone https://github.com/Yassinello/claude-prd-workflow.git
 cd claude-prd-workflow
 
-# Run installation script
+# Run the installation script
 node install.js
-# ✅ Copies 9 slash commands to ~/.claude-code/commands/
-# ✅ Copies 6 AI agents to ~/.claude-code/agents/
+# ✅ Copies 9 commands to ~/.claude-code/commands/
+# ✅ Copies 6 agents to ~/.claude-code/agents/
 # ✅ Copies 8 skills to ~/.claude-code/skills/
+# ✅ Copies plugin files to ~/.claude-code/plugins/claude-prd-workflow/
 
 # Restart Claude Code
 ```
 
-**Option C: Direct Download**
+**Option C: From Claude Code** (Interactive)
 ```bash
-# Download latest release
-wget https://github.com/Yassinello/claude-prd-workflow/releases/latest/download/claude-prd-workflow.tar.gz
+# In Claude Code, type:
+/help plugins
 
-# Extract
-tar -xzf claude-prd-workflow.tar.gz
-cd claude-prd-workflow
-
-# Run installation script
-node install.js
-
-# Restart Claude Code
+# Then follow the prompts to:
+# 1. Install from npm: claude-prd-workflow
+# 2. Restart Claude Code
+# Done!
 ```
 
 ### Step 2: Verify Installation
 
-Open Claude Code and type:
+Open **ANY project** in Claude Code and type:
 ```
 /list-prds
 ```
 
-You should see: `✅ No PRDs found. Create your first PRD with /create-prd`
+✅ **Success**: `No PRDs found. Create your first PRD with /create-prd`
+❌ **Error**: `Command not found` → Restart Claude Code
 
-**Troubleshooting**: If commands don't appear after restart:
+**Troubleshooting**:
 ```bash
-# Manually verify installation
-ls ~/.claude-code/commands/    # Should show 9 .md files
-ls ~/.claude-code/agents/      # Should show 6 .md files
-ls ~/.claude-code/skills/      # Should show 8 .md files
+# Check commands are installed
+ls ~/.claude-code/commands/ | grep prd
+# Should show: archive-prd.md, code-prd.md, create-prd.md, etc.
 
-# If missing, re-run installation
-cd ~/.claude-code/plugins/claude-prd-workflow
-node install.js
+# If missing, reinstall:
+npm install -g claude-prd-workflow --force
 ```
 
-### Step 3: Setup Your Project (30 seconds)
+### Step 3: Using in an Existing Project
 
-Navigate to your project directory in Claude Code, then:
+The plugin works immediately in any project! Just open your project in Claude Code:
 
 ```bash
-# Copy a preset configuration (choose one)
+# Open your existing project in Claude Code
+cd ~/my-existing-project
+code .  # or open with Claude Code
+
+# In Claude Code, create the PRD structure:
+/create-prd
+# The plugin will:
+# 1. Ask for PRD details
+# 2. Create product/prds/ directory if needed
+# 3. Generate your first PRD file
+```
+
+**Optional**: Customize config for this specific project:
+```bash
+# Copy a preset (choose one based on your project type)
+mkdir -p .claude
 cp ~/.claude-code/plugins/claude-prd-workflow/config/presets/startup.json .claude/config.json
 
-# Or for enterprise projects:
+# Or for enterprise:
 cp ~/.claude-code/plugins/claude-prd-workflow/config/presets/enterprise.json .claude/config.json
 
 # Or for open source:
@@ -165,20 +179,36 @@ cp ~/.claude-code/plugins/claude-prd-workflow/config/presets/open-source.json .c
 
 ---
 
-## ⚡ Quick Start (5 minutes to your first PRD)
+## ⚡ Quick Start - Real Example: Building MCP Server Prioritization
+
+Let's walk through a **real example** from idea to shipped code in 30 minutes.
+
+**Scenario**: You want to add a feature to prioritize MCP servers in Claude Code based on usage frequency.
 
 ### 1. Create Your First PRD
 
+In Claude Code, type:
 ```
 /create-prd
 ```
 
 Claude will ask:
-- **Feature name**: "User Authentication"
-- **Priority**: "P0" (must-have)
-- **PRD ID**: "PRD-001"
+- **Feature name**: `MCP Server Prioritization`
+- **Priority**: `P1` (should-have)
+- **PRD ID**: `PRD-001`
 
-**Output**: `product/prds/01-draft/251025-user-authentication-v1.md`
+**Output**: `product/prds/01-draft/251025-mcp-server-prioritization-v1.md`
+
+The PRD template is pre-filled with sections:
+- Problem Statement
+- Goals & Success Metrics
+- User Stories
+- Technical Approach
+- Acceptance Criteria
+- Dependencies
+- Risks
+
+**Time**: 2 minutes to fill in the details
 
 ### 2. Review Your PRD
 
