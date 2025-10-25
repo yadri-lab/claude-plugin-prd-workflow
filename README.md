@@ -179,6 +179,61 @@ cp ~/.claude-code/plugins/claude-prd-workflow/config/presets/open-source.json .c
 
 ---
 
+## 🔄 Keeping the Plugin Updated
+
+### Check for Updates
+
+```bash
+# Check your installed version
+npm list -g claude-prd-workflow
+
+# Check latest available version
+npm view claude-prd-workflow version
+
+# See what changed in new versions
+npm view claude-prd-workflow versions --json
+```
+
+### Update to Latest Version
+
+```bash
+# Update to the latest version
+npm install -g claude-prd-workflow@latest
+
+# The postinstall script automatically:
+# ✅ Updates commands in ~/.claude-code/commands/
+# ✅ Updates agents in ~/.claude-code/agents/
+# ✅ Updates skills in ~/.claude-code/skills/
+# ✅ Updates plugin files in ~/.claude-code/plugins/
+
+# Restart Claude Code to see changes
+```
+
+### Update Notifications
+
+**Updates are NOT automatic** - this is intentional to prevent breaking changes.
+
+**When to update**:
+- ✅ New features you want to use
+- ✅ Bug fixes for issues you're experiencing
+- ✅ Security patches (check GitHub releases)
+
+**Where to check for updates**:
+- [GitHub Releases](https://github.com/Yassinello/claude-prd-workflow/releases)
+- [npm Package Page](https://www.npmjs.com/package/claude-prd-workflow)
+- [CHANGELOG.md](CHANGELOG.md)
+
+### Version Compatibility
+
+The plugin follows [Semantic Versioning](https://semver.org/):
+- **Major** (1.x.x → 2.x.x): Breaking changes, may require config updates
+- **Minor** (1.0.x → 1.1.x): New features, backward compatible
+- **Patch** (1.0.0 → 1.0.1): Bug fixes, always safe to update
+
+**Current stable version**: ![npm version](https://img.shields.io/npm/v/claude-prd-workflow.svg)
+
+---
+
 ## ⚡ Quick Start - Real Example: Building MCP Server Prioritization
 
 Let's walk through a **real example** from idea to shipped code in 30 minutes.
