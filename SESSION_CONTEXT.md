@@ -146,17 +146,19 @@ After v1.2.0:
 
 #### Files Modified
 ```
-Modified (5 files):
-- commands/create-prd.md (Step 2 rewritten)
-- commands/code-prd.md (Step 3 enhanced)
-- commands/list-prds.md (Step 2 enhanced)
-- CHANGELOG.md (v1.2.0 added)
-- SESSION_CONTEXT.md (this update)
-- package.json (version bump)
+Modified (6 files):
+- commands/create-prd.md (Step 2 rewritten with runtime config)
+- commands/code-prd.md (Step 3 enhanced with branch naming config)
+- commands/list-prds.md (Step 2 enhanced with flexible PRD ID parsing)
+- CHANGELOG.md (v1.2.0 section added)
+- SESSION_CONTEXT.md (this session documented)
+- package.json (version 1.1.0 → 1.2.0)
+- CLAUDE.md (added end-of-session checklist) ← Added after v1.2.0 release
 ```
 
 #### Commits
-- TBD (about to commit)
+- `f7a653f` - feat: Implement runtime config parsing for PRD IDs and branch naming
+- `7d507c4` - docs: Add mandatory end-of-session checklist to CLAUDE.md
 
 ---
 
