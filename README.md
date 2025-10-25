@@ -86,31 +86,43 @@ Real-time progress on every PRD with **automatic status updates**, **WORK_PLAN.m
 
 ### Step 1: Install the Plugin
 
-**Option A: Direct Download** (Recommended)
+**Option A: npm** (Recommended - Automatic)
 ```bash
-# Download latest release
-wget https://github.com/Yassinello/claude-prd-workflow/releases/latest/download/claude-prd-workflow.tar.gz
+npm install -g claude-prd-workflow
+# ✅ Auto-installs commands, agents, and skills to ~/.claude-code/
+# ✅ Available globally across all projects
 
-# Extract to Claude Code plugins directory
-tar -xzf claude-prd-workflow.tar.gz -C ~/.claude-code/plugins/
-
-# Restart Claude Code
+# Then restart Claude Code
 ```
 
 **Option B: Git Clone** (For development)
 ```bash
-# Clone to plugins directory
-git clone https://github.com/Yassinello/claude-prd-workflow.git ~/.claude-code/plugins/claude-prd-workflow
+# Clone the repository
+git clone https://github.com/Yassinello/claude-prd-workflow.git
+cd claude-prd-workflow
+
+# Run installation script
+node install.js
+# ✅ Copies 9 slash commands to ~/.claude-code/commands/
+# ✅ Copies 6 AI agents to ~/.claude-code/agents/
+# ✅ Copies 8 skills to ~/.claude-code/skills/
 
 # Restart Claude Code
 ```
 
-**Option C: npm**
+**Option C: Direct Download**
 ```bash
-npm install -g claude-prd-workflow
-# The plugin will auto-install to ~/.claude-code/plugins/
+# Download latest release
+wget https://github.com/Yassinello/claude-prd-workflow/releases/latest/download/claude-prd-workflow.tar.gz
 
-# Then restart Claude Code
+# Extract
+tar -xzf claude-prd-workflow.tar.gz
+cd claude-prd-workflow
+
+# Run installation script
+node install.js
+
+# Restart Claude Code
 ```
 
 ### Step 2: Verify Installation
@@ -121,6 +133,18 @@ Open Claude Code and type:
 ```
 
 You should see: `✅ No PRDs found. Create your first PRD with /create-prd`
+
+**Troubleshooting**: If commands don't appear after restart:
+```bash
+# Manually verify installation
+ls ~/.claude-code/commands/    # Should show 9 .md files
+ls ~/.claude-code/agents/      # Should show 6 .md files
+ls ~/.claude-code/skills/      # Should show 8 .md files
+
+# If missing, re-run installation
+cd ~/.claude-code/plugins/claude-prd-workflow
+node install.js
+```
 
 ### Step 3: Setup Your Project (30 seconds)
 

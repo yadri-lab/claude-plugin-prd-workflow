@@ -27,6 +27,12 @@ function getClaudePluginsDir() {
   }
 }
 
+// Get Claude Code base directory
+function getClaudeBaseDir() {
+  const homeDir = os.homedir();
+  return path.join(homeDir, '.claude-code');
+}
+
 // Recursively copy directory
 function copyDir(src, dest) {
   // Create destination directory
@@ -114,6 +120,68 @@ function install() {
         fs.copyFileSync(src, dest);
         console.log(`   ✅ Copied ${file}`);
       }
+    }
+
+    // Install commands, agents, and skills to global Claude Code directories
+    console.log('\n📋 Installing to Claude Code global directories...\n');
+
+    const claudeBaseDir = getClaudeBaseDir();
+
+    // Copy commands to ~/.claude-code/commands/
+    const commandsSrc = path.join(sourceDir, 'commands');
+    const commandsDest = path.join(claudeBaseDir, 'commands');
+    if (fs.existsSync(commandsSrc)) {
+      if (!fs.existsSync(commandsDest)) {
+        fs.mkdirSync(commandsDest, { recursive: true });
+      }
+      const commandFiles = fs.readdirSync(commandsSrc);
+      for (const file of commandFiles) {
+        if (file.endsWith('.md')) {
+          fs.copyFileSync(
+            path.join(commandsSrc, file),
+            path.join(commandsDest, file)
+          );
+        }
+      }
+      console.log(`   ✅ Installed ${commandFiles.length} slash commands to ${commandsDest}`);
+    }
+
+    // Copy agents to ~/.claude-code/agents/
+    const agentsSrc = path.join(sourceDir, 'agents');
+    const agentsDest = path.join(claudeBaseDir, 'agents');
+    if (fs.existsSync(agentsSrc)) {
+      if (!fs.existsSync(agentsDest)) {
+        fs.mkdirSync(agentsDest, { recursive: true });
+      }
+      const agentFiles = fs.readdirSync(agentsSrc);
+      for (const file of agentFiles) {
+        if (file.endsWith('.md')) {
+          fs.copyFileSync(
+            path.join(agentsSrc, file),
+            path.join(agentsDest, file)
+          );
+        }
+      }
+      console.log(`   ✅ Installed ${agentFiles.length} AI agents to ${agentsDest}`);
+    }
+
+    // Copy skills to ~/.claude-code/skills/
+    const skillsSrc = path.join(sourceDir, 'skills');
+    const skillsDest = path.join(claudeBaseDir, 'skills');
+    if (fs.existsSync(skillsSrc)) {
+      if (!fs.existsSync(skillsDest)) {
+        fs.mkdirSync(skillsDest, { recursive: true });
+      }
+      const skillFiles = fs.readdirSync(skillsSrc);
+      for (const file of skillFiles) {
+        if (file.endsWith('.md')) {
+          fs.copyFileSync(
+            path.join(skillsSrc, file),
+            path.join(skillsDest, file)
+          );
+        }
+      }
+      console.log(`   ✅ Installed ${skillFiles.length} skills to ${skillsDest}`);
     }
 
     console.log('\n✨ Installation complete!\n');

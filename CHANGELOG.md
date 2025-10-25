@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - 2025-10-25
+
+### Fixed
+- **Critical installation bug**: `install.js` now correctly copies commands, agents, and skills to global Claude Code directories (`~/.claude-code/commands/`, `~/.claude-code/agents/`, `~/.claude-code/skills/`)
+- Commands now appear immediately after installation and restart (no manual copy required)
+- Added installation verification section in README
+
+### Changed
+- Updated installation instructions with clearer steps and troubleshooting guide
+- Reorganized installation options (npm now recommended as primary method)
+- Enhanced installation script output to show global directory installation status
+
 ## [1.0.1] - 2025-10-25
 
 ### Changed
@@ -100,5 +112,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Team collaboration features (assign PRDs, comments)
 - Analytics dashboard (velocity, completion rate)
 
+[1.0.2]: https://github.com/Yassinello/claude-prd-workflow/releases/tag/v1.0.2
+[1.0.1]: https://github.com/Yassinello/claude-prd-workflow/releases/tag/v1.0.1
 [1.0.0]: https://github.com/Yassinello/claude-prd-workflow/releases/tag/v1.0.0
-[Unreleased]: https://github.com/Yassinello/claude-prd-workflow/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/Yassinello/claude-prd-workflow/compare/v1.0.2...HEAD
