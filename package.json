@@ -1,0 +1,53 @@
+{
+  "name": "claude-prd-workflow",
+  "version": "1.0.0",
+  "description": "The complete Claude Code plugin for Product-Driven Development. Ship features faster with AI-powered PRD review, Git worktree support, and automated quality gates.",
+  "main": "install.js",
+  "bin": {
+    "claude-prd-install": "./bin/install.js"
+  },
+  "scripts": {
+    "postinstall": "node install.js"
+  },
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "prd",
+    "product-requirements",
+    "workflow-automation",
+    "development-workflow",
+    "ai-agents",
+    "git-worktree",
+    "code-quality",
+    "security-audit",
+    "productivity",
+    "devops"
+  ],
+  "author": "Yassine Hamou-Tahra <https://github.com/Yassinello>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Yassinello/claude-prd-workflow.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Yassinello/claude-prd-workflow/issues"
+  },
+  "homepage": "https://github.com/Yassinello/claude-prd-workflow#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "commands/",
+    "agents/",
+    "skills/",
+    "templates/",
+    "config/",
+    "docs/",
+    ".claude-plugin/",
+    "install.js",
+    "bin/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ]
+}

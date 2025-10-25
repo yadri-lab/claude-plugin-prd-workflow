@@ -1,0 +1,32 @@
+# Development files
+node_modules/
+.git/
+.gitignore
+
+# Analysis files
+ANALYSE.md
+ANALYSIS.md
+*.backup.json
+
+# GitHub specific
+.github/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test files
+test/
+tests/
+*.test.js
+
+# Don't ignore these (override .gitignore if needed)
+!install.js
+!bin/
+!.claude-plugin/

@@ -102,9 +102,12 @@ git clone https://github.com/Yassinello/claude-prd-workflow.git ~/.claude-code/p
 # Restart Claude Code
 ```
 
-**Option C: npm** (Coming soon)
+**Option C: npm**
 ```bash
-npm install -g @claude-plugins/claude-prd-workflow
+npm install -g claude-prd-workflow
+# The plugin will auto-install to ~/.claude-code/plugins/
+
+# Then restart Claude Code
 ```
 
 ### Step 2: Verify Installation
