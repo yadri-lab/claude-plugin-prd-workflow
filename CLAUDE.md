@@ -154,6 +154,17 @@ claude-prd-workflow/
 
 ## Development Guidelines
 
+### ⚠️ BEFORE YOU START: Read These Files
+
+**MANDATORY** at the start of every session:
+1. **`SESSION_CONTEXT.md`** - Current status, recent sessions, known issues
+2. **This file (`CLAUDE.md`)** - Project structure and guidelines
+3. **`CHANGELOG.md`** - Recent changes
+
+**Why?** Prevents repeating work and ensures you have full context.
+
+---
+
 ### Adding New Features
 
 1. **Update schema first**: `config/schema.json`
@@ -162,7 +173,8 @@ claude-prd-workflow/
 4. **Document in**: `docs/configuration.md`
 5. **Add examples**: `docs/examples/acmecorp-setup.md` or similar
 6. **Update CHANGELOG**: `CHANGELOG.md`
-7. **Write tests** (when test framework exists)
+7. **Update SESSION_CONTEXT.md**: Document the work in current session
+8. **Write tests** (when test framework exists)
 
 ### Configuration Changes
 
@@ -493,14 +505,45 @@ npm root -g
 
 ---
 
+## ⚠️ CRITICAL: End-of-Session Checklist
+
+**MANDATORY** - Do this at the end of EVERY session:
+
+### 1. Update SESSION_CONTEXT.md
+
+**Location**: `SESSION_CONTEXT.md` in project root
+
+**What to update**:
+- [ ] Add new session entry to "Session History"
+- [ ] Update "Current Status" section (version, active work)
+- [ ] Update "Known Issues" (mark resolved, add new)
+- [ ] Add decisions to "Decision Log" if any major decisions made
+
+**Template** is in SESSION_CONTEXT.md - copy/paste and fill in.
+
+**WHY**: This ensures continuity between sessions. Without it, context is lost and we repeat work.
+
+### 2. Commit SESSION_CONTEXT.md
+
+```bash
+git add SESSION_CONTEXT.md
+git commit -m "docs: Update SESSION_CONTEXT with session #X"
+git push origin main
+```
+
+**NEVER skip this step!** It's how we maintain project memory.
+
+---
+
 ## Questions?
 
 If Claude (or a contributor) is unclear about:
 - Release process → Re-read "Release Process" section above
 - Config changes → Re-read "Configuration Changes" section
 - Publishing → **Remember: GitHub Actions does it automatically!**
+- Session documentation → **ALWAYS update SESSION_CONTEXT.md at end of session!**
 
 ---
 
 *Last updated: 2025-10-25*
-*Plugin version: 1.1.0*
+*Plugin version: 1.2.0*
