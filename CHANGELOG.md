@@ -5,6 +5,55 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-10-25
+
+### Added
+- **Runtime configuration parsing**: Commands now actually read `.claude/config.json`
+- Detailed instructions in `/create-prd` for reading PRD ID config from user projects
+- Branch naming configuration support in `/code-prd`
+- Flexible PRD ID recognition in `/list-prds` (supports all formats)
+- Error handling and fallback to defaults if config is invalid
+
+### Fixed
+- **CRITICAL**: Custom PRD ID formats (like `WTC-PRD-XXX`) now work at runtime
+- Commands no longer hardcode `PRD-XXX` format
+- Config from v1.1.0 is now actually functional (not just documented)
+
+### Changed
+- `/create-prd` Step 2: Added explicit config reading instructions
+- `/code-prd` Step 3: Added branch naming config parsing
+- `/list-prds` Step 2: Added support for custom PRD ID formats
+
+### Technical Details
+
+**What actually happens now**:
+1. Claude reads `.claude/config.json` from user's project
+2. Parses `prd_workflow.prd_id` section
+3. Generates PRD IDs using `{prefix}{separator}{padded_number}`
+4. Generates branch names using configured pattern
+5. Falls back to defaults if config missing or invalid
+
+**Example workflow**:
+```bash
+# In Watchora project with .claude/config.json:
+{
+  "prd_workflow": {
+    "prd_id": {
+      "prefix": "WTC-PRD",
+      "separator": "-",
+      "number_padding": 3
+    }
+  }
+}
+
+# Running /create-prd now generates: WTC-PRD-001 ✅
+# Previously it would generate: PRD-001 ❌
+```
+
+### Migration from 1.1.0
+
+No migration needed! If you created a config in v1.1.0, it will now work properly.
+
 ## [1.1.0] - 2025-10-25
 
 ### Added

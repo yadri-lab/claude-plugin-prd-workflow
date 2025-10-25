@@ -43,15 +43,46 @@ If validation fails, warn user but allow proceeding.
 
 ### Step 3: Create Feature Branch
 
-Generate branch name using config pattern:
-- Default: `feat/{prd_id}-{feature_name}`
-- Example: `feat/PRD-003-design-system`
+**Read branch naming configuration**:
+
+1. **Check `.claude/config.json` for branch_naming settings**:
+   ```javascript
+   // If config exists:
+   const branch_config = {
+     prefix: config.prd_workflow.branch_naming.prefix || "feat",
+     separator: config.prd_workflow.branch_naming.separator || "-",
+     pattern: config.prd_workflow.branch_naming.pattern || "{prefix}/{prd_id}{separator}{feature_name}"
+   }
+   ```
+
+2. **Generate branch name** using pattern and PRD ID from selected PRD:
+   ```javascript
+   // Extract PRD ID and feature name from selected PRD
+   const prd_id = "WTC-PRD-003";  // From PRD metadata
+   const feature_name = "design-system";  // Slugified from feature name
+
+   // Apply pattern
+   let branch_name = branch_config.pattern;
+   branch_name = branch_name.replace("{prefix}", branch_config.prefix);
+   branch_name = branch_name.replace("{prd_id}", prd_id);
+   branch_name = branch_name.replace("{separator}", branch_config.separator);
+   branch_name = branch_name.replace("{feature_name}", feature_name);
+
+   // Result: "feat/WTC-PRD-003-design-system" (if using WTC-PRD prefix)
+   // Or: "feat/PRD-003-design-system" (if using default PRD prefix)
+   ```
+
+**Examples with different configs**:
+- Default: `feat/PRD-003-design-system`
+- Watchora: `feat/WTC-PRD-003-design-system`
+- AcmeCorp: `feat/ACME-PRD-003-design-system`
+- Custom: `feature/PRD-003/design-system` (if pattern changed)
 
 Create branch WITHOUT checking out (important for worktree):
 ```bash
 git checkout main
 git pull origin main
-git branch feat/PRD-003-design-system
+git branch feat/WTC-PRD-003-design-system
 ```
 
 ### Step 4: Create Git Worktree (if enabled)

@@ -29,30 +29,68 @@ Ask user for:
 
 ### Step 2: Generate PRD ID
 
-**Read configuration** from `.claude/config.json`:
-```javascript
-const config = {
-  prd_id: {
-    prefix: "PRD",        // e.g., "PRD", "WTC-PRD", "FEAT"
-    separator: "-",       // e.g., "-", "_"
-    number_padding: 3     // e.g., 3 → "001", 4 → "0001"
-  }
-}
-```
+**IMPORTANT: Read PRD ID configuration from user's project**
 
-**Generate ID**:
-1. Scan all PRD directories (`product/prds/**/*.md`)
-2. Extract numbers from existing PRD IDs
-3. Find highest number (e.g., if WTC-PRD-006 exists, highest = 6)
-4. Increment by 1 (next = 7)
-5. Format: `{prefix}{separator}{number}`
-   - Pad number with zeros (e.g., 7 → "007" if padding=3)
-   - Result: `WTC-PRD-007` or `PRD-007` or `FEAT-007`
+1. **Check if `.claude/config.json` exists in project root**:
+   ```bash
+   # Use Read tool to read .claude/config.json
+   # If file doesn't exist, use defaults
+   ```
 
-**Examples**:
-- Config: `{ prefix: "PRD", separator: "-", padding: 3 }` → `PRD-007`
-- Config: `{ prefix: "WTC-PRD", separator: "-", padding: 3 }` → `WTC-PRD-007`
-- Config: `{ prefix: "FEAT", separator: "_", padding: 4 }` → `FEAT_0007`
+2. **Parse config and extract prd_id settings**:
+   ```javascript
+   // If .claude/config.json exists and has prd_workflow.prd_id:
+   const prd_id_config = {
+     prefix: config.prd_workflow.prd_id.prefix,           // e.g., "WTC-PRD", "PRD"
+     separator: config.prd_workflow.prd_id.separator,     // e.g., "-", "_"
+     number_padding: config.prd_workflow.prd_id.number_padding  // e.g., 3, 4
+   }
+
+   // Otherwise use defaults:
+   const prd_id_config = {
+     prefix: "PRD",
+     separator: "-",
+     number_padding: 3
+   }
+   ```
+
+3. **Scan existing PRDs to find next number**:
+   ```bash
+   # Use Glob tool to find all PRD files
+   glob pattern: "product/prds/**/*.md"
+
+   # Extract PRD IDs from filenames and content
+   # Look for patterns like: PRD-001, WTC-PRD-003, FEAT_0012, etc.
+   # Extract the numeric part
+   # Find the highest number
+   ```
+
+4. **Generate new PRD ID**:
+   ```javascript
+   // Example calculation:
+   // If highest existing = 6, next = 7
+
+   const next_number = highest_number + 1;  // e.g., 7
+
+   // Pad with zeros based on number_padding
+   const padded = String(next_number).padStart(prd_id_config.number_padding, '0');
+   // e.g., 7 → "007" (if padding=3), or "0007" (if padding=4)
+
+   // Combine to form PRD ID
+   const prd_id = `${prd_id_config.prefix}${prd_id_config.separator}${padded}`;
+   // e.g., "WTC-PRD-007" or "PRD-007" or "FEAT_0007"
+   ```
+
+**Examples with different configs**:
+- Config: `{ prefix: "PRD", separator: "-", number_padding: 3 }` → `PRD-007`
+- Config: `{ prefix: "WTC-PRD", separator: "-", number_padding: 3 }` → `WTC-PRD-007`
+- Config: `{ prefix: "ACME-PRD", separator: "-", number_padding: 3 }` → `ACME-PRD-007`
+- Config: `{ prefix: "FEAT", separator: "_", number_padding: 4 }` → `FEAT_0007`
+
+**Error Handling**:
+- If `.claude/config.json` is malformed → Use defaults + warn user
+- If `number_padding` < 1 or > 6 → Use 3 + warn user
+- If `prefix` is empty → Use "PRD" + warn user
 
 ### Step 3: Load Template
 

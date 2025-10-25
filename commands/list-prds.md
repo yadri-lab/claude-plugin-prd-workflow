@@ -30,8 +30,24 @@ Scan these directories (from config):
 
 ### Step 2: Parse Each PRD
 
+**IMPORTANT: Support all PRD ID formats**
+
+The PRD ID can be in various formats depending on project configuration:
+- Standard: `PRD-003`, `PRD-012`
+- Watchora: `WTC-PRD-003`, `WTC-PRD-012`
+- AcmeCorp: `ACME-PRD-003`, `ACME-PRD-012`
+- Custom: `FEAT_0003`, `RFC-012`, etc.
+
+Use flexible parsing to extract PRD ID from:
+1. **Filename pattern**: `YYMMDD-{slug}-v1.md`
+2. **Metadata header**: Look for lines like:
+   - `**PRD ID**: WTC-PRD-003`
+   - `**ID**: ACME-PRD-012`
+   - `PRD ID: PRD-003`
+3. **First heading**: `# WTC-PRD-003: Feature Name`
+
 Extract metadata:
-- PRD ID (e.g., PRD-003)
+- PRD ID (e.g., PRD-003, WTC-PRD-003, ACME-PRD-003)
 - Feature name
 - Status
 - Priority (P0, P1, P2, P3)
