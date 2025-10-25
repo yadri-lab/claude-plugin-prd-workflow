@@ -122,6 +122,24 @@ function install() {
       }
     }
 
+    // Create .plugin-info.json with version metadata
+    const packageJsonPath = path.join(sourceDir, 'package.json');
+    if (fs.existsSync(packageJsonPath)) {
+      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+      const pluginInfo = {
+        name: packageJson.name,
+        version: packageJson.version,
+        description: packageJson.description,
+        installedAt: new Date().toISOString(),
+        repository: packageJson.repository?.url || 'https://github.com/Yassinello/claude-prd-workflow',
+        homepage: packageJson.homepage || 'https://github.com/Yassinello/claude-prd-workflow#readme'
+      };
+
+      const pluginInfoPath = path.join(targetDir, '.plugin-info.json');
+      fs.writeFileSync(pluginInfoPath, JSON.stringify(pluginInfo, null, 2));
+      console.log(`   ✅ Created .plugin-info.json (v${packageJson.version})`);
+    }
+
     // Install commands, agents, and skills to global Claude Code directories
     console.log('\n📋 Installing to Claude Code global directories...\n');
 
@@ -187,12 +205,14 @@ function install() {
     console.log('\n✨ Installation complete!\n');
     console.log('📖 Next steps:\n');
     console.log('   1. Restart Claude Code');
-    console.log('   2. Run /list-prds to verify installation');
-    console.log('   3. Check the documentation: https://github.com/Yassinello/claude-prd-workflow\n');
+    console.log('   2. Run /plugin-version to check version');
+    console.log('   3. Run /list-prds to verify installation');
+    console.log('   4. Check the documentation: https://github.com/Yassinello/claude-prd-workflow\n');
     console.log('🎯 Quick start:\n');
-    console.log('   /create-prd  - Create your first PRD');
-    console.log('   /review-prd  - Review a draft PRD');
-    console.log('   /code-prd    - Start development\n');
+    console.log('   /create-prd      - Create your first PRD');
+    console.log('   /review-prd      - Review a draft PRD');
+    console.log('   /code-prd        - Start development');
+    console.log('   /plugin-version  - Check plugin version\n');
 
   } catch (error) {
     console.error('❌ Installation failed:', error.message);

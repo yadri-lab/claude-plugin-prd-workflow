@@ -1,0 +1,103 @@
+{
+  "$comment": "Lightweight Preset - For side projects, prototypes, and teams that don't use PRDs",
+  "version": "2.0.0",
+  "mode": "lightweight",
+  "modules": {
+    "prd": false,
+    "quality": true,
+    "security": true,
+    "git": true,
+    "devops": false,
+    "orchestration": false
+  },
+  "prd_workflow": {
+    "enabled": false
+  },
+  "security": {
+    "enabled": true,
+    "auto_scan_on_commit": false,
+    "scan_dependencies": true,
+    "scan_code": true,
+    "fail_on_high_severity": false,
+    "ignore_patterns": [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/.next/**",
+      "**/.git/**"
+    ],
+    "tools": {
+      "npm_audit": true,
+      "eslint_security": false,
+      "git_secrets": false
+    }
+  },
+  "quality": {
+    "enabled": true,
+    "auto_format_on_save": false,
+    "linting": {
+      "enabled": true,
+      "auto_fix": true,
+      "fail_on_error": false
+    },
+    "testing": {
+      "enabled": true,
+      "auto_run": false,
+      "coverage_threshold": 60,
+      "required_for_pr": false
+    },
+    "code_complexity": {
+      "enabled": true,
+      "max_complexity": 25,
+      "warn_threshold": 20
+    }
+  },
+  "git": {
+    "enabled": true,
+    "smart_commit": {
+      "enabled": true,
+      "ai_message_generation": true,
+      "conventional_commits": true,
+      "emoji": false
+    },
+    "smart_pr": {
+      "enabled": true,
+      "ai_summary_generation": true,
+      "auto_link_issues": true,
+      "template": "default"
+    },
+    "hooks": {
+      "pre_commit_lint": true,
+      "pre_commit_test": false,
+      "pre_push_test": false
+    }
+  },
+  "orchestration": {
+    "enabled": false
+  },
+  "agents": {
+    "prd_reviewer": {
+      "enabled": false
+    },
+    "prd_implementer": {
+      "enabled": false
+    },
+    "orchestrator": {
+      "enabled": false
+    },
+    "security_expert": {
+      "enabled": true,
+      "scan_frequency": "on_demand"
+    },
+    "quality_assurance": {
+      "enabled": true,
+      "check_frequency": "on_demand"
+    },
+    "devops_engineer": {
+      "enabled": false
+    }
+  },
+  "notifications": {
+    "enabled": false
+  }
+}

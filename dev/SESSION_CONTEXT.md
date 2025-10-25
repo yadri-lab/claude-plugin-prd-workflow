@@ -15,7 +15,7 @@
 - ✅ Configurable PRD ID format implemented (v1.1.0)
 - ✅ Runtime config parsing implemented (v1.2.0) ⭐ **NEW**
 - ✅ Documentation updated
-- ✅ CLAUDE.md and SESSION_CONTEXT.md created
+- ✅ dev/DEVELOPMENT.md and SESSION_CONTEXT.md created
 
 ### Resolved Issues (v1.2.0)
 1. ✅ **Config now read at runtime**
@@ -115,7 +115,7 @@ Modified 3 critical commands to read and use `.claude/config.json`:
 
 3. **Documentation crucial**
    - SESSION_CONTEXT.md saved time (no re-explaining context)
-   - CLAUDE.md provided reference
+   - dev/DEVELOPMENT.md provided reference
    - Good docs = faster sessions
 
 #### Impact
@@ -153,12 +153,12 @@ Modified (6 files):
 - CHANGELOG.md (v1.2.0 section added)
 - SESSION_CONTEXT.md (this session documented)
 - package.json (version 1.1.0 → 1.2.0)
-- CLAUDE.md (added end-of-session checklist) ← Added after v1.2.0 release
+- dev/DEVELOPMENT.md (added end-of-session checklist) ← Added after v1.2.0 release
 ```
 
 #### Commits
 - `f7a653f` - feat: Implement runtime config parsing for PRD IDs and branch naming
-- `7d507c4` - docs: Add mandatory end-of-session checklist to CLAUDE.md
+- `7d507c4` - docs: Add mandatory end-of-session checklist to dev/DEVELOPMENT.md
 
 ---
 
@@ -175,7 +175,7 @@ Yassine shared a detailed analysis from Watchora project adoption, highlighting 
 - [x] Keep plugin 100% generic (no Watchora-specific code)
 - [x] Update documentation with examples
 - [x] Deploy to npm
-- [x] Create project documentation (CLAUDE.md, SESSION_CONTEXT.md)
+- [x] Create project documentation (dev/DEVELOPMENT.md, SESSION_CONTEXT.md)
 
 #### Work Done
 
@@ -209,7 +209,7 @@ Yassine shared a detailed analysis from Watchora project adoption, highlighting 
 - Updated local: `npm install -g claude-prd-workflow@latest`
 
 **4. Project Documentation**
-- Created `CLAUDE.md` - Project context, architecture, guidelines
+- Created `dev/DEVELOPMENT.md` - Project context, architecture, guidelines
 - Created `SESSION_CONTEXT.md` - This file!
 - Documented release process (GitHub Actions automation)
 - Documented known limitations
@@ -235,7 +235,7 @@ Yassine shared a detailed analysis from Watchora project adoption, highlighting 
 4. **GitHub Actions for all releases**
    - Never run `npm publish` manually
    - Tag triggers automatic publish
-   - Documented in CLAUDE.md to avoid future mistakes
+   - Documented in dev/DEVELOPMENT.md to avoid future mistakes
 
 #### Key Learnings
 
@@ -251,7 +251,7 @@ Yassine shared a detailed analysis from Watchora project adoption, highlighting 
    - Result: Clean, focused, generic solution
 
 3. **Documentation matters**
-   - CLAUDE.md helps future sessions (context, guidelines)
+   - dev/DEVELOPMENT.md helps future sessions (context, guidelines)
    - SESSION_CONTEXT.md tracks decisions and progress
    - Reduces "why did we do this?" questions
 
@@ -279,13 +279,13 @@ Modified (10 files):
 - commands/create-prd.md
 
 Created (2 files):
-- CLAUDE.md
+- dev/DEVELOPMENT.md
 - SESSION_CONTEXT.md
 ```
 
 #### Commits
 - `80a56e7` - feat: Add configurable PRD ID format support
-- `916028d` - docs: Add CLAUDE.md with project context and guidelines
+- `916028d` - docs: Add dev/DEVELOPMENT.md with project context and guidelines
 
 #### References
 - npm package: https://www.npmjs.com/package/claude-prd-workflow/v/1.1.0
@@ -327,7 +327,7 @@ Initial plugin development and preparation for publication.
 
 ### Starting a New Session
 1. Read this file (SESSION_CONTEXT.md)
-2. Read CLAUDE.md (project context)
+2. Read dev/DEVELOPMENT.md (project context)
 3. Check current version: `npm view claude-prd-workflow version`
 4. Pull latest: `git pull origin main`
 5. Check active issues: `gh issue list`

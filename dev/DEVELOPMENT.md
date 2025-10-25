@@ -158,7 +158,7 @@ claude-prd-workflow/
 
 **MANDATORY** at the start of every session:
 1. **`SESSION_CONTEXT.md`** - Current status, recent sessions, known issues
-2. **This file (`CLAUDE.md`)** - Project structure and guidelines
+2. **This file (`dev/DEVELOPMENT.md`)** - Project structure and guidelines
 3. **`CHANGELOG.md`** - Recent changes
 
 **Why?** Prevents repeating work and ensures you have full context.

@@ -8,6 +8,48 @@
       "type": "string",
       "description": "Configuration version"
     },
+    "mode": {
+      "type": "string",
+      "enum": ["full", "lightweight", "skills-only"],
+      "description": "Plugin operation mode: full (all features), lightweight (no PRDs), skills-only (just reusable skills)",
+      "default": "full"
+    },
+    "modules": {
+      "type": "object",
+      "description": "Enable/disable plugin modules",
+      "properties": {
+        "prd": {
+          "type": "boolean",
+          "description": "Enable PRD workflow commands (/create-prd, /review-prd, /code-prd, etc.)",
+          "default": true
+        },
+        "quality": {
+          "type": "boolean",
+          "description": "Enable quality commands (/quality-check, linting, testing)",
+          "default": true
+        },
+        "security": {
+          "type": "boolean",
+          "description": "Enable security commands (/security-audit)",
+          "default": true
+        },
+        "git": {
+          "type": "boolean",
+          "description": "Enable Git workflow enhancements (/smart-commit, /smart-pr)",
+          "default": true
+        },
+        "devops": {
+          "type": "boolean",
+          "description": "Enable DevOps commands (future: /deploy, /rollback)",
+          "default": false
+        },
+        "orchestration": {
+          "type": "boolean",
+          "description": "Enable multi-PRD orchestration (/orchestrate)",
+          "default": true
+        }
+      }
+    },
     "prd_workflow": {
       "type": "object",
       "properties": {
