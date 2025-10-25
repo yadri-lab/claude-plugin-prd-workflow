@@ -3,7 +3,9 @@
 > **The complete Claude Code plugin for Product-Driven Development**
 > Transform PRDs from ideas to shipped features with AI-powered review, guided implementation, and automated quality gates.
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/Yassinello/claude-prd-workflow/releases)
+[![npm version](https://img.shields.io/npm/v/claude-prd-workflow.svg)](https://www.npmjs.com/package/claude-prd-workflow)
+[![npm downloads](https://img.shields.io/npm/dm/claude-prd-workflow.svg)](https://www.npmjs.com/package/claude-prd-workflow)
+[![GitHub release](https://img.shields.io/github/v/release/Yassinello/claude-prd-workflow.svg)](https://github.com/Yassinello/claude-prd-workflow/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-2.0%2B-purple.svg)](https://claude.com/claude-code)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
