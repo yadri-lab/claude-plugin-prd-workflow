@@ -14,6 +14,11 @@ Thumbs.db
 # Claude
 .claude/
 
+# PRD Workflow - User's PRDs (not part of plugin source)
+product/prds/
+product/WORK_PLAN.md
+product/decisions/
+
 # Logs
 *.log
 logs/
