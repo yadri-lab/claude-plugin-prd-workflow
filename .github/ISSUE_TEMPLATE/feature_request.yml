@@ -1,0 +1,162 @@
+name: ✨ Feature Request
+description: Suggest a new feature or enhancement for the PRD Workflow Manager plugin
+title: "[Feature]: "
+labels: ["enhancement", "triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a feature! We appreciate your input in making the plugin better.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve? What's the pain point?
+      placeholder: "As a user, I'm frustrated when..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: How would you like this feature to work?
+      placeholder: Describe your ideal solution
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Which component should this affect?
+      description: Where should this feature be implemented?
+      options:
+        - New Command
+        - Existing Command Enhancement
+        - New Agent
+        - Existing Agent Enhancement
+        - New Skill
+        - Existing Skill Enhancement
+        - Configuration
+        - Template
+        - Documentation
+        - Workflow/Automation
+        - Integration (GitHub, etc.)
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case / Example
+      description: Provide a concrete example of how this feature would be used
+      placeholder: |
+        Example workflow:
+        1. User does X
+        2. Feature provides Y
+        3. User achieves Z
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What alternative solutions or workarounds have you considered?
+      placeholder: Describe any alternatives you've thought about
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature to you?
+      options:
+        - P0 (Critical - blocks my workflow)
+        - P1 (High - would significantly improve my workflow)
+        - P2 (Medium - nice to have)
+        - P3 (Low - minor enhancement)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: user-type
+    attributes:
+      label: User Type
+      description: What type of project are you working on?
+      multiple: true
+      options:
+        - Startup (fast-paced development)
+        - Enterprise (strict quality gates)
+        - Open Source (community-driven)
+        - Personal Project
+        - Academic/Research
+        - Other
+
+  - type: checkboxes
+    id: breaking
+    attributes:
+      label: Breaking Changes
+      description: Would this feature require breaking changes?
+      options:
+        - label: This feature may require breaking changes to existing functionality
+          required: false
+        - label: This feature is backward compatible
+          required: false
+
+  - type: textarea
+    id: mockup
+    attributes:
+      label: Mockup / Design
+      description: If applicable, add screenshots, diagrams, or code examples
+      placeholder: |
+        ```bash
+        /new-command --option value
+        ```
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: How will we know when this feature is complete?
+      placeholder: |
+        - [ ] User can do X
+        - [ ] Feature produces Y
+        - [ ] Documentation is updated
+    validations:
+      required: false
+
+  - type: dropdown
+    id: willingness
+    attributes:
+      label: Contribution
+      description: Would you be willing to contribute this feature?
+      options:
+        - Yes, I'd like to implement this
+        - Maybe, with guidance
+        - No, I'm just suggesting
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Any other information that would help us understand this feature request
+      placeholder: Links, research, similar features in other tools, etc.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      description: Please confirm you've completed these steps
+      options:
+        - label: I have searched existing issues to ensure this isn't a duplicate
+          required: true
+        - label: I have clearly described the problem and proposed solution
+          required: true
+        - label: I have provided a concrete use case
+          required: true

@@ -1,0 +1,29 @@
+{
+  "id": "claude-prd-workflow",
+  "name": "PRD Workflow Manager",
+  "shortDescription": "Professional PRD lifecycle management with security, quality, and orchestration",
+  "longDescription": "A comprehensive plugin for managing Product Requirements Documents through their entire lifecycle.\n\nFeatures:\n• Structured PRD Review (7-dimension analysis)\n• Git Worktree Support (parallel development)\n• Guided Implementation (task-by-task)\n• Security Audits (automated vulnerability detection)\n• Quality Assurance (code quality + testing)\n• Workflow Orchestration (multi-PRD coordination)\n• DevOps Integration (CI/CD automation)\n\nFully customizable for any project. Includes 6 specialized AI agents.",
+  "author": "Yassine Hamou-Tahra",
+  "authorUrl": "https://github.com/Yassinello",
+  "icon": "📋",
+  "screenshots": [],
+  "tags": [
+    "product",
+    "workflow",
+    "agile",
+    "prd",
+    "project-management",
+    "security",
+    "quality",
+    "devops",
+    "git-worktree"
+  ],
+  "documentation": "https://github.com/Yassinello/claude-prd-workflow#readme",
+  "changelog": "https://github.com/Yassinello/claude-prd-workflow/blob/main/CHANGELOG.md",
+  "pricing": "free",
+  "license": "MIT",
+  "compatibility": {
+    "minClaudeVersion": "2.0.0",
+    "platforms": ["windows", "macos", "linux"]
+  }
+}

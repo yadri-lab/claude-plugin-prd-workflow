@@ -1,0 +1,135 @@
+{
+  "$schema": "./schema.json",
+  "version": "1.0.0",
+  "prd_workflow": {
+    "enabled": true,
+    "directories": {
+      "draft": "product/prds/01-draft",
+      "review": "product/prds/02-review",
+      "ready": "product/prds/03-ready",
+      "in_progress": "product/prds/04-in-progress",
+      "complete": "product/prds/05-complete",
+      "archived": "product/prds/99-archived"
+    },
+    "branch_naming": {
+      "prefix": "feat",
+      "prd_id_format": "PRD-{number}",
+      "separator": "-",
+      "pattern": "{prefix}/{prd_id}{separator}{feature_name}"
+    },
+    "worktree": {
+      "enabled": true,
+      "parent_directory": "..",
+      "naming_pattern": "{project}-{feature}",
+      "auto_install_dependencies": true,
+      "auto_open_editor": false
+    },
+    "github": {
+      "enabled": true,
+      "create_issue_on_approval": true,
+      "issue_labels": ["PRD", "P0", "P1", "P2"],
+      "auto_assign": true,
+      "milestone_tracking": true
+    },
+    "review": {
+      "dimensions": [
+        "Clarity & Scope",
+        "Technical Feasibility",
+        "User Experience",
+        "Dependencies & Blockers",
+        "Acceptance Criteria",
+        "Risk Assessment",
+        "Simplification Opportunities"
+      ],
+      "grading_enabled": true,
+      "minimum_grade": "C",
+      "require_approval": true,
+      "calibration_questions": true
+    },
+    "work_plan": {
+      "enabled": true,
+      "file_path": "product/WORK_PLAN.md",
+      "update_on_status_change": true,
+      "track_decisions": true
+    }
+  },
+  "security": {
+    "enabled": true,
+    "auto_scan_on_commit": false,
+    "scan_dependencies": true,
+    "scan_code": true,
+    "fail_on_high_severity": true,
+    "ignore_patterns": [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/.next/**"
+    ],
+    "tools": {
+      "npm_audit": true,
+      "eslint_security": true,
+      "git_secrets": false
+    }
+  },
+  "quality": {
+    "enabled": true,
+    "auto_format_on_save": false,
+    "linting": {
+      "enabled": true,
+      "auto_fix": false,
+      "fail_on_error": false
+    },
+    "testing": {
+      "enabled": true,
+      "auto_run": false,
+      "coverage_threshold": 80,
+      "required_for_pr": true
+    },
+    "code_complexity": {
+      "enabled": true,
+      "max_complexity": 15,
+      "warn_threshold": 10
+    }
+  },
+  "orchestration": {
+    "enabled": true,
+    "parallel_features": 3,
+    "dependency_resolution": true,
+    "auto_merge_strategy": "squash",
+    "conflict_resolution": "manual"
+  },
+  "agents": {
+    "prd_reviewer": {
+      "enabled": true,
+      "auto_invoke": false,
+      "strictness": "balanced"
+    },
+    "prd_implementer": {
+      "enabled": true,
+      "task_breakdown_granularity": "medium"
+    },
+    "orchestrator": {
+      "enabled": true,
+      "coordination_mode": "smart"
+    },
+    "security_expert": {
+      "enabled": true,
+      "scan_frequency": "on_demand"
+    },
+    "quality_assurance": {
+      "enabled": true,
+      "check_frequency": "on_pr"
+    },
+    "devops_engineer": {
+      "enabled": false,
+      "auto_setup_ci": false
+    }
+  },
+  "notifications": {
+    "enabled": false,
+    "slack": {
+      "enabled": false,
+      "webhook_url": ""
+    }
+  }
+}

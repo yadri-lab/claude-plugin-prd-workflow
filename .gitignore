@@ -1,0 +1,53 @@
+# OS Files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Claude
+.claude/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+temp/
+.cache/
+
+# User-specific config (users should copy from default-config.json)
+config.json
+
+# Node modules (if any examples/tests added later)
+node_modules/
+npm-debug.log*
+
+# Build outputs
+dist/
+build/
+*.min.js
+
+# Coverage reports
+coverage/
+.nyc_output/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Archives
+*.zip
+*.tar.gz
+
+# Security audit reports (may contain sensitive info)
+.claude/security-audit-*.md
+.claude/quality-check-*.md

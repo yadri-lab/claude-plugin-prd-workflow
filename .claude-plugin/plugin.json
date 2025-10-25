@@ -1,0 +1,57 @@
+{
+  "name": "claude-prd-workflow",
+  "version": "1.0.0",
+  "displayName": "PRD Workflow Manager",
+  "description": "Complete PRD lifecycle management with orchestration, security, quality assurance, and guided development. Includes Git worktree support for parallel development.",
+  "author": {
+    "name": "Yassine Hamou-Tahra",
+    "email": "yassine@watchora.com",
+    "url": "https://github.com/Yassinello"
+  },
+  "homepage": "https://github.com/Yassinello/claude-prd-workflow",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Yassinello/claude-prd-workflow.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Yassinello/claude-prd-workflow/issues"
+  },
+  "license": "MIT",
+  "keywords": [
+    "prd",
+    "product-management",
+    "workflow",
+    "agile",
+    "project-management",
+    "git-worktree",
+    "security",
+    "quality-assurance",
+    "orchestration",
+    "development-workflow",
+    "code-quality",
+    "devops"
+  ],
+  "engines": {
+    "claude-code": ">=2.0.0"
+  },
+  "categories": [
+    "Project Management",
+    "Workflow Automation",
+    "Development Tools",
+    "Quality Assurance",
+    "Security"
+  ],
+  "icon": "📋",
+  "configuration": {
+    "schema": "config/schema.json",
+    "default": "config/default-config.json",
+    "description": "Customize PRD directories, branch naming, workflow behavior, and agent preferences"
+  },
+  "capabilities": {
+    "commands": true,
+    "agents": true,
+    "skills": true,
+    "templates": true,
+    "configuration": true
+  }
+}

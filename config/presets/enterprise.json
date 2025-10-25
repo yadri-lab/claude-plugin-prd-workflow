@@ -1,0 +1,138 @@
+{
+  "$comment": "Enterprise Preset - Strict processes, compliance, and quality gates for large organizations",
+  "version": "1.0.0",
+  "prd_workflow": {
+    "enabled": true,
+    "directories": {
+      "draft": "product/prds/01-draft",
+      "review": "product/prds/02-review",
+      "ready": "product/prds/03-ready",
+      "in_progress": "product/prds/04-in-progress",
+      "complete": "product/prds/05-complete",
+      "archived": "product/prds/99-archived"
+    },
+    "branch_naming": {
+      "prefix": "feature",
+      "prd_id_format": "PRD-{number}",
+      "separator": "/",
+      "pattern": "{prefix}/{prd_id}{separator}{feature_name}"
+    },
+    "worktree": {
+      "enabled": true,
+      "parent_directory": "../worktrees",
+      "naming_pattern": "{prd_id}-{feature}",
+      "auto_install_dependencies": true,
+      "auto_open_editor": false
+    },
+    "github": {
+      "enabled": true,
+      "create_issue_on_approval": true,
+      "issue_labels": ["PRD", "P0", "P1", "P2", "compliance"],
+      "auto_assign": true,
+      "milestone_tracking": true
+    },
+    "review": {
+      "dimensions": [
+        "Clarity & Scope",
+        "Technical Feasibility",
+        "User Experience",
+        "Dependencies & Blockers",
+        "Acceptance Criteria",
+        "Risk Assessment",
+        "Simplification Opportunities",
+        "Compliance & Regulatory",
+        "Security Impact",
+        "Performance Impact"
+      ],
+      "grading_enabled": true,
+      "minimum_grade": "B",
+      "require_approval": true,
+      "calibration_questions": true
+    },
+    "work_plan": {
+      "enabled": true,
+      "file_path": "product/WORK_PLAN.md",
+      "update_on_status_change": true,
+      "track_decisions": true
+    }
+  },
+  "security": {
+    "enabled": true,
+    "auto_scan_on_commit": true,
+    "scan_dependencies": true,
+    "scan_code": true,
+    "fail_on_high_severity": true,
+    "ignore_patterns": [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/.next/**"
+    ],
+    "tools": {
+      "npm_audit": true,
+      "eslint_security": true,
+      "git_secrets": true
+    }
+  },
+  "quality": {
+    "enabled": true,
+    "auto_format_on_save": true,
+    "linting": {
+      "enabled": true,
+      "auto_fix": false,
+      "fail_on_error": true
+    },
+    "testing": {
+      "enabled": true,
+      "auto_run": true,
+      "coverage_threshold": 90,
+      "required_for_pr": true
+    },
+    "code_complexity": {
+      "enabled": true,
+      "max_complexity": 10,
+      "warn_threshold": 7
+    }
+  },
+  "orchestration": {
+    "enabled": true,
+    "parallel_features": 5,
+    "dependency_resolution": true,
+    "auto_merge_strategy": "merge",
+    "conflict_resolution": "manual"
+  },
+  "agents": {
+    "prd_reviewer": {
+      "enabled": true,
+      "auto_invoke": true,
+      "strictness": "strict"
+    },
+    "prd_implementer": {
+      "enabled": true,
+      "task_breakdown_granularity": "fine"
+    },
+    "orchestrator": {
+      "enabled": true,
+      "coordination_mode": "advanced"
+    },
+    "security_expert": {
+      "enabled": true,
+      "scan_frequency": "on_commit"
+    },
+    "quality_assurance": {
+      "enabled": true,
+      "check_frequency": "on_commit"
+    },
+    "devops_engineer": {
+      "enabled": true,
+      "auto_setup_ci": true
+    }
+  },
+  "notifications": {
+    "enabled": true,
+    "slack": {
+      "enabled": true,
+      "webhook_url": ""
+    }
+  }
+}

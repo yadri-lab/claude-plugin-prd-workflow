@@ -1,0 +1,163 @@
+name: ⚙️ Configuration Help
+description: Get help with configuring the PRD Workflow Manager plugin
+title: "[Config]: "
+labels: ["configuration", "question"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Need help configuring the plugin? We're here to help! Please fill out the form below.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Configuration Question
+      description: What do you need help with?
+      placeholder: I'm trying to configure X but I'm not sure how...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: config-area
+    attributes:
+      label: Configuration Area
+      description: Which part of the configuration are you asking about?
+      options:
+        - PRD Workflow (directories, branching, worktrees)
+        - GitHub Integration (issues, labels, milestones)
+        - Review Process (dimensions, grading, approval)
+        - Work Plan (file path, tracking)
+        - Security (scanning, tools, compliance)
+        - Quality (linting, testing, complexity)
+        - Orchestration (parallel features, merging)
+        - Agents (enabling, configuring agents)
+        - Notifications (Slack, email)
+        - Presets (startup, enterprise, open-source)
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: project-type
+    attributes:
+      label: Project Type
+      description: What type of project are you working on?
+      options:
+        - Startup (need fast development)
+        - Enterprise (need strict quality)
+        - Open Source (community-driven)
+        - Microservices (distributed system)
+        - E-commerce (high scale)
+        - Personal Project
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: team-size
+    attributes:
+      label: Team Size
+      description: How many developers on your team?
+      options:
+        - Solo (1 developer)
+        - Small (2-4 developers)
+        - Medium (5-10 developers)
+        - Large (11-20 developers)
+        - Very Large (20+ developers)
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-config
+    attributes:
+      label: Current Configuration
+      description: Paste your current configuration (remove sensitive information)
+      placeholder: |
+        {
+          "prd_workflow": {
+            "enabled": true,
+            ...
+          }
+        }
+      render: json
+
+  - type: textarea
+    id: what-tried
+    attributes:
+      label: What Have You Tried?
+      description: What configurations have you already attempted?
+      placeholder: |
+        I tried setting X to Y but...
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Desired Behavior
+      description: What are you trying to achieve with this configuration?
+      placeholder: I want the plugin to...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: preset-tried
+    attributes:
+      label: Have you tried a preset?
+      description: Have you tried using one of the configuration presets?
+      options:
+        - Yes, tried startup preset
+        - Yes, tried enterprise preset
+        - Yes, tried open-source preset
+        - No, using custom config
+        - Not sure what presets are
+    validations:
+      required: true
+
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints or Requirements
+      description: Any specific constraints or requirements for your configuration?
+      placeholder: |
+        - Must support parallel development
+        - Need 90% test coverage
+        - Require PCI-DSS compliance
+        - etc.
+
+  - type: checkboxes
+    id: docs-checked
+    attributes:
+      label: Documentation Checked
+      description: Have you checked these resources?
+      options:
+        - label: I have read the [Getting Started guide](../docs/getting-started.md)
+          required: false
+        - label: I have read the [Configuration reference](../docs/configuration.md)
+          required: false
+        - label: I have reviewed the [example workflows](../docs/examples/)
+          required: false
+        - label: I have checked [Best Practices](../docs/best-practices.md)
+          required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Any other information that would help us assist you
+      placeholder: Project structure, tech stack, workflow specifics, etc.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      description: Please confirm
+      options:
+        - label: I have searched existing issues for similar questions
+          required: true
+        - label: I have checked the documentation
+          required: true
+        - label: I have provided my current configuration
+          required: true
