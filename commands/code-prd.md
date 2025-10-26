@@ -1,280 +1,247 @@
 ---
 name: code-prd
-description: Create feature branch and worktree for PRD development
+description: Guided implementation with task breakdown and validation
 category: PRD Management
 ---
 
 # Code PRD Command
 
-Start development on a PRD by creating a feature branch and optional Git worktree.
+Guide step-by-step implementation of active PRD with task breakdown and continuous validation.
 
 ## Purpose
 
-Create isolated development environment for PRD:
-- Create feature branch
-- Set up Git worktree (optional)
-- Move PRD to in-progress
-- Update WORK_PLAN.md
-- **Accept draft PRDs** (with warning) for parallel workflow
+Bridge the gap between approved PRD and completed feature through:
+- Intelligent task breakdown (phases → tasks)
+- Step-by-step guided implementation
+- Continuous validation against acceptance criteria
+- Progress tracking with checkpoints
+- Quality gates at each phase
 
 ## Workflow
 
-### Step 1: List Available PRDs
+### Phase 1: Context Loading
 
-Scan PRD directories for available PRDs:
+#### Step 1: Detect Active PRD
+
+**Method A**: Extract from current branch name
 ```bash
-# Check these directories:
-- product/prds/01-draft/
-- product/prds/02-approved/
-- product/prds/03-in-progress/ (to show what's already being worked on)
+git branch --show-current
+# Example output: feat/PRD-003-design-system
+# Extract: PRD-003
 ```
 
-Display table:
+**Method B**: Ask user if detection fails
+
+Find corresponding PRD file in `product/prds/04-in-progress/`
+
+#### Step 2: Load PRD Content
+
+Read and parse:
+- Acceptance criteria (P0, P1, P2)
+- Tech stack and architecture
+- Dependencies and constraints
+- Success metrics
+
+#### Step 3: Check for Existing Progress
+
+Look for `.claude/prd-{id}-progress.json` to resume if exists.
+
+### Phase 2: Task Breakdown
+
+Invoke `prd-implementer` agent + `estimation` skill to generate:
+
+1. **Phased Plan** (Foundation → Core → Advanced → QA)
+2. **Task List** with:
+   - Task ID and description
+   - Files to create/modify
+   - Complexity estimate (Low/Medium/High)
+   - Time estimate
+   - Dependencies
+   - Acceptance criteria (from PRD)
+
+3. **Critical Path** identification
+4. **Parallelization opportunities**
+
+Example output structure:
 ```markdown
-📋 **PRDs Available**
+📋 **Implementation Plan - PRD-003: Design System v1.0**
 
-**Draft** (Review later on feature branch):
-| # | PRD ID | Feature | Created |
-|---|--------|---------|---------|
-| 1 | PRD-007 | OAuth2 Integration | 2025-10-26 |
-| 2 | PRD-008 | Dark Mode Support | 2025-10-26 |
+## Phase 0: Foundation (Critical Path)
+- Task 1: Setup Types & Interfaces (30min, Low)
+- Task 2: Configure Tailwind (30min, Low)
+- Task 3: Install shadcn/ui (1h, Medium)
 
-**Approved** (Ready to code):
-| # | PRD ID | Feature | Grade |
-|---|--------|---------|-------|
-| 3 | PRD-003 | Design System | A- |
-| 4 | PRD-004 | Landing Page | B+ |
+## Phase 1: Core Components
+- Task 4-8: Implement 5 core components (8h, Medium)
 
-**In Progress** (Already being developed):
-| # | PRD ID | Feature | Branch |
-|---|--------|---------|--------|
-| 5 | PRD-005 | API v2 | feature/PRD-005-api-v2 |
+## Phase 2: Documentation & Testing
+- Task 12-14: Storybook + Tests + Accessibility (9h, High)
 
-Which PRD? (number, PRD-XXX, or filename)
+**Total**: 14 tasks, 18-22h estimated
 ```
 
-### Step 2: Validate and Warn if Draft
+Wait for user confirmation before proceeding.
 
-If selected PRD is in draft:
+### Phase 3: Task-by-Task Execution
+
+For each task:
+
+#### 1. Present Task Context
+- Task number and description
+- Files to touch
+- Dependencies status
+- Related PRD section
+- What to implement (code examples)
+- Acceptance criteria for this task
+
+#### 2. Wait for User Confirmation
+Ask: "Ready to implement this task? (Y/n/skip)"
+
+#### 3. Implement if Confirmed
+- Create/modify files as specified
+- Follow best practices from skills
+- Add tests if required
+- Update documentation
+
+#### 4. Validate Implementation
+Run appropriate checks:
+- TypeScript compilation
+- Linting
+- Unit tests
+- Build verification
+
+#### 5. Show Task Completion Summary
+- Validation results
+- Files changed
+- Progress percentage
+- Time spent vs estimate
+- Next task preview
+
+Ask: "Continue? (Y/n/pause)"
+
+### Phase 4: Progress Checkpoints
+
+Every 3-5 tasks or on user request:
+
+Show comprehensive checkpoint:
 ```markdown
-⚠️ **PRD-007 is still in DRAFT**
+📊 **Progress Checkpoint - Task 5/14**
 
-This PRD hasn't been reviewed or approved yet.
+## Summary
+- Completed: 5/14 (36%)
+- Time: 4h invested, 14-16h remaining
+- Velocity: On track ✅
 
-**Recommended Workflow**:
-1. Create feature branch now (parallel workflow)
-2. Review and refine PRD on feature branch
-3. Start coding after review
+## PRD Alignment
+- ✅ 2/8 components done
+- 🔄 Testing: 85% coverage
+- ⏸️ Accessibility: Pending
 
-**Benefits**:
-- Keeps your Main branch free
-- Can review in separate Cursor instance
-- Multiple PRDs can be prepped in parallel
+## Technical Decisions Made
+1. Decision X - Rationale - Impact
+2. Decision Y - Rationale - Impact
 
-**Continue anyway?** (y/n or more info)
-> y
+## Blockers: None ✅
 
-✅ Proceeding with draft PRD
-💡 Remember to /review-prd PRD-007 on the feature branch!
+## Recommendations
+- Run lint fixes
+- Consider visual regression tests
 ```
 
-If user says "no", cancel gracefully.
+### Phase 5: Completion & PR Readiness
 
-### Step 3: Generate Feature Branch Name
+When all P0 tasks complete:
 
-Read branch naming configuration from .claude/config.json or use defaults
+#### 1. Final Quality Dashboard
+- Test coverage
+- Linting status
+- TypeScript errors
+- Complexity metrics
+- Bundle size
+- Performance metrics
+- Security scan results
+- Accessibility audit
 
-Default pattern: feature/PRD-{ID}-{slug}
+#### 2. Files Changed Summary
+- Created files count
+- Modified files count
+- Total LOC added/removed
 
-Examples:
-- feature/PRD-007-oauth2-integration
-- feature/PRD-008-dark-mode-support
+#### 3. Documentation Status
+- README updated?
+- Storybook stories?
+- Migration guide?
+- API docs?
 
-Extract slug from PRD filename:
-```javascript
-// From: PRD-007-oauth2-integration.md
-// Extract: oauth2-integration
-const slug = filename.replace(/^PRD-\d+-/, '').replace('.md', '');
-```
+#### 4. Recommend Next Actions
+Based on config and context:
+- Run `/security-audit` if security is enabled
+- Run `/quality-check` if quality checks needed
+- Create PR with `/create-pr`
+- Move PRD to complete
 
-### Step 4: Create Feature Branch
+#### 5. Save Final Progress
+Update progress file with completion data.
 
-```bash
-# Ensure on main and up to date
-git checkout main
-git pull origin main
+## Progress Persistence
 
-# Create branch
-git branch feature/PRD-007-oauth2-integration
-
-# Don't checkout yet (worktree will do that if enabled)
-```
-
-### Step 5: Create Git Worktree (Optional)
-
-If worktree enabled in config:
-```bash
-# Worktree path based on config or default
-# Default: worktrees/prd-007-oauth2-integration/
-
-git worktree add worktrees/prd-007-oauth2-integration feature/PRD-007-oauth2-integration
-
-✅ Created worktree: worktrees/prd-007-oauth2-integration/
-```
-
-If worktree disabled:
-```bash
-# Just checkout the branch
-git checkout feature/PRD-007-oauth2-integration
-
-✅ Switched to branch: feature/PRD-007-oauth2-integration
-```
-
-### Step 6: Move PRD to In-Progress
-
-```bash
-# Move from draft or approved to in-progress
-mv product/prds/01-draft/PRD-007-oauth2-integration.md \
-   product/prds/03-in-progress/PRD-007-oauth2-integration.md
-
-# Or from approved:
-mv product/prds/02-approved/PRD-007-oauth2-integration.md \
-   product/prds/03-in-progress/PRD-007-oauth2-integration.md
-```
-
-Update PRD status field:
-```markdown
-**Status**: In Progress
-**Started**: 2025-10-26
-**Branch**: feature/PRD-007-oauth2-integration
-```
-
-### Step 7: Update WORK_PLAN.md
-
-Move PRD from draft/approved to in-progress section:
-```markdown
-## In Progress (1 PRD)
-| PRD ID | Feature | Owner | Started | Branch |
-|--------|---------|-------|---------|--------|
-| PRD-007 | OAuth2 Integration | @alice | 2025-10-26 | feature/PRD-007-oauth2-integration |
-```
-
-### Step 8: Provide Next Steps
-
-```markdown
-🌳 **Development Environment Ready**
-
-📂 Worktree: worktrees/prd-007-oauth2-integration/
-🌿 Branch: feature/PRD-007-oauth2-integration
-📄 PRD: product/prds/03-in-progress/PRD-007-oauth2-integration.md
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**If PRD was DRAFT**:
-⚠️ Remember to review first: /review-prd PRD-007
-
-**Next Steps**:
-1. cd worktrees/prd-007-oauth2-integration/
-2. /review-prd PRD-007 (if still draft)
-3. /work-prd PRD-007 (guided implementation)
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**Your Main branch is now free** for other work!
-
-💡 **Parallel Workflow Tip**:
-Open a new Cursor window in the worktree directory:
-  code worktrees/prd-007-oauth2-integration/
-
-This allows you to:
-- Work on PRD-007 in one Cursor instance
-- Continue other work on Main in another instance
+Progress saved to `.claude/prd-{id}-progress.json`:
+```json
+{
+  "prd_id": "PRD-003",
+  "feature": "Design System v1.0",
+  "started_at": "2025-10-25T14:30:00Z",
+  "tasks": {
+    "total": 14,
+    "completed": 5,
+    "current": 6
+  },
+  "progress_percent": 36,
+  "time_invested_hours": 4.5,
+  "estimate_remaining_hours": 15,
+  "completed_tasks": [...],
+  "decisions": [...],
+  "blockers": []
+}
 ```
 
 ## Configuration
 
-Respects prd_workflow configuration:
+Uses these config settings:
 ```json
 {
   "prd_workflow": {
-    "branch_naming": {
-      "prefix": "feature",
-      "separator": "/",
-      "pattern": "{prefix}/{prd_id_prefix}-{prd_number}-{slug}"
-    },
-    "worktree": {
+    "work_plan": {
       "enabled": true,
-      "base_path": "worktrees"
-    },
-    "allow_draft_checkout": true
+      "track_decisions": true
+    }
+  },
+  "agents": {
+    "prd_implementer": {
+      "task_breakdown_granularity": "medium"
+    }
   }
 }
 ```
 
-## Options
+## Pause & Resume
 
-```bash
-# Interactive
-/code-prd
+User can pause at any time:
+- Progress automatically saved
+- Resume with `/work-prd` in same worktree
+- Will continue from last task
 
-# Specify PRD
-/code-prd PRD-007
+## Success Criteria
 
-# Skip worktree creation
-/code-prd PRD-007 --no-worktree
+- All P0 acceptance criteria met
+- Quality gates passed (tests, linting, security)
+- Documentation complete
+- User confident in implementation
+- Ready for PR creation
 
-# Force draft (skip warning)
-/code-prd PRD-007 --force
-```
+## Related
 
-## Error Handling
-
-**PRD already in progress**:
-```markdown
-⚠️ PRD-007 is already in progress
-
-Branch: feature/PRD-007-oauth2-integration
-Worktree: worktrees/prd-007-oauth2-integration/
-
-Options:
-1. Switch to existing branch
-2. Create new branch (PRD-007-v2)
-3. Cancel
-
-Choose: (1-3)
-```
-
-**Git not clean**:
-```markdown
-❌ Git working directory not clean
-
-Uncommitted changes detected. Please:
-1. Commit changes
-2. Stash changes
-3. Or resolve conflicts
-
-Then try again.
-```
-
-## Best Practices
-
-- ✅ **Create branch even for drafts** - Enables parallel workflow
-- ✅ **Use worktrees** - Isolate features, no branch switching
-- ✅ **Review on feature branch** - Keeps Main free
-- ✅ **Open separate Cursor** - One instance per feature
-- ⚠️ **Don't forget to review** - If starting from draft
-
-## Integration
-
-Works seamlessly with:
-- /create-prd - Creates draft PRDs
-- /review-prd - Review on feature branch
-- /work-prd - Guided development
-- Git worktrees - Parallel feature development
-
----
-
-Plugin: claude-prd-workflow
-Category: PRD Management  
-Version: 2.2.0
-Requires: Git 2.25+
+- Agent: `prd-implementer` (automatically invoked)
+- Skills: `estimation`, `testing`, `code-quality`, `documentation`
+- Previous: `/code-prd` (setup worktree)
+- Next: `/security-audit`, `/quality-check`, or create PR

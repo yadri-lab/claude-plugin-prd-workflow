@@ -1,11 +1,10 @@
 {
   "name": "claude-prd-workflow",
-  "version": "2.1.0",
+  "version": "2.3.0",
   "displayName": "PRD Workflow Manager",
   "description": "Complete PRD lifecycle management with orchestration, security, quality assurance, and guided development. Includes Git worktree support for parallel development.",
   "author": {
     "name": "Yassine Hamou-Tahra",
-    "email": "yassine@acmecorp.com",
     "url": "https://github.com/Yassinello"
   },
   "homepage": "https://github.com/Yassinello/claude-prd-workflow",

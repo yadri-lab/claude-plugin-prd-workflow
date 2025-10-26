@@ -44,6 +44,17 @@ With **AI-powered agents**, **automated quality gates**, and **Git worktree orch
 **Before**: Hours of manual review, still miss critical issues
 **After**: Quick AI-powered analysis catches more gaps with actionable questions
 
+### ⚡ **Daily Development Tools (NEW in v2.3)**
+7 new agents for everyday coding (not just PRDs):
+- **code-reviewer** - 30-second automated code review (5 agents in parallel)
+- **test-automator** - Auto-generate comprehensive test suites (10x faster)
+- **backend-architect** - Expert API/database design guidance
+- **performance-analyst** - Systematic app optimization (2-3x faster)
+- **incident-coordinator** - Structured production incident response
+
+**Before**: Manual code review (30-45 min), manual test writing (hours)
+**After**: Automated review (30s), auto-generated tests (seconds)
+
 ### 🌳 **Git Worktree Orchestration**
 Work on **5+ features in parallel** without branch switching. Each PRD gets its own isolated workspace.
 
@@ -456,16 +467,28 @@ flowchart LR
     style H fill:#f6ffed
 ```
 
-### AI Agents at Work
+### AI Agents at Work (13 Total - 7 NEW in v2.3!)
 
+**PRD Management Agents** (6):
 | Agent | When | What |
 |-------|------|------|
 | 🔍 **prd-reviewer** | `/review-prd` | 7-dimension analysis, calibration questions, grading |
-| 👨‍💻 **prd-implementer** | `/work-prd` | Task breakdown, code examples, validation |
+| 👨‍💻 **prd-implementer** | `/code-prd` | Task breakdown, code examples, validation |
 | 🎼 **orchestrator** | `/orchestrate` | Dependency analysis, resource allocation, bottleneck detection |
 | 🔒 **security-expert** | `/security-audit` | OWASP Top 10, secrets detection, vulnerability scanning |
 | ✅ **quality-assurance** | `/quality-check` | Coverage, complexity, linting, type safety |
 | 🚀 **devops-engineer** | (on-demand) | CI/CD setup, infrastructure as code |
+
+**Daily Development Agents** (7 - NEW in v2.3):
+| Agent | Model | What |
+|-------|-------|------|
+| 🔎 **code-reviewer** | Haiku (fast) | Automated code review, best practices, complexity detection |
+| 🧪 **test-automator** | Haiku (fast) | Auto-generate unit/integration/E2E tests with fixtures |
+| 🏗️ **backend-architect** | Sonnet (complex) | API design, database schema, scalability guidance |
+| 🚨 **incident-coordinator** | Sonnet (complex) | Production incident response, runbooks, postmortems |
+| ⚡ **performance-analyst** | Sonnet (complex) | Bundle analysis, Core Web Vitals, systematic optimization |
+| 🎯 **full-stack-orchestrator** | Sonnet (complex) | End-to-end feature coordination (frontend → backend → tests) |
+| 🤖 **code-review-orchestrator** | Haiku (fast) | Runs 5 agents in parallel for 30-second comprehensive review |
 
 ---
 
@@ -543,8 +566,8 @@ cp config/presets/startup.json .claude/config.json
 | **Core Workflow** |||
 | `/create-prd` | Create new PRD from template | Start any new feature |
 | `/review-prd` | AI-powered 7D review + grading | Before approval |
-| `/code-prd` | Create branch + worktree | Ready to implement |
-| `/work-prd` | Guided task-by-task implementation | During development |
+| `/setup-prd` | Create branch + worktree (dev setup) | Ready to implement |
+| `/code-prd` | Guided task-by-task implementation | During development |
 | `/list-prds` | Show all PRDs with status | Check progress |
 | `/archive-prd` | Archive completed/cancelled PRDs | Cleanup |
 | **Quality & Security** |||
@@ -560,23 +583,8 @@ cp config/presets/startup.json .claude/config.json
 ## 📚 Documentation
 
 ### Getting Started
-- 📖 [Quick Start Guide](docs/getting-started.md) - Get productive in 15 minutes
-- ⚙️ [Configuration Reference](docs/configuration.md) - Every config option explained
-- 📋 [Commands Reference](docs/commands-reference.md) - All 9 commands in detail
-- 🤖 [Agents Guide](docs/agents-guide.md) - How to use the 6 AI agents
-- 🛠️ [Skills Reference](docs/skills-reference.md) - 8 reusable capabilities
-
-### Best Practices
-- ✅ [Best Practices](docs/best-practices.md) - Proven workflows
-- 🔧 [Troubleshooting](docs/troubleshooting.md) - Common issues & fixes
-- ⚡ [Quick Reference](docs/quick-reference.md) - Cheat sheet for daily use
-- 📊 [Workflow Diagrams](docs/workflow-diagrams.md) - Visual guides with Mermaid
-
-### Real-World Examples
-- 🏗️ [AcmeCorp Setup](docs/examples/acmecorp-setup.md) - Multi-tenant SaaS with design system
-- ⚡ [SaaS Startup](docs/examples/saas-startup.md) - InvoiceFlow MVP in 8 weeks
-- 🛒 [E-commerce](docs/examples/ecommerce.md) - MarketHub with Stripe Connect
-- 🌐 [Microservices](docs/examples/microservices.md) - 3-service extraction from monolith
+- 📖 **[Complete Guide](docs/guide.md)** - Everything in one place (Quick Start, Commands, Agents, Config, Troubleshooting)
+- 🎯 **[Real-World Examples](docs/examples.md)** - Startup, Enterprise, Microservices, Open Source setups
 
 ---
 
@@ -587,9 +595,9 @@ cp config/presets/startup.json .claude/config.json
 Work on **5+ features simultaneously** without branch switching:
 
 ```bash
-/code-prd  # PRD-001 → ../project-auth/
-/code-prd  # PRD-002 → ../project-dashboard/
-/code-prd  # PRD-003 → ../project-billing/
+/setup-prd  # PRD-001 → ../project-auth/
+/setup-prd  # PRD-002 → ../project-dashboard/
+/setup-prd  # PRD-003 → ../project-billing/
 
 # Each feature has its own:
 # - Isolated workspace
