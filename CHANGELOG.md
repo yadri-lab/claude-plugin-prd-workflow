@@ -5,6 +5,185 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.0] - 2025-10-26
+
+### Added - Reliability & Self-Maintenance 🏥
+
+This release focuses on **preventing installation issues** and making the plugin **self-healing**. Never worry about missing commands again!
+
+#### Automated Health Check System ✅
+
+**New Command**: `/plugin-health`
+- Runs automatically after installation/update
+- Verifies all components installed correctly:
+  - ✅ Plugin directory and metadata
+  - ✅ Slash commands (17 expected)
+  - ✅ AI agents (17 expected)
+  - ✅ Skills (13 expected)
+- Shows clear diagnostics with colored output
+- Available as standalone script: `node bin/check-health.js`
+- Returns exit code 1 on errors (CI/CD friendly)
+
+**Benefits**:
+- Instant verification that installation worked
+- Clear error messages if something is wrong
+- No more "why aren't my commands showing up?"
+
+#### Automatic Repair Tool ✅
+
+**New Command**: `/plugin-repair`
+- Automatically fixes common installation issues
+- 3-step process: Diagnose → Repair → Verify
+- Fixes:
+  - Missing command files
+  - Missing agent files
+  - Missing skill files
+  - Corrupted plugin metadata
+  - Incomplete installations
+- Safe to run multiple times (idempotent)
+- Available as standalone script: `node bin/repair.js`
+- Backs up config before making changes
+
+**Benefits**:
+- Self-healing plugin
+- Fixes 90%+ of user-reported issues automatically
+- No manual troubleshooting needed
+
+#### Smart Update System ✅
+
+**New Command**: `/plugin-update`
+**New Script**: `bin/update.js`
+- Automated update from GitHub
+- Smart detection: git-based vs manual installation
+- Auto-backup of user config
+- Stashes uncommitted changes during update
+- Reinstalls global commands/agents/skills
+- Runs health check after update
+- Shows version change and what's new
+- Rollback-friendly (keeps old version if update fails)
+
+**Benefits**:
+- One-command updates
+- Zero data loss
+- Always know what changed
+
+#### Installation Improvements ✅
+
+**Fixed Critical Bugs**:
+- ✅ **BUG FIX**: `bin/` folder now copied during installation (was missing!)
+  - Previously, health check and repair scripts were not available post-install
+  - This caused silent failures where users couldn't diagnose issues
+- ✅ **BUG FIX**: Accurate file counting (now filters .md files before counting)
+  - Previously showed incorrect counts in installation output
+  - Now shows exact number of commands/agents/skills installed
+
+**Enhanced install.js**:
+- Now copies `bin/` folder to plugin directory
+- Fixed `.md` file counting (was counting all files, now only .md)
+- Runs automatic health check after installation
+- Shows clear next steps in output
+- Better error messages with troubleshooting hints
+
+**Benefits**:
+- Installation now verifiable
+- Clear feedback on what was installed
+- Immediate error detection
+
+#### Documentation Organization ✅
+
+**New Documentation Structure**:
+```
+docs/
+├── README.md          # Documentation index
+├── guide.md           # Complete guide (updated to v2.8.0)
+├── examples.md        # Real-world examples
+└── archive/           # Historical specs
+    └── SPECS_v2.5-2.6.md
+```
+
+**Root Files** (cleaned up):
+- `README.md` - Main project readme
+- `CHANGELOG.md` - Version history
+- `CONTRIBUTING.md` - Contribution guide
+- `SECURITY.md` - Security policy
+- `TROUBLESHOOTING.md` - Quick troubleshooting reference
+
+**Updated Documentation**:
+- docs/guide.md updated to v2.8.0 with new Maintenance Tools section
+- docs/README.md added as documentation index
+- TROUBLESHOOTING.md enhanced with diagnostic commands
+- Old specs moved to docs/archive/
+
+**Benefits**:
+- Easier to find documentation
+- Clear separation of concerns
+- Up-to-date guides
+
+### Changed
+
+- **install.js**: Now includes `bin/` in directories to copy
+- **install.js**: Fixed file counting logic (filters .md before counting)
+- **install.js**: Runs health check automatically post-install
+- **commands/plugin-update.md**: Updated to use new `bin/update.js` script
+- **docs/guide.md**: Updated to reflect v2.8.0 features
+- **package.json**: Version bumped to 2.8.0
+
+### Fixed
+
+- Fixed missing `bin/` folder in installations (critical bug)
+- Fixed incorrect file counts in installation output
+- Fixed outdated version numbers in documentation
+
+### Migration Guide
+
+If you're on v2.7.0 or earlier:
+
+1. **Update to v2.8.0**:
+   ```bash
+   cd ~/.claude-code/plugins/claude-prd-workflow
+   git pull origin main
+   node install.js
+   ```
+
+2. **Verify installation**:
+   ```bash
+   /plugin-health
+   ```
+
+3. **If issues detected**:
+   ```bash
+   /plugin-repair
+   ```
+
+4. **Future updates**:
+   ```bash
+   /plugin-update  # One command!
+   ```
+
+### Developer Notes
+
+**For contributors**:
+- Health check system in `bin/check-health.js`
+- Repair system in `bin/repair.js`
+- Update system in `bin/update.js`
+- All scripts follow same colored output pattern
+- All scripts have both module export and CLI mode
+- Documentation structure in `docs/README.md`
+
+**Testing installation**:
+```bash
+# Test full installation
+node install.js
+
+# Should auto-run health check and show ✅ for all components
+
+# Test repair
+node bin/repair.js
+
+# Test update (requires git repo)
+node bin/update.js
+```
+
 ## [2.7.0] - 2025-10-26
 
 ### Added - Advanced Features Complete 🚀

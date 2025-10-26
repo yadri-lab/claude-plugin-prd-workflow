@@ -97,6 +97,7 @@ function install() {
       'templates',
       'config',
       'docs',
+      'bin',
       '.claude-plugin'
     ];
 
@@ -152,14 +153,12 @@ function install() {
       if (!fs.existsSync(commandsDest)) {
         fs.mkdirSync(commandsDest, { recursive: true });
       }
-      const commandFiles = fs.readdirSync(commandsSrc);
+      const commandFiles = fs.readdirSync(commandsSrc).filter(f => f.endsWith('.md'));
       for (const file of commandFiles) {
-        if (file.endsWith('.md')) {
-          fs.copyFileSync(
-            path.join(commandsSrc, file),
-            path.join(commandsDest, file)
-          );
-        }
+        fs.copyFileSync(
+          path.join(commandsSrc, file),
+          path.join(commandsDest, file)
+        );
       }
       console.log(`   ✅ Installed ${commandFiles.length} slash commands to ${commandsDest}`);
     }
@@ -171,14 +170,12 @@ function install() {
       if (!fs.existsSync(agentsDest)) {
         fs.mkdirSync(agentsDest, { recursive: true });
       }
-      const agentFiles = fs.readdirSync(agentsSrc);
+      const agentFiles = fs.readdirSync(agentsSrc).filter(f => f.endsWith('.md'));
       for (const file of agentFiles) {
-        if (file.endsWith('.md')) {
-          fs.copyFileSync(
-            path.join(agentsSrc, file),
-            path.join(agentsDest, file)
-          );
-        }
+        fs.copyFileSync(
+          path.join(agentsSrc, file),
+          path.join(agentsDest, file)
+        );
       }
       console.log(`   ✅ Installed ${agentFiles.length} AI agents to ${agentsDest}`);
     }
@@ -190,29 +187,45 @@ function install() {
       if (!fs.existsSync(skillsDest)) {
         fs.mkdirSync(skillsDest, { recursive: true });
       }
-      const skillFiles = fs.readdirSync(skillsSrc);
+      const skillFiles = fs.readdirSync(skillsSrc).filter(f => f.endsWith('.md'));
       for (const file of skillFiles) {
-        if (file.endsWith('.md')) {
-          fs.copyFileSync(
-            path.join(skillsSrc, file),
-            path.join(skillsDest, file)
-          );
-        }
+        fs.copyFileSync(
+          path.join(skillsSrc, file),
+          path.join(skillsDest, file)
+        );
       }
       console.log(`   ✅ Installed ${skillFiles.length} skills to ${skillsDest}`);
     }
 
     console.log('\n✨ Installation complete!\n');
-    console.log('📖 Next steps:\n');
+
+    // Run automatic health check
+    console.log('🏥 Running automatic health check...\n');
+    try {
+      const healthCheckPath = path.join(targetDir, 'bin', 'check-health.js');
+      if (fs.existsSync(healthCheckPath)) {
+        const { runHealthCheck } = require(healthCheckPath);
+        const healthResults = runHealthCheck();
+
+        const hasErrors = Object.values(healthResults).some(r => r.status === 'error');
+        if (hasErrors) {
+          console.log('\n⚠️  Health check detected issues. Run: node bin/repair.js\n');
+        }
+      }
+    } catch (error) {
+      console.log('⚠️  Could not run health check:', error.message);
+    }
+
+    console.log('\n📖 Next steps:\n');
     console.log('   1. Restart Claude Code');
-    console.log('   2. Run /plugin-version to check version');
-    console.log('   3. Run /list-prds to verify installation');
+    console.log('   2. Run /plugin-health to verify installation');
+    console.log('   3. Run /list-prds to check available commands');
     console.log('   4. Check the documentation: https://github.com/Yassinello/claude-prd-workflow\n');
     console.log('🎯 Quick start:\n');
     console.log('   /create-prd      - Create your first PRD');
     console.log('   /review-prd      - Review a draft PRD');
     console.log('   /code-prd        - Start development');
-    console.log('   /plugin-version  - Check plugin version\n');
+    console.log('   /plugin-health   - Run health check\n');
 
   } catch (error) {
     console.error('❌ Installation failed:', error.message);

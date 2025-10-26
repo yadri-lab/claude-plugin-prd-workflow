@@ -8,21 +8,64 @@ Transform PRDs from ideas to shipped features with AI-powered review, guided imp
 
 ## Table of Contents
 
-1. [What's New in v2.4.0](#whats-new-in-v240)
+1. [What's New in v2.8.0](#whats-new-in-v280)
 2. [Quick Start](#quick-start)
 3. [Core Commands](#core-commands)
 4. [Agents & Skills](#agents--skills)
 5. [Configuration](#configuration)
 6. [Daily Development (Beyond PRDs)](#daily-development-beyond-prds)
-7. [Best Practices](#best-practices)
-8. [Troubleshooting](#troubleshooting)
+7. [Maintenance Tools](#maintenance-tools)
+8. [Best Practices](#best-practices)
+9. [Troubleshooting](#troubleshooting)
 
 ---
 
-## What's New in v2.4.0
+## What's New in v2.8.0
 
 **Release Date**: 2025-10-26
-**Focus**: Developer Experience & Productivity
+**Focus**: Reliability & Self-Maintenance
+
+### 🏥 Automated Health & Repair System (NEW in v2.8)
+
+Never worry about missing commands again! The plugin now includes:
+
+**Auto-Health Check**:
+- Runs automatically after installation
+- Verifies all commands, agents, and skills are installed
+- Available via `/plugin-health` command
+
+**Auto-Repair Tool**:
+- Fixes missing or corrupted files automatically
+- Available via `/plugin-repair` command
+- Safe to run multiple times
+
+**Smart Update System**:
+- Automated update via `/plugin-update`
+- Backs up your config automatically
+- Runs health check after update
+- Shows what's new in each version
+
+**Example**:
+```bash
+# Installation now auto-verifies everything
+node install.js
+
+🏥 Running automatic health check...
+   ✅ Plugin directory found
+   ✅ Plugin version: 2.8.0
+   ✅ Installed 17 slash commands
+   ✅ Installed 17 AI agents
+   ✅ Installed 13 skills
+
+✅ All systems operational!
+
+# If something goes wrong later
+/plugin-health  # Diagnose issues
+/plugin-repair  # Auto-fix problems
+/plugin-update  # Update to latest version
+```
+
+### 🎯 Key Improvements from v2.4-2.7
 
 ### 🚀 Key Improvements
 
@@ -882,6 +925,185 @@ Expected resolution: 12:20 PM UTC"
 ```
 
 **Impact**: 50% faster MTTR, 80% fewer repeat incidents
+
+---
+
+## Maintenance Tools
+
+The plugin includes self-diagnostic and repair tools to ensure reliability.
+
+### `/plugin-health` - Health Check
+
+**Purpose**: Verify plugin installation is complete and working
+
+**Usage**:
+```bash
+/plugin-health
+```
+
+**What it checks**:
+- ✅ Plugin directory exists
+- ✅ Plugin version and metadata
+- ✅ Slash commands installed (should be 17+)
+- ✅ AI agents installed (should be 17+)
+- ✅ Skills installed (should be 13+)
+
+**Example output**:
+```
+🏥 Running health check for claude-prd-workflow...
+
+📁 Checking plugin installation...
+   ✅ Plugin directory found
+
+📋 Checking plugin metadata...
+   ✅ Plugin version: 2.8.0
+   📅 Installed: 10/26/2025
+
+📝 Checking slash commands...
+   ✅ Global commands: 17 files found
+
+🤖 Checking AI agents...
+   ✅ Global agents: 17 files found
+
+⚡ Checking skills...
+   ✅ Global skills: 13 files found
+
+============================================================
+
+📊 HEALTH CHECK SUMMARY
+
+✅ All systems operational!
+
+🎯 You can now use the following commands:
+   /create-prd  - Create a new PRD
+   /list-prds   - List all PRDs
+   /review-prd  - Review a PRD
+   /code-prd    - Start development
+
+💡 Tip: Restart Claude Code if commands are not visible
+```
+
+**When to use**:
+- After installation
+- After update
+- When commands are not visible
+- When experiencing issues
+
+---
+
+### `/plugin-repair` - Auto-Repair
+
+**Purpose**: Automatically fix common installation issues
+
+**Usage**:
+```bash
+/plugin-repair
+```
+
+**What it fixes**:
+- Missing command files
+- Missing agent files
+- Missing skill files
+- Corrupted plugin metadata
+- Incomplete installations
+
+**Example output**:
+```
+🔧 Running repair tool for claude-prd-workflow...
+
+📋 Step 1: Running diagnostic check...
+
+❌ Slash commands: Directory exists but empty
+✅ AI agents: 17 files found
+✅ Skills: 13 files found
+
+============================================================
+
+🔨 Step 2: Attempting automatic repair...
+
+🔄 Reinstalling plugin...
+   ✅ Copied commands/
+   ✅ Copied agents/
+   ✅ Copied skills/
+   ✅ Installed 17 slash commands
+
+✅ Reinstallation complete!
+
+============================================================
+
+🏥 Step 3: Verifying repair...
+
+✅ All systems operational!
+
+💡 Important: Restart Claude Code to see the changes.
+```
+
+**When to use**:
+- Commands not showing up
+- Commands return errors
+- After failed update
+- When health check shows errors
+
+---
+
+### `/plugin-update` - Update Plugin
+
+**Purpose**: Update to latest version from GitHub
+
+**Usage**:
+```bash
+/plugin-update
+```
+
+**What it does**:
+- Checks current version
+- Fetches latest from GitHub
+- Backs up current config
+- Updates via git pull
+- Reinstalls global files
+- Runs health check
+- Shows what's new
+
+**Example output**:
+```
+🔄 Updating claude-prd-workflow plugin...
+
+📦 Current version: 2.7.0
+
+============================================================
+
+🔍 Checking for updates...
+
+   Fetching latest version from GitHub...
+   Pulling latest changes...
+
+============================================================
+
+🔨 Reinstalling to update global files...
+
+   ✅ Installed 17 slash commands
+   ✅ Installed 17 AI agents
+   ✅ Installed 13 skills
+
+🏥 Running automatic health check...
+   ✅ All systems operational!
+
+============================================================
+
+✅ Update complete!
+
+📦 Updated: 2.7.0 → 2.8.0
+
+💡 Important:
+   1. Restart Claude Code to see the changes
+   2. Run /plugin-health to verify the update
+   3. Check CHANGELOG.md for what's new
+```
+
+**When to use**:
+- Regularly (check for updates weekly)
+- When new features are announced
+- When experiencing issues (latest version may fix them)
 
 ---
 

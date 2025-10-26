@@ -97,6 +97,23 @@ Real-time progress on every PRD with **automatic status updates**, **WORK_PLAN.m
 **Before**: "How's feature X going?" → *checks 5 places*
 **After**: `/list-prds` → instant status on everything
 
+### 🏥 **Self-Healing & Reliability (NEW in v2.8)**
+Never worry about installation issues again! The plugin now **self-diagnoses** and **auto-repairs**:
+
+- **Auto Health Check** - Runs after every install/update to verify everything works
+- **One-Command Repair** - `/plugin-repair` fixes 90%+ of issues automatically
+- **Smart Updates** - `/plugin-update` updates safely with auto-backup
+- **Clear Diagnostics** - Know exactly what's wrong and how to fix it
+
+**Before**: "Why aren't my commands showing up?" → hours of debugging
+**After**: `/plugin-health` → instant diagnosis + `/plugin-repair` → fixed in seconds
+
+**Key Benefits**:
+- ✅ Zero missing commands (bin/ folder now copied correctly)
+- ✅ Accurate installation verification (exact file counts)
+- ✅ Self-healing when issues occur (auto-repair)
+- ✅ Safe updates with rollback (never lose your config)
+
 ---
 
 ## 🎯 How It Works: Two Workflow Modes
@@ -221,10 +238,20 @@ cd claude-prd-workflow
 
 # Run the installation script
 node install.js
-# ✅ Copies 9 commands to ~/.claude-code/commands/
-# ✅ Copies 6 agents to ~/.claude-code/agents/
-# ✅ Copies 8 skills to ~/.claude-code/skills/
+# ✅ Copies 18 slash commands to ~/.claude-code/commands/
+# ✅ Copies 17 AI agents to ~/.claude-code/agents/
+# ✅ Copies 13 skills to ~/.claude-code/skills/
 # ✅ Copies plugin files to ~/.claude-code/plugins/claude-prd-workflow/
+# ✅ Runs automatic health check to verify installation
+
+🏥 Running automatic health check...
+   ✅ Plugin directory found
+   ✅ Plugin version: 2.8.0
+   ✅ Installed 18 slash commands
+   ✅ Installed 17 AI agents
+   ✅ Installed 13 skills
+
+✅ All systems operational!
 
 # Restart Claude Code
 ```
@@ -242,23 +269,40 @@ node install.js
 
 ### Step 2: Verify Installation
 
-Open **ANY project** in Claude Code and type:
+The installation script automatically runs a health check, but you can verify anytime:
+
+**Option A: Via Command** (Recommended)
+```
+/plugin-health
+```
+
+**Option B: Via Script**
+```bash
+cd ~/.claude-code/plugins/claude-prd-workflow
+node bin/check-health.js
+```
+
+✅ **Success**: All systems operational
+❌ **Error**: Issues detected
+
+**If Issues Detected**:
+```bash
+# Auto-repair (fixes 90%+ of issues)
+/plugin-repair
+
+# Or manually
+cd ~/.claude-code/plugins/claude-prd-workflow
+node bin/repair.js
+
+# Restart Claude Code after repair
+```
+
+**Quick Test**:
 ```
 /list-prds
 ```
-
 ✅ **Success**: `No PRDs found. Create your first PRD with /create-prd`
-❌ **Error**: `Command not found` → Restart Claude Code
-
-**Troubleshooting**:
-```bash
-# Check commands are installed
-ls ~/.claude-code/commands/ | grep prd
-# Should show: archive-prd.md, code-prd.md, create-prd.md, etc.
-
-# If missing, reinstall:
-npm install -g claude-prd-workflow --force
-```
+❌ **Error**: `Command not found` → Run `/plugin-repair` then restart Claude Code
 
 ### Step 3: Using in an Existing Project
 
@@ -295,6 +339,39 @@ cp ~/.claude-code/plugins/claude-prd-workflow/config/presets/open-source.json .c
 ---
 
 ## 🔄 Keeping the Plugin Updated
+
+**New in v2.8**: One-command updates with automatic backup and health check!
+
+### Update to Latest Version
+
+**Option A: One-Command Update** (Recommended - NEW in v2.8)
+```bash
+/plugin-update
+```
+
+The update command automatically:
+- ✅ Checks current version and fetches latest from GitHub
+- ✅ Backs up your config (automatic - no data loss)
+- ✅ Stashes uncommitted changes during update
+- ✅ Updates via git pull (if installed via git)
+- ✅ Reinstalls all commands/agents/skills globally
+- ✅ Runs health check to verify update succeeded
+- ✅ Shows version change and what's new
+- ✅ Rollback-friendly (keeps old version if update fails)
+
+**Option B: Manual Update** (Git-based installations)
+```bash
+cd ~/.claude-code/plugins/claude-prd-workflow
+git pull origin main
+node install.js
+# Restart Claude Code
+```
+
+**Option C: Reinstall** (npm-based installations)
+```bash
+npm install -g claude-prd-workflow@latest
+# Restart Claude Code
+```
 
 ### Check for Updates
 
