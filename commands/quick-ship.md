@@ -34,7 +34,7 @@ Use Full PRD for:
 - High-risk changes
 - Customer-facing features
 
-## Workflow
+## Workflow (Ultra-Simple - Option B)
 
 ### Step 1: Describe Change
 
@@ -46,26 +46,34 @@ Example: "Fix dark mode toggle on iOS Safari"
 > [User input]
 ```
 
-### Step 2: Quick Analysis
+### Step 2: AI Quick Analysis & Auto-Setup
 
-AI analyzes and shows plan:
+AI analyzes in ONE step and auto-creates everything:
+
 ```markdown
-Quick Ship: Fix dark mode toggle on iOS Safari
+🚀 Quick Ship: Fix dark mode toggle on iOS Safari
 
-Detected Type: Bug Fix
-Estimated Time: 1 hour
-Risk Level: Low
+📊 Analysis:
+  Type: Bug Fix
+  Time: ~1 hour
+  Risk: Low
+  Files: src/styles/theme.css, src/components/ThemeToggle.tsx
 
-Implementation Plan:
-1. Root cause: CSS variables not supported in iOS <15
-2. Solution: Add fallback using media queries
-3. Files: src/styles/theme.css, src/components/ThemeToggle.tsx
-4. Testing: iOS Safari 14.5+
+💡 Plan:
+  1. Root cause: CSS variables not supported in iOS <15
+  2. Solution: Add fallback using media queries
+  3. Testing: iOS Safari 14.5+
 
-Proceed? (y/n/adjust)
+✅ Auto-created:
+  - Branch: quickship/fix-dark-mode-ios
+  - Log: .claude/quick-ships/2025-10-26-dark-mode-ios.md
+
+Ready to code! Here's what to do next...
 ```
 
-### Step 3: Create Branch and Log
+**No user confirmation needed** - AI is confident, just go!
+
+### Step 3: Guided Implementation (Inline)
 
 ```bash
 # Create quick-ship branch
@@ -100,58 +108,67 @@ Add CSS fallback using media queries instead of CSS variables
 - Chrome/Firefox (regression check)
 ```
 
-### Step 4: Guided Implementation
-
-AI guides through implementation with code examples
-
-### Step 5: Test and Commit
-
-```bash
-# Run tests
-npm test
-
-# Smart commit
-/smart-commit
-
-# Or manual:
-git add .
-git commit -m "fix(ui): Add iOS Safari fallback for dark mode toggle"
-```
-
-### Step 6: Create PR
-
-```bash
-# Auto-create PR
-/smart-pr
-
-# PR includes:
-- Problem/Solution from log
-- Files changed
-- Testing checklist
-```
-
-### Step 7: Auto-Merge
-
-If all checks pass:
+AI provides inline guidance:
 ```markdown
-Tests: PASSING
-Security: PASSED
-Linting: PASSED
+📝 Task 1/3: Update CSS fallback
 
-Auto-merging to main...
+Edit: src/styles/theme.css
 
-MERGED
-Deployed to production
-
-Cleanup...
-- Deleted branch: quickship/fix-dark-mode-ios
-- Updated log with completion time
-
-Quick Ship Complete!
-Duration: 47 minutes
+Add this code:
+```css
+/* Fallback for iOS <15 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #1a1a1a;
+    --text-color: #ffffff;
+  }
+}
 ```
 
-### Step 8: Update Log
+When done, type: next
+```
+
+### Step 4: Auto-Commit & Auto-PR (Integrated)
+
+**No separate commands needed!** When user finishes coding:
+
+```markdown
+✅ Changes detected in src/styles/theme.css, src/components/ThemeToggle.tsx
+
+🔍 Running checks:
+  - Linting... ✅
+  - Tests... ✅
+  - Security... ✅
+
+🤖 Auto-committing:
+  Message: "fix(ui): Add iOS Safari fallback for dark mode toggle"
+
+📤 Auto-creating PR #89:
+  Title: "Fix: Dark mode toggle on iOS Safari"
+  Description: Auto-generated from quick-ship log
+
+🔀 PR checks passing... Auto-merging to main...
+```
+
+**All automatic - zero manual steps!**
+
+### Step 5: Auto-Completion
+
+```markdown
+✅ MERGED to main
+🚀 Deployed to production
+
+🧹 Auto-cleanup:
+  - Branch deleted: quickship/fix-dark-mode-ios
+  - Log updated with metrics
+
+🎉 Quick Ship Complete!
+  Duration: 47 min (estimated: 1h)
+  Files: 2 changed (+20 -5)
+  Tests: +2% coverage
+```
+
+### Step 6: Updated Log (Automatic)
 
 ```markdown
 # Fix: Dark Mode Toggle on iOS Safari
@@ -199,18 +216,40 @@ STATUS: COMPLETE
 }
 ```
 
-## Options
+## Usage Examples
 
 ```bash
-# Interactive
+# Interactive (asks for description)
 /quick-ship
 
-# With description
+# Direct (one command, done)
 /quick-ship "Fix login button alignment"
 
-# No auto-merge
-/quick-ship "Risky change" --manual
+# Risky change (manual merge)
+/quick-ship "Refactor auth module" --manual-merge
 ```
+
+## Key Features (Option B - Ultra Simple)
+
+✅ **One command, zero friction**
+- No separate /smart-commit or /smart-pr needed
+- Everything automated from description to deployment
+
+✅ **Intelligent auto-detection**
+- AI detects files to change
+- AI generates commit message
+- AI creates PR description
+- AI decides safe to auto-merge
+
+✅ **Inline guidance**
+- Code examples shown directly
+- Task-by-task breakdown
+- No context switching
+
+✅ **Safe defaults**
+- Auto-merge only if all checks pass
+- Manual flag for risky changes
+- Complete rollback if issues detected
 
 ## Quick Ships vs PRDs
 

@@ -30,17 +30,196 @@ Example: "Add OAuth2 authentication with Google and GitHub"
 > [User input]
 ```
 
-### Step 2: Interactive Refinement Questions
+### Step 2: Detect Feature Type & Ask Contextual Questions
 
-**CRITICAL**: Ask 4-6 targeted questions to refine scope BEFORE generating full PRD.
+**NEW**: AI detects feature type and asks **type-specific questions** instead of generic ones.
 
-Question Selection Strategy:
-- Choose questions based on feature type
-- Focus on scope boundaries and key decisions  
-- Avoid obvious questions
-- Keep it conversational
+#### Step 2a: Classify Feature Type
 
-Example Question Flow:
+AI analyzes description and classifies into one of these types:
+- 🔐 **Authentication/Security** (login, OAuth, permissions, encryption)
+- 💳 **Payment/Financial** (billing, subscriptions, invoices, PCI)
+- 🎨 **UI/UX** (design, themes, layouts, components)
+- 🔌 **API/Backend** (endpoints, services, data processing)
+- 🗄️ **Database** (schema, migrations, data modeling)
+- 🔗 **Integration** (third-party APIs, webhooks, SDKs)
+- 🏗️ **Infrastructure** (CI/CD, deployment, monitoring)
+- 📊 **Analytics/Reporting** (dashboards, metrics, exports)
+- 🧪 **Testing/QA** (test frameworks, coverage, automation)
+- 📝 **Simple/Generic** (unclear type or very simple)
+
+#### Step 2b: Ask Type-Specific Questions (4-6 questions)
+
+**For simple/well-defined features**: Skip questions, go straight to generation
+**For complex features**: Ask targeted questions based on type
+
+#### Example: Payment/Financial Feature
+
+User input: "Add payment processing with Stripe"
+
+```markdown
+Great! I've detected this is a Payment/Financial feature. Let me ask a few specific questions...
+
+❓ Question 1: Compliance & Security
+Do you need PCI-DSS Level 1 compliance?
+- Yes (we handle card data directly)
+- No (use Stripe.js tokenization - recommended)
+
+> [User: No, use tokenization]
+
+❓ Question 2: Payment Methods
+Which payment methods for v1?
+- Credit/Debit cards only
+- Cards + Apple Pay/Google Pay
+- Cards + Bank transfers (ACH)
+- Full suite (cards + wallets + buy-now-pay-later)
+
+> [User: Cards + Apple Pay]
+
+❓ Question 3: Billing Model
+One-time payments or recurring?
+- One-time only
+- Recurring subscriptions (monthly/yearly)
+- Both
+- Usage-based billing
+
+> [User: Recurring subscriptions]
+
+❓ Question 4: Multi-Currency
+Single currency or international?
+- USD only
+- Multiple currencies (which regions: US, EU, Asia?)
+- Dynamic currency based on user location
+
+> [User: USD only for v1]
+
+❓ Question 5: Failed Payment Handling
+How to handle failed recurring payments?
+- Retry logic (how many attempts?)
+- Dunning emails (automated reminders)
+- Grace period before cancellation
+- All of the above
+
+> [User: Retry 3x, then 7-day grace period]
+
+❓ Question 6: Out of Scope
+What are you explicitly NOT doing in v1?
+(Prevents scope creep!)
+
+> [User: No refunds UI, no invoice PDFs, no tax calculations]
+```
+
+#### Example: UI/UX Feature
+
+User input: "Add dark mode to the app"
+
+```markdown
+Got it! This is a UI/UX feature. A few quick questions...
+
+❓ Question 1: Scope
+Which parts get dark mode in v1?
+- Entire app (all pages)
+- Specific pages (dashboard, settings only)
+- Just the main layout (header, sidebar)
+
+> [User: Entire app]
+
+❓ Question 2: User Preference
+How should we remember the preference?
+- localStorage (per-device)
+- User account setting (synced across devices)
+- Auto-detect system preference only (no toggle)
+
+> [User: User account + system preference fallback]
+
+❓ Question 3: Color Palette
+How many themes?
+- Light + Dark (2 themes)
+- Light + Dark + High Contrast (3 themes)
+- Custom theme builder (let users pick colors)
+
+> [User: Just Light + Dark]
+
+❓ Question 4: Transition
+Switch between themes how?
+- Instant (no animation)
+- Smooth fade (300ms transition)
+- Page reload required
+
+> [User: Smooth fade]
+
+❓ Question 5: Out of Scope
+What's NOT included in v1?
+
+> [User: No custom themes, no scheduled auto-switch, no theme previews]
+```
+
+#### Example: API/Backend Feature
+
+User input: "Build a REST API for product catalog"
+
+```markdown
+This is an API/Backend feature. Let's define the scope...
+
+❓ Question 1: API Design
+REST or GraphQL?
+- REST (standard HTTP methods)
+- GraphQL (flexible queries)
+- Both (REST for simple, GraphQL for complex)
+
+> [User: REST]
+
+❓ Question 2: Authentication
+Who can access this API?
+- Public (no auth required)
+- Internal only (service-to-service)
+- API keys (for third-party integrations)
+- OAuth 2.0 (for user-specific data)
+
+> [User: API keys for partners]
+
+❓ Question 3: Rate Limiting
+How many requests per minute?
+- None (trusted users only)
+- 60 req/min per API key
+- 1000 req/min (high volume)
+- Tiered (different limits per plan)
+
+> [User: 1000 req/min, tiered later]
+
+❓ Question 4: Data Format
+Response format?
+- JSON only
+- JSON + XML
+- JSON + CSV export
+
+> [User: JSON only]
+
+❓ Question 5: Endpoints (v1 scope)
+Which operations for v1?
+- CRUD (Create, Read, Update, Delete)
+- Read-only (GET endpoints)
+- Create + Read only (no updates/deletes yet)
+
+> [User: Read-only for v1]
+
+❓ Question 6: Out of Scope
+What's deferred to v2?
+
+> [User: No webhooks, no bulk import, no API versioning]
+```
+
+#### Example: Simple Feature (Skip Questions)
+
+User input: "Add a loading spinner to the button"
+
+```markdown
+This is a simple, well-defined UI change. No need for questions!
+
+Generating PRD directly...
+```
+
+**Question Selection Strategy** (Enhanced)
 ```markdown
 Great! Let me ask a few questions to refine the scope...
 

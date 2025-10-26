@@ -42,7 +42,107 @@ Show table:
 Which PRD to complete? (number, PRD-XXX, or filename)
 ```
 
-### Step 2: Verify PR Status
+### Step 2: Pre-Merge Conflict Detection & Resolution
+
+**NEW: AI-Powered Conflict Helper**
+
+Before attempting to merge, check for conflicts:
+
+```bash
+# Fetch latest main
+git fetch origin main
+
+# Check if merge would cause conflicts (dry-run)
+git merge-tree $(git merge-base HEAD origin/main) HEAD origin/main
+```
+
+#### If Conflicts Detected
+
+```markdown
+🔀 Merge Conflict Detected
+
+📂 Files with conflicts:
+  - src/auth.ts (lines 45-67)
+  - src/config/env.ts (lines 12-18)
+
+🤖 AI Conflict Analysis
+
+**Conflict 1: src/auth.ts**
+
+<<< Your changes (PRD-003 - OAuth):
+```typescript
+function login(email, password) {
+  return OAuth.loginWithGoogle(email, password);
+}
+```
+
+=======
+
+>>> Main branch (from PRD-005 - Password Reset):
+```typescript
+function login(email, password) {
+  return db.validatePassword(email, password);
+}
+```
+
+💡 **AI Recommendation**: Keep BOTH (different authentication methods)
+
+```typescript
+function login(email, password, method = 'password') {
+  if (method === 'oauth') {
+    return OAuth.loginWithGoogle(email, password);
+  }
+  return db.validatePassword(email, password);
+}
+```
+
+**Why this works**:
+- Both features (OAuth + Password) can coexist
+- Method parameter allows switching
+- Backward compatible (defaults to password)
+
+🔧 Actions:
+  [A] Accept AI suggestion (auto-resolve)
+  [M] Manual resolution (open editor)
+  [S] Skip this file (resolve later)
+  [C] Cancel merge
+
+> [User choice]
+```
+
+#### If User Accepts AI Suggestion
+
+```markdown
+✅ Auto-resolving conflict in src/auth.ts
+
+Applied fix:
+  - Merged both login methods
+  - Added method parameter
+  - Maintained backward compatibility
+
+✔️ Conflict 1/2 resolved
+
+🔀 Next conflict: src/config/env.ts
+...
+```
+
+#### After All Conflicts Resolved
+
+```markdown
+✅ All conflicts resolved!
+
+📊 Summary:
+  - 2 files had conflicts
+  - 2 auto-resolved by AI
+  - 0 manual resolutions needed
+
+🧪 Next: Run tests to verify merge
+  npm test
+
+Continue with merge? (y/n)
+```
+
+### Step 3: Verify PR Status
 
 Check if PR is actually merged:
 

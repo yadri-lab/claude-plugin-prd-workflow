@@ -14,6 +14,7 @@ Bridge the gap between approved PRD and completed feature through:
 - Intelligent task breakdown (phases → tasks)
 - Step-by-step guided implementation
 - Continuous validation against acceptance criteria
+- **Auto-recovery from interruptions** (NEW)
 - Progress tracking with checkpoints
 - Quality gates at each phase
 
@@ -42,9 +43,72 @@ Read and parse:
 - Dependencies and constraints
 - Success metrics
 
-#### Step 3: Check for Existing Progress
+#### Step 3: Check for Existing Progress & Auto-Recovery
 
-Look for `.claude/prd-{id}-progress.json` to resume if exists.
+**NEW: Automatic Progress Checkpoints**
+
+Before starting, check for `.claude/prd-{id}-progress.json`:
+
+```json
+{
+  "prd_id": "PRD-003",
+  "total_tasks": 42,
+  "completed_tasks": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+  "current_task": 15,
+  "phases": {
+    "phase_1_setup": "completed",
+    "phase_2_backend": "in_progress",
+    "phase_3_frontend": "pending"
+  },
+  "last_checkpoint": "2025-10-26T14:23:17Z",
+  "estimated_time_remaining": "6 hours"
+}
+```
+
+**If progress file exists**, show recovery prompt:
+
+```markdown
+💾 Found saved progress for PRD-003
+
+📊 Progress: 14/42 tasks completed (33%)
+⏱️ Last worked: 2 hours ago
+📍 Stopped at: Task 15 - Implement auth middleware
+
+🔄 What would you like to do?
+  [R] Resume from task 15 (recommended)
+  [S] Start from scratch (discard progress)
+  [V] View completed tasks
+
+> [User choice]
+```
+
+**If user chooses Resume**:
+
+```markdown
+✅ Resuming from task 15/42
+
+Already completed:
+  ✓ Phase 1: Setup (tasks 1-8)
+  ✓ Phase 2: Backend - Part 1 (tasks 9-14)
+
+Next up:
+  📝 Task 15: Implement auth middleware
+  📝 Task 16: Add JWT validation
+  ...
+```
+
+**Auto-save progress after each task**:
+
+```markdown
+✅ Task 15 complete
+
+💾 Progress auto-saved
+  - Checkpoint: 15/42 tasks (35%)
+  - Next: Task 16 - Add JWT validation
+  - Safe to pause anytime
+```
+
+**If crash/timeout occurs**, next run automatically offers to resume!
 
 ### Phase 2: Task Breakdown
 

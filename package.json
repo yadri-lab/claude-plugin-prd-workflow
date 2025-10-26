@@ -1,6 +1,6 @@
 {
   "name": "claude-prd-workflow",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "The complete Claude Code plugin for Product-Driven Development. Ship features faster with AI-powered PRD review, Git worktree support, and automated quality gates.",
   "main": "install.js",
   "bin": {

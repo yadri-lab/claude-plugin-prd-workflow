@@ -73,6 +73,67 @@ Extract metadata:
 
 ---
 
+## Error Handling & Helpful Suggestions
+
+### When No PRDs Found
+
+Instead of just "No PRDs found", show:
+
+```markdown
+📋 No PRDs found
+
+🚀 Get started:
+  1. Create your first PRD: /create-prd
+  2. Import existing: Move PRD files to product/prds/01-draft/
+
+📖 Need help?
+  - Quick guide: See docs/guide.md
+  - Examples: See docs/examples.md
+```
+
+### When Specific PRD Not Found
+
+User runs: `/review-prd PRD-999`
+
+```markdown
+❌ PRD-999 not found in any directory
+
+📂 Available PRDs:
+Draft:
+  - PRD-006: OAuth Integration
+  - PRD-008: Dark Mode Support
+
+Ready:
+  - PRD-005: Dashboard UI
+  - PRD-007: User Profile
+
+💡 Did you mean?
+  - PRD-006 (most similar name)
+
+Or:
+  - Create it: /create-prd
+  - List all: /list-prds
+```
+
+### When PRD in Wrong State
+
+User runs: `/code-prd PRD-006` but PRD-006 is in draft
+
+```markdown
+⚠️ PRD-006 is in DRAFT state
+
+You need to review and approve it first:
+
+Next steps:
+  1. Review: /review-prd PRD-006
+  2. After approval, setup: /setup-prd PRD-006
+
+Or:
+  - Skip review (not recommended): /setup-prd PRD-006 --skip-review
+```
+
+---
+
 ## 🚧 In Progress (2)
 
 | PRD ID | Feature | Priority | Grade | Branch | Days |
