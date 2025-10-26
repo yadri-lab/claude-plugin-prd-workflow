@@ -1,0 +1,85 @@
+name: ecommerce
+displayName: E-Commerce Store
+description: Online store with product catalog, cart, checkout, and payment processing
+category: E-Commerce
+icon: 🛒
+
+sections:
+  overview: |
+    Build a complete e-commerce platform with product browsing, shopping cart,
+    checkout flow, and payment integration.
+
+  features:
+    - Product catalog with search, filters, and categories
+    - Shopping cart (add, remove, update quantity)
+    - Checkout flow (address, shipping, payment)
+    - Order management (history, tracking, returns)
+    - Payment integration (Stripe/PayPal)
+    - Inventory management
+    - Customer accounts
+
+  tech_stack_suggestions:
+    framework: Next.js 14 with App Router
+    database: PostgreSQL with Prisma
+    payment: Stripe for payments
+    search: Algolia for product search
+    styling: Tailwind CSS + shadcn/ui
+    cdn: Cloudinary for product images
+    email: Resend for order confirmations
+
+  acceptance_criteria:
+    P0:
+      - User can browse products by category with filters (price, rating)
+      - User can search products with autocomplete
+      - User can add items to cart and update quantities
+      - User can complete checkout in ≤3 steps
+      - Payment processing is PCI-compliant (using Stripe.js)
+      - Order confirmation email sent within 30 seconds
+      - Inventory decrements on successful order
+    P1:
+      - User can view order history and tracking
+      - User can save items to wishlist
+      - Guest checkout supported (no account required)
+      - Product recommendations based on browsing
+      - Admin panel for product management
+    P2:
+      - Abandoned cart recovery emails
+      - Product reviews and ratings
+      - Coupon/discount codes
+      - Multi-currency support
+
+  out_of_scope:
+    - Multi-vendor marketplace (single store only)
+    - Physical store integration (POS system)
+    - Subscription products (one-time purchases only)
+    - International shipping calculations (use flat rates)
+    - Tax calculations (manual for v1)
+
+  technical_approach: |
+    **Architecture**: Server Components for product pages, Client Components for cart
+
+    **Key Technical Decisions**:
+    1. Use Stripe Checkout (hosted) to avoid PCI compliance complexity
+    2. Product search via Algolia (real-time sync from database)
+    3. Shopping cart in session storage + database sync on checkout
+    4. Optimistic UI updates for cart operations
+    5. Image optimization with Next.js Image + Cloudinary CDN
+
+    **Database Schema**:
+    - products (id, sku, name, price, stock, images)
+    - categories (id, name, parent_id)
+    - orders (id, user_id, status, total, created_at)
+    - order_items (order_id, product_id, quantity, price)
+
+  risks:
+    - High traffic on launch day (solution: CDN + edge caching)
+    - Inventory race conditions (solution: database row locking)
+    - Payment failures (solution: retry logic + customer notifications)
+    - Cart abandonment rate (solution: email reminders, simplified checkout)
+
+  success_metrics:
+    - Checkout completion rate >60%
+    - Average order value >$50
+    - Page load time <2s
+    - Payment success rate >95%
+    - Search relevance >80% (user clicks top 3 results)

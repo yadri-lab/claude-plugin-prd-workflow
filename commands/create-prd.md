@@ -19,6 +19,68 @@ Generate well-scoped PRDs through:
 
 ## Workflow
 
+### Step 0: Check for Template Usage (NEW in v2.6)
+
+**Check for --template flag**:
+
+```bash
+/create-prd --template=ecommerce "Add shopping cart feature"
+```
+
+**If template specified**:
+1. List available templates if `--list-templates`
+2. Load template YAML file
+3. Pre-fill PRD sections from template
+4. Skip to Step 3 (generation)
+
+**Available Templates** (7 total):
+- 🛒 `ecommerce` - Online store with cart, checkout, payments
+- 💼 `saas` - SaaS app with auth, billing, dashboard
+- 📱 `mobile-app` - Cross-platform mobile with offline support
+- 🔌 `api-service` - REST/GraphQL API with documentation
+- ⚙️ `admin-panel` - Admin dashboard with CRUD operations
+- 📊 `analytics-dashboard` - Real-time analytics and reporting
+- 🔗 `integration` - Third-party API integration with webhooks
+
+**List templates**:
+```bash
+/create-prd --list-templates
+
+📋 Available PRD Templates:
+
+1. 🛒 ecommerce - E-Commerce Store
+   Online store with product catalog, cart, checkout, and payments
+
+2. 💼 saas - SaaS Application
+   SaaS app with authentication, billing, and user dashboard
+
+3. 📱 mobile-app - Mobile Application
+   Cross-platform mobile app for iOS and Android
+
+4. 🔌 api-service - API Service
+   RESTful API or GraphQL service with documentation
+
+5. ⚙️ admin-panel - Admin Dashboard
+   Internal admin panel with CRUD and user management
+
+6. 📊 analytics-dashboard - Analytics Dashboard
+   Real-time analytics and reporting dashboard
+
+7. 🔗 integration - Third-Party Integration
+   Integration with third-party API and webhooks
+
+Usage: /create-prd --template=<name> "Your feature description"
+Example: /create-prd --template=ecommerce "Add shopping cart"
+```
+
+**Template Benefits**:
+- Pre-filled acceptance criteria (P0, P1, P2)
+- Tech stack recommendations
+- Out-of-scope examples (prevent creep)
+- Success metrics
+- Risk analysis
+- 50% faster PRD creation
+
 ### Step 1: Gather Feature Description
 
 Ask user for brief feature description:
@@ -26,6 +88,9 @@ Ask user for brief feature description:
 What feature do you want to build?
 
 Example: "Add OAuth2 authentication with Google and GitHub"
+
+💡 Tip: Use --template flag for faster PRD creation!
+   /create-prd --list-templates
 
 > [User input]
 ```

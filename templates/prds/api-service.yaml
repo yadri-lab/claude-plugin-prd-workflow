@@ -1,0 +1,78 @@
+name: api-service
+displayName: API Service
+description: RESTful API or GraphQL service with authentication and documentation
+category: Backend
+icon: 🔌
+
+sections:
+  overview: |
+    Build a production-ready API service with authentication, rate limiting,
+    comprehensive documentation, and monitoring.
+
+  features:
+    - REST or GraphQL endpoints
+    - API key or OAuth authentication
+    - Rate limiting per user/key
+    - OpenAPI/Swagger documentation
+    - Request/response logging
+    - Error handling with proper status codes
+    - API versioning strategy
+
+  tech_stack_suggestions:
+    framework: FastAPI (Python) or Express (Node.js)
+    auth: JWT tokens or API keys
+    ratelimit: Redis for rate limiting
+    docs: OpenAPI (Swagger UI)
+    monitoring: Sentry for errors, Prometheus for metrics
+    database: PostgreSQL with connection pooling
+    cache: Redis for frequently accessed data
+
+  acceptance_criteria:
+    P0:
+      - All endpoints documented with OpenAPI spec
+      - Authentication required (JWT or API keys)
+      - Rate limiting 1000 req/min per API key
+      - Response time <200ms at p95
+      - Proper HTTP status codes (200, 400, 401, 404, 500)
+      - CORS configured correctly
+    P1:
+      - Request ID tracing for debugging
+      - Pagination for list endpoints (cursor-based)
+      - Filtering and sorting support
+      - Bulk operations endpoints
+      - Health check endpoint (/health)
+    P2:
+      - Webhooks for real-time notifications
+      - GraphQL subscriptions (if GraphQL)
+      - API key rotation mechanism
+      - Usage analytics per customer
+
+  out_of_scope:
+    - Admin web UI (API-only)
+    - Multiple API versions (v1 only)
+    - Complex authorization rules (simple RBAC)
+    - Real-time features (polling acceptable)
+
+  technical_approach: |
+    **API Design**: RESTful with resource-based URLs
+
+    **Key Decisions**:
+    1. FastAPI for auto-generated OpenAPI docs
+    2. JWT tokens (short-lived) + refresh tokens
+    3. Redis for rate limiting (token bucket algorithm)
+    4. Cursor-based pagination for scalability
+    5. Consistent error response format
+
+    **Endpoints Example**:
+    - GET /v1/users?cursor=xxx&limit=20
+    - POST /v1/users
+    - GET /v1/users/:id
+    - PATCH /v1/users/:id
+    - DELETE /v1/users/:id
+
+  success_metrics:
+    - API uptime >99.9%
+    - P95 response time <200ms
+    - Error rate <0.1%
+    - Documentation coverage 100%
+    - Rate limit violations <1%

@@ -1,0 +1,77 @@
+name: mobile-app
+displayName: Mobile Application
+description: Cross-platform mobile app for iOS and Android with native features
+category: Mobile
+icon: 📱
+
+sections:
+  overview: |
+    Build a cross-platform mobile application with native features like
+    push notifications, camera access, and offline support.
+
+  features:
+    - User onboarding flow (splash screen, tutorial)
+    - Authentication with biometric support
+    - Push notifications
+    - Camera/photo library access
+    - Offline-first data sync
+    - Location services
+    - App store deployment ready
+
+  tech_stack_suggestions:
+    framework: React Native or Flutter (recommend React Native if team knows React)
+    navigation: React Navigation
+    state: Zustand or Redux Toolkit
+    offline: WatermelonDB or AsyncStorage
+    push: Firebase Cloud Messaging
+    auth: Firebase Auth or Auth0
+    backend: Firebase or custom API
+
+  acceptance_criteria:
+    P0:
+      - App works on iOS 15+ and Android 12+
+      - User can sign in with email or social OAuth
+      - Biometric authentication (Face ID, Touch ID, Fingerprint)
+      - Push notifications delivered within 10 seconds
+      - Core features work offline (local storage + sync)
+      - Camera integration for profile photos
+    P1:
+      - Location-based features (if applicable)
+      - Deep linking from notifications
+      - Background sync when app reopens
+      - Pull-to-refresh on data screens
+      - Crash reporting and analytics
+    P2:
+      - Dark mode support
+      - Haptic feedback
+      - Share functionality (native share sheet)
+      - In-app purchases (if monetization)
+
+  out_of_scope:
+    - Tablet optimization (phone-only for v1)
+    - Apple Watch or Android Wear
+    - AR/VR features
+    - Complex offline conflict resolution (last-write-wins)
+
+  technical_approach: |
+    **Architecture**: Offline-first with background sync
+
+    **Key Decisions**:
+    1. React Native (better for JS team, larger ecosystem)
+    2. Firebase for push notifications (cross-platform)
+    3. AsyncStorage for simple data, WatermelonDB for complex
+    4. NetInfo for connectivity detection
+    5. React Query for server state management
+
+    **Offline Strategy**:
+    - Write locally first (optimistic UI)
+    - Queue sync operations
+    - Retry with exponential backoff
+    - Conflict resolution: last-write-wins
+
+  success_metrics:
+    - App store rating >4.0 stars
+    - Crash-free rate >99.5%
+    - Push notification delivery rate >95%
+    - Offline mode usage >30%
+    - Cold start time <3s

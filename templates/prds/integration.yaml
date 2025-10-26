@@ -1,0 +1,78 @@
+name: integration
+displayName: Third-Party Integration
+description: Integration with third-party API including webhooks and data sync
+category: Integration
+icon: 🔗
+
+sections:
+  overview: |
+    Build a reliable integration with a third-party service including API client,
+    webhook receiver, and bidirectional data synchronization.
+
+  features:
+    - API client with authentication
+    - Webhook receiver with signature verification
+    - Data synchronization (one-way or bidirectional)
+    - Error handling with retry logic
+    - Rate limiting compliance
+    - Monitoring and alerting
+    - Admin UI for connection management
+
+  tech_stack_suggestions:
+    http_client: Axios or Fetch with retry
+    queue: Bull or BullMQ (Redis-based)
+    cache: Redis for rate limiting
+    webhooks: Express webhook endpoint
+    monitoring: Sentry for errors
+    database: PostgreSQL for sync state
+    crypto: crypto-js for signature verification
+
+  acceptance_criteria:
+    P0:
+      - API client authenticates correctly (OAuth or API key)
+      - Webhook signature verified (HMAC-SHA256)
+      - Failed webhooks retried 3x with exponential backoff
+      - Data sync completes within 5 minutes
+      - Rate limits respected (per vendor limits)
+      - Sync errors logged with full context
+    P1:
+      - Dead letter queue for failed webhooks
+      - Manual retry trigger from admin UI
+      - Sync status dashboard
+      - Historical sync logs (30 days)
+      - Idempotency for webhook processing
+    P2:
+      - Real-time sync for critical data
+      - Conflict resolution UI
+      - Multiple connection support
+      - Webhook replay for debugging
+
+  out_of_scope:
+    - Batch import/export (manual files)
+    - Multiple vendor integrations (single vendor)
+    - Real-time bidirectional sync
+    - Complex data transformation
+
+  technical_approach: |
+    **Architecture**: Event-driven with job queue
+
+    **Key Decisions**:
+    1. Bull queue for reliable job processing
+    2. Idempotency via unique request IDs
+    3. Exponential backoff (1s, 2s, 4s delays)
+    4. Webhook signature with HMAC-SHA256
+    5. Database transactions for data consistency
+
+    **Sync Flow**:
+    1. Webhook received → verify signature
+    2. Queue job for processing
+    3. Process with retries
+    4. Update sync state
+    5. Send confirmation if needed
+
+  success_metrics:
+    - Webhook processing success rate >99%
+    - Sync completion time <5 minutes
+    - Zero data loss
+    - Downtime <0.1%
+    - Error detection time <5 minutes

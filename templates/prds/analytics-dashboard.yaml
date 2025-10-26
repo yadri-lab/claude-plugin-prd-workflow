@@ -1,0 +1,75 @@
+name: analytics-dashboard
+displayName: Analytics Dashboard
+description: Real-time analytics and reporting dashboard with custom metrics
+category: Analytics
+icon: 📊
+
+sections:
+  overview: |
+    Build a real-time analytics dashboard for tracking key metrics, generating
+    reports, and setting up alerts.
+
+  features:
+    - Real-time metrics display
+    - Custom dashboards with drag-and-drop widgets
+    - Time range selection (today, 7d, 30d, custom)
+    - Export reports (PDF, CSV)
+    - Automated alerts on thresholds
+    - Data visualization (charts, graphs, heatmaps)
+    - Comparison views (vs previous period)
+
+  tech_stack_suggestions:
+    framework: Next.js with App Router
+    database: PostgreSQL + TimescaleDB for time-series
+    charts: Recharts or Apache ECharts
+    realtime: Polling or Server-Sent Events (SSE)
+    analytics: Mixpanel SDK or custom events
+    export: jsPDF for PDF, papaparse for CSV
+
+  acceptance_criteria:
+    P0:
+      - Dashboard updates in real-time (max 5s delay)
+      - Date range picker with presets
+      - Core metrics: Users, Sessions, Conversions, Revenue
+      - Line charts, bar charts, pie charts
+      - Export data to CSV
+      - Responsive on desktop (1920x1080 to 1280x720)
+    P1:
+      - Custom metrics with formulas
+      - Comparison mode (current vs previous period)
+      - Alerts when metrics hit thresholds (email/Slack)
+      - Funnels and cohort analysis
+      - Export to PDF with charts
+    P2:
+      - Saved custom dashboards per user
+      - Annotations on charts (mark events)
+      - Forecasting with trend lines
+      - Anomaly detection alerts
+
+  out_of_scope:
+    - Raw event tracking (use existing analytics)
+    - A/B testing framework
+    - User segmentation builder
+    - Advanced attribution modeling
+
+  technical_approach: |
+    **Architecture**: Server-side aggregation with client-side visualization
+
+    **Key Decisions**:
+    1. TimescaleDB for efficient time-series queries
+    2. Server-Sent Events for real-time updates
+    3. Materialized views for pre-aggregated data
+    4. Recharts for React integration
+    5. Background jobs for report generation
+
+    **Performance**:
+    - Cache aggregated data (15min buckets)
+    - Lazy load charts (only when visible)
+    - Debounce filter changes (300ms)
+
+  success_metrics:
+    - Dashboard load time <3s
+    - Real-time data lag <5s
+    - Query response time <1s
+    - Report generation <10s
+    - User engagement >3 visits/week

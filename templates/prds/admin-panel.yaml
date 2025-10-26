@@ -1,0 +1,75 @@
+name: admin-panel
+displayName: Admin Dashboard
+description: Internal admin panel with CRUD operations and user management
+category: Admin Tools
+icon: ⚙️
+
+sections:
+  overview: |
+    Build an internal admin dashboard for managing users, data, and system operations
+    with role-based access control.
+
+  features:
+    - User management (list, create, edit, delete, suspend)
+    - Role-based permissions (Admin, Support, Read-only)
+    - Data tables with search, filter, sort, export
+    - Audit logs (who changed what and when)
+    - Bulk operations
+    - Reports and analytics
+    - System configuration
+
+  tech_stack_suggestions:
+    framework: Next.js with tRPC or React Admin
+    database: PostgreSQL with Prisma
+    tables: TanStack Table (React Table v8)
+    charts: Recharts or Chart.js
+    export: xlsx library for Excel export
+    auth: Internal SSO or OAuth
+
+  acceptance_criteria:
+    P0:
+      - Admin can perform all CRUD operations on users
+      - Search with real-time results (<500ms)
+      - Filtering by multiple fields (status, role, date)
+      - Sorting by any column
+      - Pagination (show 50 per page)
+      - Role-based access (Admins see all, Support limited)
+    P1:
+      - Audit log for all changes
+      - Bulk actions (delete, suspend, export)
+      - Export to CSV/Excel
+      - Advanced filters (date ranges, multiple values)
+      - Dashboard with key metrics
+    P2:
+      - Scheduled reports via email
+      - Custom views per admin user
+      - Data visualization charts
+      - Quick actions from list view
+
+  out_of_scope:
+    - Public-facing features (internal only)
+    - Mobile app (desktop web only)
+    - Real-time collaboration
+    - Version history (just audit logs)
+
+  technical_approach: |
+    **Architecture**: Server-side rendered with progressive enhancement
+
+    **Key Decisions**:
+    1. TanStack Table for advanced table features
+    2. Server-side pagination and filtering
+    3. tRPC for type-safe API calls
+    4. Row-level security in database
+    5. Audit logs via database triggers
+
+    **Permissions Model**:
+    - Admin: Full access
+    - Support: Read + limited updates
+    - Read-only: View only
+
+  success_metrics:
+    - Admin task completion time <30s
+    - Search results load <500ms
+    - Zero unauthorized access incidents
+    - Audit log coverage 100%
+    - User satisfaction >4/5

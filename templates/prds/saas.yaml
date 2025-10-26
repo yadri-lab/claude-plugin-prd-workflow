@@ -1,0 +1,77 @@
+name: saas
+displayName: SaaS Application
+description: SaaS app with authentication, subscription billing, and user dashboard
+category: SaaS
+icon: 💼
+
+sections:
+  overview: |
+    Build a complete SaaS application with user authentication, subscription billing,
+    user dashboard, and admin panel.
+
+  features:
+    - User authentication (email/password + OAuth)
+    - Subscription billing with multiple plans
+    - User dashboard with metrics and settings
+    - Team/workspace management
+    - Admin panel for user management
+    - Usage tracking and analytics
+    - API access with rate limiting
+
+  tech_stack_suggestions:
+    framework: Next.js 14 with App Router
+    auth: NextAuth.js v5 (Auth.js)
+    database: PostgreSQL with Prisma
+    billing: Stripe for subscriptions
+    analytics: PostHog or Mixpanel
+    styling: Tailwind CSS + shadcn/ui
+    email: Resend for transactional emails
+
+  acceptance_criteria:
+    P0:
+      - User can sign up with email or OAuth (Google, GitHub)
+      - User can select subscription plan (Free, Pro, Enterprise)
+      - User can update payment method
+      - Dashboard loads in <2s with key metrics
+      - Billing portal for plan upgrades/downgrades
+      - API rate limiting per plan tier
+    P1:
+      - Team creation with member invitations
+      - Role-based permissions (Owner, Admin, Member)
+      - Usage analytics dashboard
+      - Admin panel to view all users
+      - Automated invoice generation
+    P2:
+      - Custom branding per workspace
+      - SSO for enterprise plans
+      - Audit logs for compliance
+      - API webhooks for integrations
+
+  out_of_scope:
+    - Mobile apps (web-only for v1)
+    - White-label solution
+    - Multi-language support
+    - Advanced analytics (just basic metrics)
+
+  technical_approach: |
+    **Architecture**: Multi-tenant with workspace isolation
+
+    **Key Decisions**:
+    1. Stripe Customer Portal for self-service billing
+    2. Row-level security (RLS) in database for data isolation
+    3. tRPC for type-safe API between frontend/backend
+    4. Server Components for dashboard (RSC)
+    5. Middleware for authentication checks
+
+    **Database Schema**:
+    - users (id, email, name, created_at)
+    - workspaces (id, name, plan, owner_id)
+    - memberships (user_id, workspace_id, role)
+    - subscriptions (workspace_id, stripe_subscription_id, status)
+
+  success_metrics:
+    - Sign-up conversion >15%
+    - Upgrade to paid plan >5%
+    - Monthly churn rate <5%
+    - Dashboard load time <2s
+    - API uptime >99.9%
