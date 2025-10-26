@@ -16,6 +16,21 @@ Provide quick visibility into:
 - Bottlenecks in the pipeline
 - Next actions needed
 
+## Usage
+
+### Default View (Table)
+```bash
+/list-prds
+/list-prds --status=ready
+/list-prds --priority=P0
+```
+
+### Kanban View (v2.7+)
+```bash
+/list-prds --view=kanban
+/list-prds -k
+```
+
 ## Workflow
 
 ### Step 1: Scan All PRD Directories
@@ -203,6 +218,83 @@ If user wants to filter:
 - By status: `/list-prds --status=ready`
 - By priority: `/list-prds --priority=P0`
 - By grade: `/list-prds --grade=A,B`
+
+### Step 5: Kanban View (Optional)
+
+When user specifies `--view=kanban` or `-k`, display an ASCII Kanban board:
+
+```
+📋 PRD Pipeline - Kanban View
+
+┌─────────────────┬─────────────────┬─────────────────┬─────────────────┬─────────────────┐
+│ 📝 DRAFT (3)    │ 🔍 REVIEW (2)   │ ✅ READY (5)    │ 🚧 IN PROGRESS  │ ✔️ COMPLETE (8) │
+│                 │                 │                 │      (2)        │                 │
+├─────────────────┼─────────────────┼─────────────────┼─────────────────┼─────────────────┤
+│                 │                 │                 │                 │                 │
+│ PRD-014         │ PRD-011         │ PRD-004         │ ⚡ PRD-003      │ PRD-001         │
+│ Chat Feature    │ Mobile App      │ Landing Page    │ Design System   │ Project Setup   │
+│ P1 │ -          │ P0 │ C          │ P0 │ B+         │ P0 │ A- │ Day 3  │ P0 │ 8 days     │
+│                 │                 │                 │ 67% ██████▌░░   │ Completed       │
+│                 │                 │                 │                 │                 │
+│ PRD-016         │                 │ PRD-007         │ PRD-008         │ PRD-002         │
+│ Payment Integ.  │ PRD-013         │ User Auth       │ RSS Monitor     │ CI/CD Pipeline  │
+│ P0 │ -          │ API v2          │ P0 │ A          │ P0 │ B │ Day 2   │ P1 │ 4 days     │
+│                 │ P1 │ B-         │ 🔒 Blocked by   │ 45% ████▌░░░    │ Completed       │
+│                 │                 │    PRD-003      │                 │                 │
+│ PRD-017         │                 │ PRD-009         │                 │ PRD-005         │
+│ Admin Panel     │                 │ Analytics       │                 │ Dark Mode       │
+│ P2 │ -          │                 │ P1 │ B          │                 │ P2 │ 2 days     │
+│ On hold         │                 │                 │                 │ Completed       │
+│                 │                 │ PRD-012         │                 │                 │
+│                 │                 │ Email Notify    │                 │ (+ 5 more)      │
+│                 │                 │ P1 │ B          │                 │                 │
+│                 │                 │                 │                 │                 │
+│                 │                 │ PRD-015         │                 │                 │
+│                 │                 │ Search          │                 │                 │
+│                 │                 │ P2 │ C+         │                 │                 │
+└─────────────────┴─────────────────┴─────────────────┴─────────────────┴─────────────────┘
+
+Legend:
+  Priority: P0 (must-have), P1 (should-have), P2 (nice-to-have), P3 (maybe)
+  Grade: A (excellent), B (good), C (needs work), D/F (major issues)
+  🔒 = Blocked by dependencies
+  ⚡ = Active work today
+  Progress bar: █ = 10% complete
+
+💡 Actionable Insights:
+  • Complete PRD-003 (Design System) to unblock PRD-007
+  • PRD-011 stuck in review for 4 days (C grade) - needs attention
+  • PRD-004 (Landing Page) ready, no blockers, P0 priority - start next
+  • 2 PRDs in progress, capacity for 1 more with worktrees
+
+🎯 Suggested Next Action: /code-prd PRD-004
+```
+
+**Kanban Layout Rules**:
+
+1. **Column Widths**: Each column is 17 characters wide
+2. **Card Format**:
+   ```
+   PRD-XXX          # PRD ID
+   Feature Name     # Truncate to 15 chars if needed
+   P0 | A           # Priority | Grade (or - if no grade)
+   Additional Info  # Status-specific (days, progress, etc.)
+   ```
+
+3. **Progress Bars** (for in-progress only):
+   - Calculate from git commit activity or time elapsed
+   - Format: `XX% ████░░░░░░` (10 blocks, █ for done, ░ for remaining)
+
+4. **Status-Specific Info**:
+   - Draft: Show "On hold" if not updated in 7+ days
+   - Review: Show grade
+   - Ready: Show blockers if any (🔒)
+   - In Progress: Show progress bar + days elapsed
+   - Complete: Show total days taken
+
+5. **Active Work Indicator**: Use ⚡ for PRDs modified today
+
+6. **Truncation**: If more than 3 PRDs in a column, show first 3 + "(+ N more)"
 
 ## Configuration
 
