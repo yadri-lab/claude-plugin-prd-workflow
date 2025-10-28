@@ -153,12 +153,12 @@ jobs:
       - name: Complete PRD
         if: github.event.action == 'closed' && steps.prd.outputs.prd_id
         run: |
-          # Find PRD file in 04-in-progress/
-          PRD_FILE=$(find product/prds/04-in-progress -name "*${{ steps.prd.outputs.prd_id }}*")
+          # Find PRD file in 03-in-progress/
+          PRD_FILE=$(find product/prds/03-in-progress -name "*${{ steps.prd.outputs.prd_id }}*")
 
           if [ -n "$PRD_FILE" ]; then
-            # Move to 05-complete/
-            mv "$PRD_FILE" product/prds/05-complete/
+            # Move to 04-complete/
+            mv "$PRD_FILE" product/prds/04-complete/
 
             # Commit
             git config user.name "github-actions[bot]"
@@ -171,11 +171,11 @@ jobs:
       - name: Reopen PRD
         if: github.event.action == 'reopened' && steps.prd.outputs.prd_id
         run: |
-          # Move PRD back to 04-in-progress/
-          PRD_FILE=$(find product/prds/05-complete -name "*${{ steps.prd.outputs.prd_id }}*")
+          # Move PRD back to 03-in-progress/
+          PRD_FILE=$(find product/prds/04-complete -name "*${{ steps.prd.outputs.prd_id }}*")
 
           if [ -n "$PRD_FILE" ]; then
-            mv "$PRD_FILE" product/prds/04-in-progress/
+            mv "$PRD_FILE" product/prds/03-in-progress/
             git add .
             git commit -m "Reopen ${{ steps.prd.outputs.prd_id }} (Issue #${{ github.event.issue.number }} reopened)"
             git push
@@ -187,7 +187,7 @@ jobs:
 Update `/complete-prd` command to close linked Issue:
 
 ```bash
-# In /complete-prd workflow, after moving PRD to 05-complete/:
+# In /complete-prd workflow, after moving PRD to 04-complete/:
 
 # Extract Issue number from PRD
 ISSUE_NUMBER=$(grep "GitHub Issue.*#" "$PRD_FILE" | grep -o '#[0-9]\+' | tr -d '#')

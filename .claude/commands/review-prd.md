@@ -34,7 +34,6 @@ Which PRD would you like to review? (1-3 or filename)
 
 ### Step 2: Move to Review Folder
 
-Once user selects, move PRD from `01-draft/` to `02-review/`.
 
 ### Step 3: Analyze PRD (7 Dimensions)
 
@@ -92,7 +91,6 @@ Do NOT proceed until user responds to the critical questions.
 Based on answers:
 1. Summarize proposed changes
 2. Wait for approval
-3. Update PRD in place (same file in `02-review/`)
 4. Update WORK_PLAN.md (if enabled in config)
 
 ### Step 7: Grade & Recommend
@@ -102,13 +100,56 @@ Show before/after grade and recommend next steps:
 - If still C/D: recommend more refinement
 - If grade declined: identify what went wrong
 
-### Step 8: Handle Approval
+### Step 8: Update PRD Metadata
 
-If user says "approve":
-1. Move PRD to `03-ready/`
-2. Create GitHub Issue (if configured)
-3. Update WORK_PLAN.md
-4. Provide next steps
+**NEW: Update metadata only, NO file movement**
+
+Add/update review metadata in PRD header:
+
+```markdown
+**Review Status**: Reviewed
+**Review Date**: 2025-10-28
+**Review Grade**: A-
+**Reviewer**: Claude
+**Last Review**: 2025-10-28
+```
+
+**Recommendation based on grade**:
+
+```markdown
+✅ Review Complete: PRD-007 - OAuth2 Integration
+
+📊 Final Grade: A-
+
+📝 **Status**: Draft (no movement)
+📂 **Location**: product/prds/01-draft/PRD-007-oauth2.md
+
+**Next Steps**:
+✅ Grade A/B detected - Ready for setup!
+
+Run: /setup-prd PRD-007
+  → Creates feature branch
+  → Auto-assigns to you
+  → Moves to 02-ready/
+  
+Then: /code-prd PRD-007 (when ready to implement)
+```
+
+**If Grade C/D**:
+```markdown
+⚠️ Review Complete: PRD-008 - Dark Mode
+
+📊 Final Grade: C
+
+**Recommendation**: Iterate on PRD before setup
+- Address critical questions
+- Clarify scope boundaries
+- Define acceptance criteria
+
+Run /review-prd PRD-008 again after improvements.
+```
+
+**NO automatic file movement** - User decides when to run /setup-prd.
 
 ## Configuration
 
@@ -118,8 +159,7 @@ Uses these config settings:
   "prd_workflow": {
     "directories": {
       "draft": "product/prds/01-draft",
-      "review": "product/prds/02-review",
-      "ready": "product/prds/03-ready"
+      "ready": "product/prds/02-ready"
     },
     "review": {
       "dimensions": [...],

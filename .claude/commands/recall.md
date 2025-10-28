@@ -122,7 +122,7 @@ Found 3 matches:
   • PRD-007: SSO Integration (similar pattern)
   • PRD-012: API Authentication (depends on this)
 
-📄 File: product/prds/05-complete/241015-user-auth-PRD-003-v1.md
+📄 File: product/prds/04-complete/241015-user-auth-PRD-003-v1.md
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -131,7 +131,7 @@ Found 3 matches:
 
 Snippet: "...building on <mark>OAuth</mark> foundation from PRD-003, add SAML..."
 
-📄 File: product/prds/04-in-progress/241020-sso-PRD-007-v1.md
+📄 File: product/prds/03-in-progress/241020-sso-PRD-007-v1.md
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -140,7 +140,7 @@ Snippet: "...building on <mark>OAuth</mark> foundation from PRD-003, add SAML...
 
 Snippet: "...reuse <mark>OAuth</mark> client credentials flow for API-to-API..."
 
-📄 File: product/prds/03-ready/241023-api-auth-PRD-012-v1.md
+📄 File: product/prds/02-ready/241023-api-auth-PRD-012-v1.md
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

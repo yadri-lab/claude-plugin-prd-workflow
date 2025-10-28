@@ -21,7 +21,7 @@ Keep PRD directories clean while preserving historical context:
 ### Step 1: List Archivable PRDs
 
 Show PRDs from:
-- `05-complete/` - Completed and merged
+- `04-complete/` - Completed and merged
 - Any directory if user wants to cancel/deprecate
 
 ```markdown
@@ -91,7 +91,7 @@ Add archive metadata to PRD:
 
 Move file:
 ```bash
-mv product/prds/05-complete/250915-project-setup-v1.md \
+mv product/prds/04-complete/250915-project-setup-v1.md \
    product/prds/99-archived/250915-project-setup-v1.md
 ```
 
@@ -114,7 +114,7 @@ Add to archive log (if exists):
 ```markdown
 ✅ **PRD Archived: PRD-005 - Database Schema**
 
-**From**: product/prds/05-complete/
+**From**: product/prds/04-complete/
 **To**: product/prds/99-archived/
 **Reason**: Completed and shipped
 

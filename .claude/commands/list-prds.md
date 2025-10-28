@@ -37,10 +37,9 @@ Provide quick visibility into:
 
 Scan these directories (from config):
 - `01-draft/` - PRDs being written
-- `02-review/` - PRDs under review
-- `03-ready/` - Approved, ready to code
-- `04-in-progress/` - Currently being developed
-- `05-complete/` - Finished features
+- `02-ready/` - Approved, ready to code
+- `03-in-progress/` - Currently being developed
+- `04-complete/` - Finished features
 - `99-archived/` - Historical PRDs
 
 ### Step 2: Parse Each PRD
@@ -304,10 +303,9 @@ Uses these config settings:
   "prd_workflow": {
     "directories": {
       "draft": "product/prds/01-draft",
-      "review": "product/prds/02-review",
-      "ready": "product/prds/03-ready",
-      "in_progress": "product/prds/04-in-progress",
-      "complete": "product/prds/05-complete",
+      "ready": "product/prds/02-ready",
+      "in_progress": "product/prds/03-in-progress",
+      "complete": "product/prds/04-complete",
       "archived": "product/prds/99-archived"
     }
   }

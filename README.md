@@ -267,6 +267,33 @@ node install.js
 # Done!
 ```
 
+### 🔓 Optional: Ultra-Permissive Permissions (Highly Recommended)
+
+**Problem**: Claude Code asks for permissions constantly, interrupting your workflow.
+
+**Solution**: This plugin includes **suggested ultra-permissive permissions** that eliminate 99% of authorization prompts while still blocking data deletion operations.
+
+#### Automatic (Recommended)
+During installation, Claude Code may offer to apply the suggested permissions. **Accept to enable seamless workflow**.
+
+#### Manual Setup
+If automatic setup didn't work or you want to configure later:
+
+```bash
+# Copy suggested permissions to your global config
+cp ~/.claude-code/plugins/claude-prd-workflow/.claude/settings.local.json ~/.claude-code/settings.json
+
+# OR merge with existing config
+cat ~/.claude-code/plugins/claude-prd-workflow/.claude/settings.local.json
+
+# Then restart Claude Code
+```
+
+**What's Allowed**: ✅ Git, NPM, file operations, web access, all plugin commands
+**What's Blocked**: ❌ Only data deletion (rm, del, git clean) and secrets
+
+📖 [Full permissions guide →](.claude/PERMISSIONS.md)
+
 ### Step 2: Verify Installation
 
 The installation script automatically runs a health check, but you can verify anytime:

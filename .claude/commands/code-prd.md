@@ -33,7 +33,7 @@ git branch --show-current
 
 **Method B**: Ask user if detection fails
 
-Find corresponding PRD file in `product/prds/04-in-progress/`
+Find corresponding PRD file in `product/prds/03-in-progress/`
 
 #### Step 2: Load PRD Content
 
@@ -43,7 +43,95 @@ Read and parse:
 - Dependencies and constraints
 - Success metrics
 
-#### Step 3: Check for Existing Progress & Auto-Recovery
+#### Step 3: Verify PRD is in Ready State
+
+**NEW: Enforce Ready-First Workflow**
+
+```bash
+# Check if PRD exists in 02-ready/
+if [ ! -f "product/prds/02-ready/PRD-${ID}*.md" ]; then
+  echo "❌ PRD-${ID} is not in Ready state"
+  echo ""
+  echo "Current location:"
+  find product/prds/ -name "PRD-${ID}*.md" -type f
+  echo ""
+  echo "❓ Did you run /setup-prd PRD-${ID} first?"
+  echo ""
+  echo "📖 Workflow:"
+  echo "  1. /setup-prd PRD-${ID}  → Moves to Ready + creates branch"
+  echo "  2. /code-prd PRD-${ID}   → Starts implementation"
+  exit 1
+fi
+```
+
+#### Step 4: Check Dependencies
+
+**NEW: Dependency Validation**
+
+Parse PRD metadata for dependencies:
+```yaml
+depends_on:
+  - PRD-003: Database schema
+  - PRD-005: Auth system
+```
+
+Check each dependency status:
+```bash
+for dep in "${DEPS[@]}"; do
+  DEP_ID=$(echo "$dep" | cut -d: -f1)
+  
+  # Check if dependency is complete
+  if [ -f "product/prds/04-complete/$DEP_ID*.md" ]; then
+    echo "✅ $dep is complete"
+  else
+    echo "⚠️  WARNING: $dep is NOT complete"
+    BLOCKERS+=("$dep")
+  fi
+done
+```
+
+If blockers found:
+```markdown
+⚠️  **Dependency Blockers Detected**
+
+This PRD depends on:
+  ❌ PRD-003: Database schema (Status: In Progress)
+  ❌ PRD-005: Auth system (Status: Draft)
+
+**Recommendation**: Wait for dependencies to complete first.
+
+Continue anyway? (not recommended) (y/n)
+> _
+```
+
+#### Step 5: Move PRD to In-Progress (First Run Only)
+
+**NEW: Auto-Move on First Run**
+
+Only move if this is the first time /code-prd is run:
+```bash
+# Check if PRD is still in Ready
+if [ -f "product/prds/02-ready/PRD-${ID}*.md" ]; then
+  echo "📦 Moving PRD to In-Progress..."
+  
+  mv product/prds/02-ready/PRD-${ID}*.md \
+     product/prds/03-in-progress/PRD-${ID}*.md
+  
+  # Update metadata
+  sed -i 's/Status: Ready for Development/Status: In Progress/' \
+    product/prds/03-in-progress/PRD-${ID}*.md
+  
+  sed -i "/\*\*Status\*\*/a **Started**: $(date +%Y-%m-%d)" \
+    product/prds/03-in-progress/PRD-${ID}*.md
+  
+  echo "✅ PRD moved to 03-in-progress/"
+else
+  echo "ℹ️  PRD already in In-Progress, resuming..."
+fi
+```
+
+
+#### Step 6: Check for Existing Progress & Auto-Recovery
 
 **NEW: Automatic Progress Checkpoints**
 

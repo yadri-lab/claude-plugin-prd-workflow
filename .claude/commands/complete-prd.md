@@ -13,7 +13,7 @@ Mark a PRD as complete after its PR has been merged and deployed to production.
 Close the PRD lifecycle loop:
 - Verify PR is merged
 - Update PRD status to "Complete"
-- Move PRD to `05-complete/` directory
+- Move PRD to `04-complete/` directory
 - Clean up Git worktree (optional)
 - Update WORK_PLAN.md
 - Record completion metrics
@@ -255,9 +255,9 @@ Add completion metadata to PRD header:
 PRD_FILE="product/prds/03-in-progress/250915-oauth2-integration-v1.md"
 
 # Move to complete
-mv "$PRD_FILE" "product/prds/05-complete/250915-oauth2-integration-v1.md"
+mv "$PRD_FILE" "product/prds/04-complete/250915-oauth2-integration-v1.md"
 
-echo "✅ Moved PRD to 05-complete/"
+echo "✅ Moved PRD to 04-complete/"
 ```
 
 ### Step 6: Clean Up Git Worktree (Optional)
@@ -349,7 +349,7 @@ Show final summary:
 - Security: All checks passed ✅
 
 🧹 **Cleanup**:
-- ✅ PRD moved to 05-complete/
+- ✅ PRD moved to 04-complete/
 - ✅ Worktree removed
 - ✅ Branches deleted
 - ✅ WORK_PLAN.md updated
@@ -429,7 +429,7 @@ If no PR was needed (hotfix, etc.):
 
 **PRD already complete**:
 ```
-ℹ️ PRD-003 is already in 05-complete/
+ℹ️ PRD-003 is already in 04-complete/
 
 Completed: 2025-10-25
 PR: #42
