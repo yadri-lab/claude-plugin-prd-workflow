@@ -1,58 +1,54 @@
-# OS Files
-.DS_Store
-Thumbs.db
-*.swp
-*.swo
-*~
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
 
-# IDE
-.vscode/
-.idea/
-*.sublime-project
-*.sublime-workspace
+# Diagnostic reports
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
-# Claude
-.claude/
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.test
+
+# Claude - Exclude user-generated files but keep plugin source
+# Ignore user-generated Claude files
+.claude/prd-*-progress.json
+.claude/*.backup
+.prd-config.json
+.claude/commands/*.backup
 
 # PRD Workflow - User's PRDs (not part of plugin source)
 product/prds/
 product/WORK_PLAN.md
 product/decisions/
 
-# Logs
-*.log
-logs/
-
-# Temporary files
-*.tmp
-temp/
-.cache/
-
-# User-specific config (users should copy from default-config.json)
-config.json
-
-# Node modules (if any examples/tests added later)
-node_modules/
-npm-debug.log*
-
-# Build outputs
-dist/
-build/
-*.min.js
-
-# Coverage reports
-coverage/
-.nyc_output/
-
-# Environment variables
-.env
-.env.local
-.env.*.local
-
-# Archives
-*.zip
-*.tar.gz
+# Development files
+dev/
+*.md.backup
 
 # Security audit reports (may contain sensitive info)
 .claude/security-audit-*.md
 .claude/quality-check-*.md
+
+# OS
+.DS_Store
+Thumbs.db
