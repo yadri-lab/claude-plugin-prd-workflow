@@ -64,6 +64,26 @@ See [VERSION_RESET.md](./docs/VERSION_RESET.md) for full rationale.
 - Warns about blockers (dependencies not yet complete)
 - Prevents starting work on blocked features
 
+#### /create-prd-env - Initialize PRD Structure (NEW)
+- **New command**: Set up complete PRD workflow in any project
+- Auto-detect existing structure (supports v2.x migration)
+- Create all folders: 01-draft, 02-ready, 03-in-progress, 04-complete, 99-archived
+- Generate 3 PRD templates: full-feature, quick-feature, experiment
+- Create configuration (.prd-config.json)
+- One-command setup for new or existing projects
+
+#### Feature Type Auto-Detection
+- /create-prd now auto-detects feature type from description
+- Keywords: "experiment|poc|prototype" → 🧪 Experiment template
+- Keywords: "fix|bug|update|quick" → ⚡ Quick Ship template
+- Default → 🎯 Full Feature template
+- Right template for right scope
+
+#### Enhanced Dependencies Display
+- /list-prds shows dependency status with icons
+- Status icons: ✅ Complete, 🔨 In Progress, ⏳ Ready, ⚠️ Missing
+- Identify blockers at a glance
+
 ### 🔄 Workflow Changes
 
 #### `/setup-prd` - Redesigned
