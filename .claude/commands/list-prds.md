@@ -37,10 +37,9 @@ Provide quick visibility into:
 
 Scan these directories (from config):
 - `01-draft/` - PRDs being written
-- `02-review/` - PRDs under review
-- `03-ready/` - Approved, ready to code
-- `04-in-progress/` - Currently being developed
-- `05-complete/` - Finished features
+- `02-ready/` - Approved, ready to code
+- `03-in-progress/` - Currently being developed
+- `04-complete/` - Finished features
 - `99-archived/` - Historical PRDs
 
 ### Step 2: Parse Each PRD
@@ -70,6 +69,48 @@ Extract metadata:
 - Branch (if in progress)
 - Started date (if in progress)
 - Completed date (if complete)
+
+
+### Step 2.5: Parse Dependencies (NEW in v0.3)
+
+**Extract dependency information from PRD metadata**:
+
+Look for dependency declarations in PRD header:
+```yaml
+**Depends On**:
+- PRD-003: Database schema
+- PRD-005: Auth system
+
+**Blocks**:
+- PRD-010: User dashboard
+```
+
+**Dependency status resolution**:
+```bash
+for dep in "${DEPENDS_ON[@]}"; do
+  DEP_ID=$(echo "$dep" | cut -d: -f1 | tr -d ' ')
+  
+  # Find dependency PRD location
+  if [ -f "product/prds/04-complete/$DEP_ID*.md" ]; then
+    STATUS="✅"
+  elif [ -f "product/prds/03-in-progress/$DEP_ID*.md" ]; then
+    STATUS="🔨"
+  elif [ -f "product/prds/02-ready/$DEP_ID*.md" ]; then
+    STATUS="⏳"
+  else
+    STATUS="⚠️"
+  fi
+  
+  DEPS_DISPLAY+=" $STATUS $DEP_ID"
+done
+```
+
+**Status icons**:
+- ✅ Complete (04-complete/)
+- 🔨 In Progress (03-in-progress/)
+- ⏳ Ready (02-ready/)
+- ⚠️ Not Found or Draft
+
 
 ### Step 3: Display Summary Dashboard
 
@@ -160,13 +201,13 @@ Or:
 
 ## ✅ Ready for Development (5)
 
-| PRD ID | Feature | Priority | Grade | Next Action |
-|--------|---------|----------|-------|-------------|
-| PRD-004 | Landing Page | P0 | B+ | Run `/code-prd` |
-| PRD-007 | User Authentication | P0 | A | Waiting for PRD-003 |
-| PRD-009 | Analytics Dashboard | P1 | B | Run `/code-prd` |
-| PRD-012 | Email Notifications | P1 | B | Run `/code-prd` |
-| PRD-015 | Search Functionality | P2 | C+ | Consider re-review |
+| PRD ID | Feature | Priority | Grade | Dependencies | Next Action |
+|--------|---------|----------|-------|--------------|-------------|
+| PRD-004 | Landing Page | P0 | B+ | - | Run `/code-prd` |
+| PRD-007 | User Authentication | P0 | A | - | Waiting for PRD-003 |
+| PRD-009 | Analytics Dashboard | P1 | B | - | Run `/code-prd` |
+| PRD-012 | Email Notifications | P1 | B | - | Run `/code-prd` |
+| PRD-015 | Search Functionality | P2 | C+ | - | Consider re-review |
 
 ---
 
@@ -304,10 +345,9 @@ Uses these config settings:
   "prd_workflow": {
     "directories": {
       "draft": "product/prds/01-draft",
-      "review": "product/prds/02-review",
-      "ready": "product/prds/03-ready",
-      "in_progress": "product/prds/04-in-progress",
-      "complete": "product/prds/05-complete",
+      "ready": "product/prds/02-ready",
+      "in_progress": "product/prds/03-in-progress",
+      "complete": "product/prds/04-complete",
       "archived": "product/prds/99-archived"
     }
   }
@@ -326,3 +366,31 @@ Uses these config settings:
 - Command: `/review-prd` (for PRDs in review)
 - Command: `/code-prd` (for ready PRDs)
 - Command: `/work-prd` (for in-progress PRDs)
+
+### Dependencies Display Example (NEW in v0.3)
+
+**With dependencies shown**:
+
+```markdown
+## ✅ Ready for Development
+
+| PRD ID | Feature | Priority | Grade | Dependencies | Next Action |
+|--------|---------|----------|-------|--------------|-------------|
+| PRD-004 | Landing Page | P0 | B+ | - | Run `/code-prd` |
+| PRD-007 | User Auth | P0 | A | ⏳ PRD-003, 🔨 PRD-005 | Waiting |
+| PRD-009 | Analytics | P1 | B | ✅ PRD-003 | Run `/code-prd` |
+| PRD-015 | Search | P2 | C+ | ⚠️ PRD-999 | Blocker missing |
+```
+
+**Dependency status legend**:
+- ✅ Complete and merged
+- 🔨 In progress
+- ⏳ Ready but not started
+- ⚠️ Not found (draft or missing)
+- `-` No dependencies
+
+**Actionable insights**:
+- PRD-007: Blocked by PRD-003 (ready) and PRD-005 (in progress)
+- PRD-009: Ready to start (PRD-003 complete)
+- PRD-015: Blocker PRD-999 doesn't exist - needs fixing
+

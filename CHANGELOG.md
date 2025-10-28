@@ -5,6 +5,143 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [0.3.0] - 2025-10-28
+
+### ⚠️ BREAKING CHANGES - Version Reset
+
+This release **resets version from v2.8.0 → v0.3.0** to better reflect the beta status of this plugin.
+
+**Why the reset?**
+- Reached v2.8 after only 2 days of development = version inflation
+- Being honest: this is beta software, still evolving rapidly
+- v0.x signals that breaking changes are expected
+- v1.0 will come when the plugin is truly stable and battle-tested
+
+See [VERSION_RESET.md](./docs/VERSION_RESET.md) for full rationale.
+
+### 🏗️ Folder Structure Overhaul
+
+**BREAKING**: Simplified PRD folder structure:
+
+**Old structure:**
+```
+01-draft/
+02-review/    ← REMOVED
+03-ready/     → Now 02-ready/
+04-in-progress/ → Now 03-in-progress/
+05-complete/  → Now 04-complete/
+99-archived/
+```
+
+**New structure:**
+```
+01-draft/
+02-ready/       (was 03-ready)
+03-in-progress/ (was 04-in-progress)
+04-complete/    (was 05-complete)
+99-archived/
+```
+
+**Rationale**: Review is a process, not a state. PRDs can be reviewed at any stage (Draft OR Ready).
+
+### 🎯 New Features
+
+#### Auto-Assignment
+- `/setup-prd` now auto-detects and assigns the current GitHub user
+- Detection cascade: `gh auth` → `git config` → cached config → ask user
+- Assignment cached in `.prd-config.json` for future PRDs
+
+#### Progress Tracking
+- `/code-prd` displays real-time progress: "12/45 tasks (27%)"
+- Auto-checkpoint every 3 tasks to `.claude/prd-XXX-progress.json`
+- Resume from checkpoint on crash/restart
+- Track completion percentage and time estimates
+
+#### Dependency Validation
+- Declare dependencies in PRD metadata: `depends_on: [PRD-003, PRD-005]`
+- `/code-prd` validates dependencies before starting
+- Warns about blockers (dependencies not yet complete)
+- Prevents starting work on blocked features
+
+#### /create-prd-env - Initialize PRD Structure (NEW)
+- **New command**: Set up complete PRD workflow in any project
+- Auto-detect existing structure (supports v2.x migration)
+- Create all folders: 01-draft, 02-ready, 03-in-progress, 04-complete, 99-archived
+- Generate 3 PRD templates: full-feature, quick-feature, experiment
+- Create configuration (.prd-config.json)
+- One-command setup for new or existing projects
+
+#### Feature Type Auto-Detection
+- /create-prd now auto-detects feature type from description
+- Keywords: "experiment|poc|prototype" → 🧪 Experiment template
+- Keywords: "fix|bug|update|quick" → ⚡ Quick Ship template
+- Default → 🎯 Full Feature template
+- Right template for right scope
+
+#### Enhanced Dependencies Display
+- /list-prds shows dependency status with icons
+- Status icons: ✅ Complete, 🔨 In Progress, ⏳ Ready, ⚠️ Missing
+- Identify blockers at a glance
+
+### 🔄 Workflow Changes
+
+#### `/setup-prd` - Redesigned
+- **Before**: Created branch and moved to In-Progress
+- **After**: Creates branch, assigns user, moves to **Ready** (not In-Progress)
+- Idempotent: can run multiple times safely
+- Supports Draft → Ready workflow
+
+#### `/code-prd` - Enhanced
+- **Enforces Ready-first workflow**: Refuses to run if PRD not in 02-ready/
+- Checks dependencies before starting
+- Auto-moves Ready → In-Progress on first run only
+- Shows progress tracking during implementation
+- Resumes from checkpoint after interruptions
+
+#### `/review-prd` - Simplified
+- **Before**: Moved files between folders (Draft → Review → Ready)
+- **After**: Updates metadata only, NO file movement
+- Can review PRDs in Draft OR Ready state
+- Recommends `/setup-prd` after A/B grade
+- User decides when to setup (explicit control)
+
+### 📦 Migration Guide
+
+See [MIGRATION_v2_to_v0.md](./docs/MIGRATION_v2_to_v0.md) for step-by-step migration instructions.
+
+**Quick migration:**
+```bash
+# Rename your PRD folders
+mv product/prds/03-ready product/prds/02-ready
+mv product/prds/04-in-progress product/prds/03-in-progress
+mv product/prds/05-complete product/prds/04-complete
+rm -rf product/prds/02-review  # No longer needed
+
+# Update plugin
+npm update -g claude-prd-workflow
+
+# Done!
+```
+
+### 🐛 Bug Fixes
+- Fixed folder reference inconsistencies across all commands
+- Corrected `.gitignore` to properly track plugin source files
+- Fixed permissions blocking in Git Bash/MINGW64 environments
+
+### 📝 Documentation
+- Updated README with new workflow examples
+- Created VERSION_RESET.md explaining rationale
+- Created MIGRATION_v2_to_v0.md for easy upgrade
+- Updated all command documentation
+
+### 🔗 Links
+- **Previous version**: [v2.8.0] (now tagged as `legacy`)
+- **Migration guide**: [docs/MIGRATION_v2_to_v0.md](./docs/MIGRATION_v2_to_v0.md)
+- **Version reset rationale**: [docs/VERSION_RESET.md](./docs/VERSION_RESET.md)
+
+---
+
 ## [2.8.0] - 2025-10-26
 
 ### Added - Reliability & Self-Maintenance 🏥

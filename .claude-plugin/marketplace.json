@@ -16,7 +16,7 @@
     {
       "name": "claude-prd-workflow",
       "displayName": "PRD Workflow Manager",
-      "version": "2.8.0",
+      "version": "0.3.0",
       "description": "Complete PRD lifecycle management with orchestration, security, quality assurance, and guided development. Includes Git worktree support for parallel development.",
       "source": {
         "source": "github",

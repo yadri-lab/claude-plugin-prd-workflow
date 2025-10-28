@@ -6,18 +6,17 @@ category: PRD Management
 
 # Setup PRD Command
 
-Prepare development environment for a PRD by creating a feature branch and Git worktree.
+Prepare development environment for a PRD by creating a feature branch, auto-assigning, and moving to Ready.
 
 ## Purpose
 
 Create isolated development environment for PRD:
 - Create feature branch
 - Set up Git worktree (optional)
-- Move PRD to in-progress
+- Auto-assign to current user
+- Move PRD to Ready (02-ready/)
 - Update WORK_PLAN.md
 - **Accept draft PRDs** (with warning) for parallel workflow
-
-## Workflow
 
 ### Step 1: List Available PRDs
 
@@ -25,7 +24,7 @@ Scan PRD directories for available PRDs:
 ```bash
 # Check these directories:
 - product/prds/01-draft/
-- product/prds/02-approved/
+- product/prds/02-ready/
 - product/prds/03-in-progress/ (to show what's already being worked on)
 ```
 
@@ -130,53 +129,92 @@ git checkout feature/PRD-007-oauth2-integration
 ✅ Switched to branch: feature/PRD-007-oauth2-integration
 ```
 
-### Step 6: Move PRD to In-Progress
+### Step 6: Auto-Assign to Current User
+
+Detect GitHub username using cascade:
 
 ```bash
-# Move from draft or approved to in-progress
-mv product/prds/01-draft/PRD-007-oauth2-integration.md \
-   product/prds/03-in-progress/PRD-007-oauth2-integration.md
+# Try 1: GitHub CLI
+USERNAME=$(gh auth status 2>&1 | grep -oP 'Logged in to github.com as \K[^\s]+' || echo "")
 
-# Or from approved:
-mv product/prds/02-approved/PRD-007-oauth2-integration.md \
-   product/prds/03-in-progress/PRD-007-oauth2-integration.md
+# Try 2: Git config (fallback)
+if [ -z "$USERNAME" ]; then
+  USERNAME=$(git config user.name || echo "")
+fi
+
+# Try 3: Check cached config
+if [ -z "$USERNAME" ] && [ -f .prd-config.json ]; then
+  USERNAME=$(jq -r '.default_assignee // empty' .prd-config.json 2>/dev/null || echo "")
+fi
+
+# Try 4: Ask user and cache
+if [ -z "$USERNAME" ]; then
+  echo "💬 What's your GitHub username?"
+  read USERNAME
+  
+  # Cache for future use
+  echo "{\"default_assignee\": \"$USERNAME\"}" > .prd-config.json
+  echo "✅ Saved to .prd-config.json for future PRDs"
+fi
+```
+
+Update PRD metadata by adding/updating these fields:
+```markdown
+**Assignee**: @$USERNAME
+**Assigned**: $(date +%Y-%m-%d)
+```
+
+### Step 7: Move PRD to Ready
+
+**Important**: `/setup-prd` moves Draft → Ready (NOT In-Progress)
+
+```bash
+# Move from draft to ready
+mv product/prds/01-draft/PRD-007-oauth2-integration.md \
+   product/prds/02-ready/PRD-007-oauth2-integration.md
+```
+
+If PRD is already in Ready, skip the move (idempotent):
+```bash
+if [ -f product/prds/02-ready/PRD-007-oauth2-integration.md ]; then
+  echo "ℹ️  PRD already in Ready, skipping move"
+fi
 ```
 
 Update PRD status field:
 ```markdown
-**Status**: In Progress
-**Started**: 2025-10-26
+**Status**: Ready for Development
 **Branch**: feature/PRD-007-oauth2-integration
+**Assignee**: @yassinello
+**Setup Date**: 2025-10-28
 ```
 
-### Step 7: Update WORK_PLAN.md
+### Step 8: Update WORK_PLAN.md
 
-Move PRD from draft/approved to in-progress section:
+Move PRD from draft to ready section:
 ```markdown
-## In Progress (1 PRD)
-| PRD ID | Feature | Owner | Started | Branch |
-|--------|---------|-------|---------|--------|
-| PRD-007 | OAuth2 Integration | @alice | 2025-10-26 | feature/PRD-007-oauth2-integration |
+## Ready for Development (1 PRD)
+| PRD ID | Feature | Owner | Branch |
+|--------|---------|-------|--------|
+| PRD-007 | OAuth2 Integration | @yassinello | feature/PRD-007-oauth2-integration |
 ```
 
-### Step 8: Provide Next Steps
+### Step 9: Provide Next Steps
 
 ```markdown
 🌳 **Development Environment Ready**
 
 📂 Worktree: worktrees/prd-007-oauth2-integration/
 🌿 Branch: feature/PRD-007-oauth2-integration
-📄 PRD: product/prds/03-in-progress/PRD-007-oauth2-integration.md
+📄 PRD: product/prds/02-ready/PRD-007-oauth2-integration.md
+👤 Assignee: @yassinello
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-**If PRD was DRAFT**:
-⚠️ Remember to review first: /review-prd PRD-007
-
 **Next Steps**:
-1. cd worktrees/prd-007-oauth2-integration/
-2. /review-prd PRD-007 (if still draft)
-3. /work-prd PRD-007 (guided implementation)
+1. cd worktrees/prd-007-oauth2-integration/ (if using worktree)
+2. /review-prd PRD-007 (optional, refine the PRD)
+3. /code-prd PRD-007 (start guided implementation)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -189,8 +227,6 @@ Open a new Cursor window in the worktree directory:
 This allows you to:
 - Work on PRD-007 in one Cursor instance
 - Continue other work on Main in another instance
-```
-
 ## Configuration
 
 Respects prd_workflow configuration:

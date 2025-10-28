@@ -267,6 +267,33 @@ node install.js
 # Done!
 ```
 
+### 🔓 Optional: Ultra-Permissive Permissions (Highly Recommended)
+
+**Problem**: Claude Code asks for permissions constantly, interrupting your workflow.
+
+**Solution**: This plugin includes **suggested ultra-permissive permissions** that eliminate 99% of authorization prompts while still blocking data deletion operations.
+
+#### Automatic (Recommended)
+During installation, Claude Code may offer to apply the suggested permissions. **Accept to enable seamless workflow**.
+
+#### Manual Setup
+If automatic setup didn't work or you want to configure later:
+
+```bash
+# Copy suggested permissions to your global config
+cp ~/.claude-code/plugins/claude-prd-workflow/.claude/settings.local.json ~/.claude-code/settings.json
+
+# OR merge with existing config
+cat ~/.claude-code/plugins/claude-prd-workflow/.claude/settings.local.json
+
+# Then restart Claude Code
+```
+
+**What's Allowed**: ✅ Git, NPM, file operations, web access, all plugin commands
+**What's Blocked**: ❌ Only data deletion (rm, del, git clean) and secrets
+
+📖 [Full permissions guide →](.claude/PERMISSIONS.md)
+
 ### Step 2: Verify Installation
 
 The installation script automatically runs a health check, but you can verify anytime:
@@ -469,7 +496,7 @@ The PRD template is pre-filled with sections:
 3. You answer questions → PRD is updated
 4. **Grade assigned** (A-F)
 5. If grade ≥ minimum (B for enterprise, C for startup) → **Approved!**
-6. PRD moves to `product/prds/03-ready/`
+6. PRD moves to `product/prds/02-ready/`
 7. **GitHub issue created** (if enabled)
 
 **Time**: 15 minutes (vs 2 hours manual review)
@@ -484,7 +511,7 @@ The PRD template is pre-filled with sections:
 1. Creates branch `feat/PRD-001-user-authentication`
 2. Creates Git worktree `../my-project-user-authentication/` (isolated workspace)
 3. Installs dependencies (if configured)
-4. Moves PRD to `product/prds/04-in-progress/`
+4. Moves PRD to `product/prds/03-in-progress/`
 5. Opens implementation context
 
 **You're now coding in a clean workspace!**
@@ -535,7 +562,7 @@ Before creating your PR:
 
 Create PR → Code review → Merge → Done! 🎉
 
-PRD automatically moves to `product/prds/05-complete/`
+PRD automatically moves to `product/prds/04-complete/`
 
 ---
 

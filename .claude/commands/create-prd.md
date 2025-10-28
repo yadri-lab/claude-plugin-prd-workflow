@@ -81,6 +81,69 @@ Example: /create-prd --template=ecommerce "Add shopping cart"
 - Risk analysis
 - 50% faster PRD creation
 
+
+### Step 0.5: Auto-Detect Feature Type (NEW in v0.3)
+
+**Before generating PRD, analyze feature description for type hints**:
+
+```bash
+FEATURE_DESC="$1"
+
+# Detection logic
+if echo "$FEATURE_DESC" | grep -iE "experiment|poc|prototype|test|trial|pilot" > /dev/null; then
+  FEATURE_TYPE="experiment"
+  TEMPLATE_FILE="product/templates/experiment.md"
+  EMOJI="🧪"
+elif echo "$FEATURE_DESC" | grep -iE "fix|bug|hotfix|patch|update|tweak|small|minor|quick" > /dev/null; then
+  FEATURE_TYPE="quick"
+  TEMPLATE_FILE="product/templates/quick-feature.md"
+  EMOJI="⚡"
+else
+  FEATURE_TYPE="full"
+  TEMPLATE_FILE="product/templates/full-feature.md"
+  EMOJI="🎯"
+fi
+```
+
+**Display detection result**:
+
+```markdown
+🔍 **Feature Type Auto-Detected**: ${EMOJI} ${FEATURE_TYPE^}
+
+Based on keywords in: "${FEATURE_DESC}"
+
+Detected as: **${FEATURE_TYPE^} Feature**
+- Template: ${TEMPLATE_FILE}
+- Estimated: ${ESTIMATE}
+
+Is this correct? (y/n/change)
+> _
+```
+
+**Type characteristics**:
+
+| Type | Keywords | Estimate | Template |
+|------|----------|----------|----------|
+| 🎯 Full | (default) | 5+ days | full-feature.md |
+| ⚡ Quick | fix, bug, update, small | 1-3 days | quick-feature.md |
+| 🧪 Experiment | experiment, poc, prototype | 1-2 weeks | experiment.md |
+
+**If user says "change"**:
+```markdown
+Which type should this be?
+  [1] 🎯 Full Feature (5+ days)
+  [2] ⚡ Quick Ship (1-3 days)
+  [3] 🧪 Experiment/POC (1-2 weeks)
+
+Choose: _
+```
+
+**Why this matters**:
+- **Different templates** for different feature sizes
+- **Right level of detail** - Quick features don't need extensive docs
+- **Clearer expectations** - Team knows scope upfront
+
+
 ### Step 1: Gather Feature Description
 
 Ask user for brief feature description:

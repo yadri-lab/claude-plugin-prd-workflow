@@ -334,8 +334,8 @@ while true; do
     gh pr merge 42 --squash
 
     # Update status
-    mv product/prds/04-in-progress/251024-design-system-v1.md \
-       product/prds/05-complete/251024-design-system-v1.md
+    mv product/prds/03-in-progress/251024-design-system-v1.md \
+       product/prds/04-complete/251024-design-system-v1.md
 
     # Trigger next wave
     /code-prd PRD-004
