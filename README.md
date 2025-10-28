@@ -496,7 +496,7 @@ The PRD template is pre-filled with sections:
 3. You answer questions → PRD is updated
 4. **Grade assigned** (A-F)
 5. If grade ≥ minimum (B for enterprise, C for startup) → **Approved!**
-6. PRD moves to `product/prds/03-ready/`
+6. PRD moves to `product/prds/02-ready/`
 7. **GitHub issue created** (if enabled)
 
 **Time**: 15 minutes (vs 2 hours manual review)
@@ -511,7 +511,7 @@ The PRD template is pre-filled with sections:
 1. Creates branch `feat/PRD-001-user-authentication`
 2. Creates Git worktree `../my-project-user-authentication/` (isolated workspace)
 3. Installs dependencies (if configured)
-4. Moves PRD to `product/prds/04-in-progress/`
+4. Moves PRD to `product/prds/03-in-progress/`
 5. Opens implementation context
 
 **You're now coding in a clean workspace!**
@@ -562,7 +562,7 @@ Before creating your PR:
 
 Create PR → Code review → Merge → Done! 🎉
 
-PRD automatically moves to `product/prds/05-complete/`
+PRD automatically moves to `product/prds/04-complete/`
 
 ---
 
