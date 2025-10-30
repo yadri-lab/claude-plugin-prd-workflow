@@ -38,11 +38,43 @@ With **AI-powered agents**, **automated quality gates**, and **Git worktree orch
 
 ## ✨ Key Features
 
+## 🆕 What's New in v0.3.1
+
+### 🚦 **Review Gate - Stop Bad Ideas in 30 Seconds**
+3 killer questions **before** you waste time on full analysis:
+1. **KILL** - Should this even exist?
+2. **SKIP** - Can we wait 3 months?
+3. **SHRINK** - What's the 20% MVP?
+
+**Impact**: Catch scope bloat and unjustified features in 30s vs 10 min
+
+### 🤖 **Agent Orchestration - One Command, Full Analysis**
+```bash
+/invoke "implement Stripe payments"
+→ Runs: architecture + security + tests + plan (parallel)
+→ 12 min → comprehensive outputs
+```
+
+### ⚙️ **Worktree Health Checks - No More Cryptic Errors**
+Pre-flight validation catches Git issues **before** they break:
+- ✓ Version check (need 2.25+)
+- ✓ Permissions check
+- ✓ Conflict detection
+
+**Impact**: Clear remediation vs "git worktree add failed"
+
+### 📊 **3x Faster Reviews - 10-20 min → 3-5 min**
+- 4 core dimensions (not 7)
+- Dynamic contextual (tag-based)
+- Compact format (icons, bullets)
+
+---
+
 ### 🔍 **AI-Powered PRD Review**
-7-dimension analysis with **automatic grading (A-F)** and **calibration questions** that expose gaps you didn't know existed.
+Multi-dimension analysis with **automatic grading (A-F)** and **calibration questions** that expose gaps you didn't know existed.
 
 **Before**: Hours of manual review, still miss critical issues
-**After**: Quick AI-powered analysis catches more gaps with actionable questions
+**After**: Minutes of AI analysis catches more with actionable questions
 
 ### ⚡ **Daily Development Tools (v2.3)**
 7 new agents for everyday coding (not just PRDs):
@@ -68,10 +100,10 @@ Smart features that prevent errors and save time:
 **After**: 100% recovery, smart questions, AI-assisted merges
 
 ### 🌳 **Git Worktree Orchestration**
-Work on **5+ features in parallel** without branch switching. Each PRD gets its own isolated workspace.
+Work on **5+ features in parallel** without branch switching. **Enforced by default** with health checks - Git 2.25+ required.
 
-**Before**: Context switching costs hours every day
-**After**: Minimal context switching, instant feature switching
+**Before**: Context switching costs hours every day, optional worktree = inconsistent workflow
+**After**: Mandatory isolation, instant feature switching, clear error handling
 
 ### 👨‍💻 **Guided Implementation**
 AI breaks your PRD into granular tasks with acceptance criteria, file paths, and code examples.

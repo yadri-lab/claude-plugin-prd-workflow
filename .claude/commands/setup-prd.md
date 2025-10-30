@@ -109,24 +109,162 @@ git branch feature/PRD-007-oauth2-integration
 # Don't checkout yet (worktree will do that if enabled)
 ```
 
-### Step 5: Create Git Worktree (Optional)
+### Step 5: Create Git Worktree (Enforced)
 
-If worktree enabled in config:
+**Pre-flight Health Checks**:
+
 ```bash
-# Worktree path based on config or default
-# Default: worktrees/prd-007-oauth2-integration/
+echo "🔍 Running pre-flight checks..."
 
-git worktree add worktrees/prd-007-oauth2-integration feature/PRD-007-oauth2-integration
+# 1. Check Git version (need 2.25+)
+GIT_VERSION=$(git --version | grep -oP '\d+\.\d+' | head -1)
+MIN_VERSION="2.25"
 
-✅ Created worktree: worktrees/prd-007-oauth2-integration/
+if [ "$(printf '%s\n' "$MIN_VERSION" "$GIT_VERSION" | sort -V | head -n1)" != "$MIN_VERSION" ]; then
+  echo "❌ Git version too old: $GIT_VERSION (need ≥$MIN_VERSION)"
+  echo ""
+  echo "📖 REMEDIATION:"
+  echo "   1. Upgrade Git: https://git-scm.com/downloads"
+  echo "   2. OR set fallback_on_error=true in .claude/config.json"
+  echo ""
+  exit 1
+fi
+echo "✓ Git version $GIT_VERSION compatible"
+
+# 2. Check parent directory exists and is writable
+PARENT_DIR=$(jq -r '.prd_workflow.worktree.parent_directory // ".."' .claude/config.json)
+
+if [ ! -d "$PARENT_DIR" ]; then
+  echo "❌ Parent directory does not exist: $PARENT_DIR"
+  echo ""
+  echo "📖 REMEDIATION:"
+  echo "   1. Create directory: mkdir -p $PARENT_DIR"
+  echo "   2. OR change parent_directory in .claude/config.json"
+  echo ""
+  exit 1
+fi
+
+if [ ! -w "$PARENT_DIR" ]; then
+  echo "❌ Parent directory not writable: $PARENT_DIR"
+  echo ""
+  echo "📖 REMEDIATION:"
+  echo "   1. Fix permissions: chmod +w $PARENT_DIR"
+  echo "   2. OR change parent_directory in .claude/config.json"
+  echo ""
+  exit 1
+fi
+echo "✓ Parent directory writable: $PARENT_DIR"
+
+# 3. Check for worktree conflicts
+EXISTING_WORKTREE=$(git worktree list | grep -F "feature/PRD-007" || true)
+if [ -n "$EXISTING_WORKTREE" ]; then
+  echo "⚠️  Worktree already exists for this PRD"
+  echo "$EXISTING_WORKTREE"
+  echo ""
+  echo "Options:"
+  echo "  1. Remove existing: git worktree remove <path>"
+  echo "  2. Use existing worktree"
+  echo "  3. Cancel"
+  read -p "Choice (1-3): " choice
+
+  if [ "$choice" = "1" ]; then
+    WORKTREE_PATH=$(echo "$EXISTING_WORKTREE" | awk '{print $1}')
+    git worktree remove "$WORKTREE_PATH" --force
+    echo "✓ Removed existing worktree"
+  elif [ "$choice" = "2" ]; then
+    echo "ℹ️  Using existing worktree - skipping creation"
+    exit 0
+  else
+    exit 1
+  fi
+fi
+
+echo "✅ Pre-flight checks passed"
+echo ""
 ```
 
-If worktree disabled:
-```bash
-# Just checkout the branch
-git checkout feature/PRD-007-oauth2-integration
+**Create Worktree**:
 
-✅ Switched to branch: feature/PRD-007-oauth2-integration
+```bash
+# Build worktree path
+PROJECT_NAME=$(basename "$(git rev-parse --show-toplevel)")
+FEATURE_SLUG=$(echo "prd-007-oauth2-integration" | tr '[:upper:]' '[:lower:]')
+WORKTREE_PATH="$PARENT_DIR/${PROJECT_NAME}-${FEATURE_SLUG}"
+
+echo "🌳 Creating worktree: $WORKTREE_PATH"
+
+# Create worktree
+if git worktree add "$WORKTREE_PATH" "feature/PRD-007-oauth2-integration"; then
+  echo "✅ Worktree created successfully"
+
+  # Optional: Auto-install dependencies
+  AUTO_INSTALL=$(jq -r '.prd_workflow.worktree.auto_install_dependencies // false' .claude/config.json)
+  if [ "$AUTO_INSTALL" = "true" ]; then
+    echo "📦 Installing dependencies..."
+    (cd "$WORKTREE_PATH" && npm ci 2>/dev/null || yarn install --frozen-lockfile 2>/dev/null || echo "⏭️  No package manager found, skipping")
+  fi
+
+  echo ""
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "✅ Environment Ready"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "📂 Worktree: $WORKTREE_PATH"
+  echo "🌿 Branch: feature/PRD-007-oauth2-integration"
+  echo ""
+  echo "Next: cd $WORKTREE_PATH"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+else
+  # Worktree creation failed - check if fallback allowed
+  ALLOW_FALLBACK=$(jq -r '.prd_workflow.worktree.fallback_on_error // false' .claude/config.json)
+
+  if [ "$ALLOW_FALLBACK" = "true" ]; then
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "⚠️  WORKTREE CREATION FAILED"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "🔄 FALLBACK AVAILABLE: git checkout (not recommended)"
+    echo ""
+    echo "⚠️  Fallback consequences:"
+    echo "   • No workspace isolation"
+    echo "   • Main branch will be blocked"
+    echo "   • Cannot work on multiple PRDs in parallel"
+    echo ""
+    echo "Continue with fallback? (yes/no)"
+    read -r response
+
+    if [ "$response" = "yes" ]; then
+      echo ""
+      echo "🔄 Falling back to git checkout..."
+      git checkout "feature/PRD-007-oauth2-integration"
+      echo ""
+      echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+      echo "⚠️  FALLBACK MODE ACTIVE"
+      echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+      echo "🚨 You are on branch: feature/PRD-007-oauth2-integration"
+      echo "🚨 Main branch is now BLOCKED"
+      echo ""
+      echo "Fix for next time: Upgrade Git to 2.25+"
+      echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    else
+      echo "❌ Setup cancelled"
+      exit 1
+    fi
+  else
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "❌ WORKTREE CREATION FAILED"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "Fallback disabled in config (fallback_on_error=false)"
+    echo ""
+    echo "📖 OPTIONS:"
+    echo "   1. Fix the issue above and retry"
+    echo "   2. Set fallback_on_error=true in .claude/config.json"
+    echo ""
+    exit 1
+  fi
+fi
 ```
 
 ### Step 6: Auto-Assign to Current User
@@ -251,17 +389,36 @@ Respects prd_workflow configuration:
 
 ```bash
 # Interactive
-/code-prd
+/setup-prd
 
 # Specify PRD
-/code-prd PRD-007
-
-# Skip worktree creation
-/code-prd PRD-007 --no-worktree
+/setup-prd PRD-007
 
 # Force draft (skip warning)
-/code-prd PRD-007 --force
+/setup-prd PRD-007 --force
 ```
+
+## Emergency Override (Hidden)
+
+**Only for system limitations or testing** - not supported for production use:
+
+```bash
+# Bypass worktree enforcement (use git checkout instead)
+FORCE_NO_WORKTREE=1 /setup-prd PRD-007
+```
+
+This will:
+- Skip worktree creation entirely
+- Use plain `git checkout` on the feature branch
+- Block your main branch (no parallel work possible)
+- Not be recommended or supported
+
+⚠️  Use only when:
+- Testing the plugin without worktree support
+- System has filesystem limitations
+- Temporary workaround for urgent fixes
+
+**Recommended instead**: Set `fallback_on_error=true` in config for automatic fallback with proper warnings.
 
 ## Error Handling
 
@@ -294,10 +451,12 @@ Then try again.
 
 ## Best Practices
 
-- ✅ **Create branch even for drafts** - Enables parallel workflow
-- ✅ **Use worktrees** - Isolate features, no branch switching
+- ✅ **Worktrees enforced by default** - Automatic isolation, parallel workflow enabled
+- ✅ **Create branch even for drafts** - Enables review on feature branch
 - ✅ **Review on feature branch** - Keeps Main free
-- ✅ **Open separate Cursor** - One instance per feature
+- ✅ **Open separate editor instance** - One Cursor/VSCode window per feature
+- ✅ **Auto-dependency installation** - Enable in config for faster setup
+- ⚠️ **Git 2.25+ required** - Upgrade if you see version errors
 - ⚠️ **Don't forget to review** - If starting from draft
 
 ## Integration
@@ -311,6 +470,6 @@ Works seamlessly with:
 ---
 
 Plugin: claude-prd-workflow
-Category: PRD Management  
-Version: 2.2.0
-Requires: Git 2.25+
+Category: PRD Management
+Version: 0.3.1
+Requires: Git 2.25+ (enforced)

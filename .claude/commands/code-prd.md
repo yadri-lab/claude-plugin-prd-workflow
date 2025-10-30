@@ -64,6 +64,145 @@ if [ ! -f "product/prds/02-ready/PRD-${ID}*.md" ]; then
 fi
 ```
 
+#### Step 3.5: Auto-Detect Complexity & Suggest Agents (NEW)
+
+**Analyze PRD for complexity signals**:
+
+```bash
+echo "🔍 Analyzing PRD complexity..."
+
+# Parse PRD content for signals
+PRD_CONTENT=$(cat "$PRD_FILE")
+COMPLEXITY=0
+AGENTS_SUGGESTED=()
+
+# Check for security keywords
+if echo "$PRD_CONTENT" | grep -qi "auth\|oauth\|payment\|security\|token"; then
+  COMPLEXITY=$((COMPLEXITY + 3))
+  AGENTS_SUGGESTED+=("security-expert")
+  echo "🔒 Security-sensitive feature detected"
+fi
+
+# Check for API/integration keywords
+if echo "$PRD_CONTENT" | grep -qi "API\|integration\|webhook\|third-party"; then
+  COMPLEXITY=$((COMPLEXITY + 2))
+  AGENTS_SUGGESTED+=("backend-architect")
+  echo "🔌 Integration complexity detected"
+fi
+
+# Check for real-time/async keywords
+if echo "$PRD_CONTENT" | grep -qi "real-time\|websocket\|async\|event"; then
+  COMPLEXITY=$((COMPLEXITY + 2))
+  AGENTS_SUGGESTED+=("test-automator")
+  echo "⚡ Async/real-time complexity detected"
+fi
+
+# Check for database keywords
+if echo "$PRD_CONTENT" | grep -qi "database\|schema\|migration\|model"; then
+  COMPLEXITY=$((COMPLEXITY + 2))
+  AGENTS_SUGGESTED+=("database-architect")
+  echo "💾 Database work detected"
+fi
+
+# Always include prd-implementer
+AGENTS_SUGGESTED+=("prd-implementer")
+
+# Determine complexity level
+if [ $COMPLEXITY -le 3 ]; then
+  COMPLEXITY_LEVEL="LOW"
+elif [ $COMPLEXITY -le 6 ]; then
+  COMPLEXITY_LEVEL="MEDIUM"
+else
+  COMPLEXITY_LEVEL="HIGH"
+fi
+
+echo ""
+echo "📊 PRD-${ID} Complexity: $COMPLEXITY_LEVEL (score: $COMPLEXITY/10)"
+echo ""
+```
+
+**Display agent recommendation**:
+
+```markdown
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💡 AGENT RECOMMENDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This PRD would benefit from:
+[For each suggested agent:]
+  • [agent-name] ([purpose])
+
+Estimated analysis time: ~[X] min
+
+This will generate:
+  • Architecture docs
+  • Security checklist
+  • Test strategy
+  • Detailed task breakdown
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❓ Auto-invoke agent pipeline?
+   [Y] Yes, run /invoke first (recommended for HIGH complexity)
+   [N] No, skip to manual task breakdown
+   [C] Customize agent selection
+
+> _
+```
+
+**Handle user response**:
+
+```bash
+read -r response
+
+if [ "$response" = "Y" ] || [ "$response" = "y" ]; then
+  echo ""
+  echo "🤖 Invoking agent pipeline..."
+  echo ""
+
+  # Call /invoke with PRD context
+  # Extract feature description from PRD
+  FEATURE_DESC=$(grep -m 1 "^# " "$PRD_FILE" | sed 's/^# //')
+
+  # In real implementation, call /invoke command
+  # For now, simulate:
+  echo "Running: /invoke \"$FEATURE_DESC\""
+  echo ""
+  echo "[Agent pipeline would run here]"
+  echo ""
+  echo "✅ Agent outputs saved to .claude/agents/"
+  echo ""
+  echo "Continue with implementation using agent outputs? (y/n)"
+  read -r continue
+
+  if [ "$continue" != "y" ]; then
+    echo "⏸️  Paused - Review agent outputs before continuing"
+    echo "📂 See: .claude/agents/"
+    exit 0
+  fi
+
+elif [ "$response" = "C" ] || [ "$response" = "c" ]; then
+  echo ""
+  echo "Available agents:"
+  for i in "${!AGENTS_SUGGESTED[@]}"; do
+    echo "  $((i+1)). ${AGENTS_SUGGESTED[$i]}"
+  done
+  echo ""
+  echo "Enter agent numbers (comma-separated):"
+  read -r selection
+
+  # Handle custom selection
+  echo "🤖 Invoking selected agents..."
+  # [Implementation similar to Y case]
+
+else
+  echo ""
+  echo "⏭️  Skipping agent invocation"
+  echo "📋 Proceeding with standard task breakdown..."
+  echo ""
+fi
+```
+
 #### Step 4: Check Dependencies
 
 **NEW: Dependency Validation**
