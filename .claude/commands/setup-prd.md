@@ -99,14 +99,100 @@ const slug = filename.replace(/^PRD-\d+-/, '').replace('.md', '');
 ### Step 4: Create Feature Branch
 
 ```bash
-# Ensure on main and up to date
-git checkout main
-git pull origin main
+# Extract PRD number and slug
+PRD_NUMBER=$(basename "$PRD_FILE" | grep -oP 'PRD-\K\d+')
+FEATURE_SLUG=$(basename "$PRD_FILE" .md | sed 's/^PRD-[0-9]*-//')
 
-# Create branch
-git branch feature/PRD-007-oauth2-integration
+# Generate branch name from config
+BRANCH_PREFIX=$(jq -r '.prd_workflow.branch_naming.prefix // "feat"' .claude/config.json)
+BRANCH_NAME="${BRANCH_PREFIX}/PRD-${PRD_NUMBER}-${FEATURE_SLUG}"
+
+# Check if branch already exists (from /create-prd)
+if git show-ref --verify --quiet "refs/heads/$BRANCH_NAME"; then
+  echo "ℹ️  Branch $BRANCH_NAME already exists (created by /create-prd)"
+  echo "   Reusing existing branch..."
+else
+  # Create branch if it doesn't exist
+  echo "🔄 Creating branch $BRANCH_NAME..."
+
+  # Ensure on main and up to date
+  git checkout main
+  git pull origin main
+
+  # Create branch
+  git branch "$BRANCH_NAME"
+
+  echo "✅ Branch created: $BRANCH_NAME"
+fi
 
 # Don't checkout yet (worktree will do that if enabled)
+```
+
+### Step 4.5: Check for Existing PR (NEW)
+
+**Purpose**: Reuse draft PR created by `/create-prd` if it exists
+
+```bash
+echo "🔍 Checking for existing PR..."
+
+# Check if PR exists for this branch
+EXISTING_PR=$(gh pr list --head "$BRANCH_NAME" --json number,isDraft,title --jq '.[0]' 2>/dev/null)
+
+if [ -n "$EXISTING_PR" ] && [ "$EXISTING_PR" != "null" ]; then
+  PR_NUMBER=$(echo "$EXISTING_PR" | jq -r '.number')
+  IS_DRAFT=$(echo "$EXISTING_PR" | jq -r '.isDraft')
+  PR_TITLE=$(echo "$EXISTING_PR" | jq -r '.title')
+
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "✅ EXISTING PR FOUND"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+  echo "PR #$PR_NUMBER: $PR_TITLE"
+  echo "Status: $([ "$IS_DRAFT" = "true" ] && echo "Draft" || echo "Open")"
+  echo "Created by: /create-prd (alignment locked)"
+  echo ""
+  echo "🔄 Updating PR description to mark development started..."
+
+  # Update PR description to show development has started
+  UPDATED_BODY="📋 **PRD**: \`$PRD_FILE\`
+
+🚀 **Status**: Development started
+
+## PRD Details
+- **Priority**: $(grep -m1 '^\*\*Priority\*\*:' "$PRD_FILE" | sed 's/.*: //' || echo 'Not set')
+- **Estimated Effort**: $(grep -m1 '^\*\*Estimated Effort\*\*:' "$PRD_FILE" | sed 's/.*: //' || echo 'TBD')
+- **Grade**: $(grep -m1 '^\*\*Grade\*\*:' "$PRD_FILE" | sed 's/.*: //' || echo 'Not reviewed')
+
+## Development Progress
+- [x] PRD created and reviewed
+- [x] Development environment set up (\`/setup-prd\`)
+- [ ] Implementation in progress
+- [ ] Tests added
+- [ ] Documentation updated
+- [ ] Ready for review
+
+## Worktree
+Branch checked out in isolated worktree for parallel development
+
+---
+✅ **PRD-${PRD_NUMBER} ↔ PR #${PR_NUMBER}** alignment maintained
+
+*Development started: $(date +%Y-%m-%d\ %H:%M:%S)*"
+
+  gh pr edit "$PR_NUMBER" --body "$UPDATED_BODY" 2>/dev/null
+
+  echo "✅ PR #$PR_NUMBER updated and ready for development"
+  echo ""
+  echo "🔗 PRD-${PRD_NUMBER} ↔ PR #${PR_NUMBER} alignment maintained"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+  SKIP_PR_CREATION=true
+else
+  echo "ℹ️  No existing PR found for branch $BRANCH_NAME"
+  echo "   PR will be created after worktree setup"
+  echo ""
+  SKIP_PR_CREATION=false
+fi
 ```
 
 ### Step 5: Create Git Worktree (Enforced)
@@ -325,6 +411,91 @@ Update PRD status field:
 **Branch**: feature/PRD-007-oauth2-integration
 **Assignee**: @yassinello
 **Setup Date**: 2025-10-28
+```
+
+### Step 7.5: Create PR (Fallback if not exists)
+
+**Purpose**: Ensure PR exists even if `/create-prd` was skipped or failed
+
+```bash
+# Check if we need to create a PR (wasn't created in Step 4.5)
+if [ "$SKIP_PR_CREATION" = "false" ]; then
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "🔄 Creating Draft PR (fallback)"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+
+  # Verify gh CLI is available
+  if ! gh auth status >/dev/null 2>&1; then
+    echo "⚠️  GitHub CLI not authenticated"
+    echo "   PR creation skipped - you can create manually later"
+    echo ""
+    echo "To create PR manually:"
+    echo "  gh pr create --draft --title \"PRD-${PRD_NUMBER}: <feature>\" --head $BRANCH_NAME"
+    echo ""
+  else
+    # Extract feature name from PRD
+    FEATURE_NAME=$(grep -m1 '^# ' "$PRD_FILE" | sed 's/^# //' | sed 's/^PRD-[0-9]*: //')
+
+    # Create PR body
+    PR_BODY="📋 **PRD**: \`$PRD_FILE\`
+
+🚀 **Status**: Development environment ready
+
+## PRD Details
+- **Priority**: $(grep -m1 '^\*\*Priority\*\*:' "$PRD_FILE" | sed 's/.*: //' || echo 'Not set')
+- **Estimated Effort**: $(grep -m1 '^\*\*Estimated Effort\*\*:' "$PRD_FILE" | sed 's/.*: //' || echo 'TBD')
+- **Grade**: $(grep -m1 '^\*\*Grade\*\*:' "$PRD_FILE" | sed 's/.*: //' || echo 'Not reviewed')
+- **Assignee**: @$USERNAME
+
+## Development Progress
+- [x] PRD created and approved
+- [x] Development environment set up (\`/setup-prd\`)
+- [ ] Implementation in progress
+- [ ] Tests added
+- [ ] Documentation updated
+- [ ] Ready for review
+
+## Worktree
+Branch checked out in isolated worktree: \`$WORKTREE_PATH\`
+
+---
+⚠️ **Note**: PR created as fallback by \`/setup-prd\`
+
+Ideally PRs are created in \`/create-prd\` for perfect PRD-PR alignment
+
+*Created: $(date +%Y-%m-%d\ %H:%M:%S)*"
+
+    # Create draft PR
+    gh pr create --draft \
+      --title "PRD-${PRD_NUMBER}: ${FEATURE_NAME}" \
+      --body "$PR_BODY" \
+      --head "$BRANCH_NAME" \
+      --base main 2>&1 | tee /tmp/pr_create_output.txt
+
+    # Capture PR number
+    PR_NUMBER=$(gh pr list --head "$BRANCH_NAME" --json number --jq '.[0].number' 2>/dev/null)
+
+    if [ -n "$PR_NUMBER" ]; then
+      echo "✅ Draft PR #$PR_NUMBER created"
+      echo ""
+      echo "⚠️  Note: PRD-${PRD_NUMBER} ↔ PR #$PR_NUMBER"
+      echo "    (Alignment may not match if other PRs were created)"
+      echo ""
+
+      # Update PRD with PR link
+      if ! grep -q "^\*\*PR\*\*:" "$PRD_FILE"; then
+        sed -i "/^\*\*Status\*\*:/a **PR**: #$PR_NUMBER" "$PRD_FILE"
+      fi
+    else
+      echo "⚠️  PR creation failed - check /tmp/pr_create_output.txt"
+      echo "   You can create PR manually later with gh CLI"
+    fi
+  fi
+
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+fi
 ```
 
 ### Step 8: Update WORK_PLAN.md

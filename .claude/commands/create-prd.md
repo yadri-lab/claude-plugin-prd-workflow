@@ -429,7 +429,150 @@ Save to: product/prds/01-draft/PRD-{ID}-{feature-slug}.md
 
 Add new entry to PRD pipeline table
 
-### Step 8: Provide Next Steps with Options
+### Step 8: Create Draft PR (Lock PRD↔PR Alignment)
+
+**Purpose**: Reserve PR number immediately to guarantee PRD-025 ↔ PR #25 alignment
+
+**Pre-flight checks**:
+```bash
+# 1. Ensure gh CLI is authenticated
+if ! gh auth status >/dev/null 2>&1; then
+  echo "⚠️  GitHub CLI not authenticated"
+  echo "Run: gh auth login"
+  echo ""
+  echo "Skipping PR creation (will be created in /setup-prd)"
+  SKIP_PR_CREATION=true
+fi
+
+# 2. Detect expected PR number
+NEXT_PRD_NUMBER=$(basename "$PRD_FILE" | grep -oP 'PRD-\K\d+')
+NEXT_PR_NUMBER=$(gh pr list --json number --limit 1 | jq -r '.[0].number + 1 // 1')
+
+# 3. Check for desync
+if [ "$NEXT_PRD_NUMBER" != "$NEXT_PR_NUMBER" ]; then
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "⚠️  PRD-PR ALIGNMENT WARNING"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+  echo "Expected: PRD-$NEXT_PRD_NUMBER ↔ PR #$NEXT_PRD_NUMBER"
+  echo "Actual:   PRD-$NEXT_PRD_NUMBER ↔ PR #$NEXT_PR_NUMBER"
+  echo ""
+  echo "Possible causes:"
+  echo "  • Manual PR created (policy violation)"
+  echo "  • PRD numbers were reset"
+  echo "  • PR was deleted from GitHub"
+  echo ""
+  echo "Options:"
+  echo "  1. Continue anyway (breaks alignment)"
+  echo "  2. Skip PR creation (fix manually later)"
+  echo "  3. Cancel and investigate"
+  echo ""
+  read -p "Choose (1-3): " choice
+
+  case $choice in
+    1) echo "⚠️  Proceeding with misalignment" ;;
+    2) SKIP_PR_CREATION=true ;;
+    3) echo "❌ Cancelled"; exit 1 ;;
+  esac
+fi
+```
+
+**Create feature branch**:
+```bash
+# Generate branch name from config
+BRANCH_PREFIX=$(jq -r '.prd_workflow.branch_naming.prefix // "feat"' .claude/config.json)
+FEATURE_SLUG=$(basename "$PRD_FILE" .md | sed 's/^PRD-[0-9]*-//' | tr '_' '-')
+BRANCH_NAME="${BRANCH_PREFIX}/PRD-${NEXT_PRD_NUMBER}-${FEATURE_SLUG}"
+
+# Create branch (don't checkout - will be done in /setup-prd)
+git branch "$BRANCH_NAME" main
+
+echo "✅ Branch created: $BRANCH_NAME"
+```
+
+**Create draft PR**:
+```bash
+if [ "$SKIP_PR_CREATION" != "true" ]; then
+  echo "🔄 Creating draft PR to lock alignment..."
+
+  # Extract feature name from PRD
+  FEATURE_NAME=$(grep -m1 '^# ' "$PRD_FILE" | sed 's/^# //' | sed 's/^PRD-[0-9]*: //')
+
+  # Create PR body
+  PR_BODY="📋 **PRD**: \`$PRD_FILE\`
+
+🚧 **Status**: Draft (not ready for development)
+
+## PRD Details
+- **Priority**: $(grep -m1 '^\*\*Priority\*\*:' "$PRD_FILE" | sed 's/.*: //' || echo 'Not set')
+- **Estimated Effort**: $(grep -m1 '^\*\*Estimated Effort\*\*:' "$PRD_FILE" | sed 's/.*: //' || echo 'TBD')
+- **Grade**: $(grep -m1 '^\*\*Grade\*\*:' "$PRD_FILE" | sed 's/.*: //' || echo 'Not reviewed')
+
+## Next Steps
+- [ ] PRD review and approval (\`/review-prd PRD-${NEXT_PRD_NUMBER}\`)
+- [ ] Run \`/setup-prd PRD-${NEXT_PRD_NUMBER}\` to start development
+- [ ] Worktree will be created automatically
+
+---
+⚠️ **Draft PR created by \`/create-prd\` to reserve PR number**
+
+**Purpose**: Ensures PRD-${NEXT_PRD_NUMBER} ↔ PR #${NEXT_PR_NUMBER} alignment for the team
+
+Do not close manually - will be auto-managed by PRD lifecycle
+
+*Auto-created: $(date +%Y-%m-%d\ %H:%M:%S)*"
+
+  # Create draft PR
+  gh pr create --draft \
+    --title "PRD-${NEXT_PRD_NUMBER}: ${FEATURE_NAME}" \
+    --body "$PR_BODY" \
+    --head "$BRANCH_NAME" \
+    --base main 2>&1 | tee /tmp/pr_create_output.txt
+
+  # Capture PR number
+  PR_NUMBER=$(gh pr list --head "$BRANCH_NAME" --json number --jq '.[0].number' 2>/dev/null)
+
+  if [ -n "$PR_NUMBER" ]; then
+    echo "✅ Draft PR #$PR_NUMBER created"
+    echo ""
+    echo "🔗 PRD-${NEXT_PRD_NUMBER} ↔ PR #$PR_NUMBER locked"
+
+    # Update PRD with PR link
+    if ! grep -q "^\*\*PR\*\*:" "$PRD_FILE"; then
+      # Add PR field after Status
+      sed -i "/^\*\*Status\*\*:/a **PR**: #$PR_NUMBER" "$PRD_FILE"
+    fi
+
+    # Update WORK_PLAN with PR link
+    if [ -f "product/WORK_PLAN.md" ]; then
+      sed -i "s/PRD-${NEXT_PRD_NUMBER}/PRD-${NEXT_PRD_NUMBER} ([#$PR_NUMBER](https:\/\/github.com\/$(gh repo view --json nameWithOwner -q .nameWithOwner)\/pull\/$PR_NUMBER))/" product/WORK_PLAN.md
+    fi
+  else
+    echo "⚠️  PR creation failed - check /tmp/pr_create_output.txt"
+    echo "PR will be created in /setup-prd instead"
+  fi
+else
+  echo "ℹ️  PR creation skipped - will be created in /setup-prd"
+fi
+```
+
+**Success output**:
+```markdown
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ PRD-PR ALIGNMENT LOCKED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 PRD: PRD-025-context-management.md
+🌿 Branch: feat/PRD-025-context-management
+🔗 PR: #25 (draft)
+
+✅ PRD-025 ↔ PR #25 guaranteed
+
+Next: /setup-prd PRD-025 (will reuse this PR)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+### Step 9: Provide Next Steps with Options
 
 ```markdown
 PRD Created: PRD-007 - OAuth2 Integration

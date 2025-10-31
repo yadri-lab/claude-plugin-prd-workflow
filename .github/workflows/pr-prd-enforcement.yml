@@ -1,0 +1,166 @@
+name: PR-PRD Enforcement
+
+# Purpose: Enforce "No PR without PRD" rule for team alignment
+# This ensures PRD-025 ↔ PR #25 alignment and prevents manual PR creation
+
+on:
+  pull_request:
+    types: [opened, reopened, edited]
+
+jobs:
+  check-prd-link:
+    runs-on: ubuntu-latest
+    name: Verify PRD Link
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need full history to find PRD files
+
+      - name: Validate PR Title Format
+        id: validate_title
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+
+          echo "📋 Checking PR title: $PR_TITLE"
+
+          # Check if title starts with PRD-XXX format
+          if [[ "$PR_TITLE" =~ ^PRD-[0-9]+ ]]; then
+            echo "✅ PR title format is valid"
+            echo "valid=true" >> $GITHUB_OUTPUT
+          else
+            echo "❌ PR title must start with PRD-XXX format"
+            echo ""
+            echo "Examples:"
+            echo "  • PRD-025: Context Management MVP"
+            echo "  • PRD-007: OAuth2 Integration"
+            echo ""
+            echo "valid=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: Extract PRD ID
+        id: extract_prd
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PRD_ID=$(echo "$PR_TITLE" | grep -oP '^PRD-\d+')
+
+          echo "PRD ID: $PRD_ID"
+          echo "prd_id=$PRD_ID" >> $GITHUB_OUTPUT
+
+      - name: Search for PRD File
+        id: find_prd
+        run: |
+          PRD_ID="${{ steps.extract_prd.outputs.prd_id }}"
+
+          echo "🔍 Searching for $PRD_ID in PRD directories..."
+
+          # Search in all PRD directories
+          PRD_FILE=$(find product/prds -name "${PRD_ID}-*.md" 2>/dev/null | head -1)
+
+          if [ -n "$PRD_FILE" ]; then
+            echo "✅ PRD file found: $PRD_FILE"
+            echo "found=true" >> $GITHUB_OUTPUT
+            echo "file=$PRD_FILE" >> $GITHUB_OUTPUT
+
+            # Extract PRD status (from directory)
+            if echo "$PRD_FILE" | grep -q "01-draft"; then
+              STATUS="Draft"
+            elif echo "$PRD_FILE" | grep -q "02-review"; then
+              STATUS="Under Review"
+            elif echo "$PRD_FILE" | grep -q "03-ready"; then
+              STATUS="Ready"
+            elif echo "$PRD_FILE" | grep -q "04-in-progress"; then
+              STATUS="In Progress"
+            elif echo "$PRD_FILE" | grep -q "05-complete"; then
+              STATUS="Complete"
+            else
+              STATUS="Unknown"
+            fi
+
+            echo "status=$STATUS" >> $GITHUB_OUTPUT
+          else
+            echo "❌ No PRD file found for $PRD_ID"
+            echo ""
+            echo "Searched in:"
+            echo "  • product/prds/01-draft/"
+            echo "  • product/prds/02-review/"
+            echo "  • product/prds/03-ready/"
+            echo "  • product/prds/04-in-progress/"
+            echo "  • product/prds/05-complete/"
+            echo ""
+            echo "found=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: Verify PR-PRD Alignment
+        id: check_alignment
+        run: |
+          PRD_ID="${{ steps.extract_prd.outputs.prd_id }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+
+          # Extract numeric parts
+          PRD_NUM=$(echo "$PRD_ID" | grep -oP '\d+')
+
+          echo "PRD Number: $PRD_NUM"
+          echo "PR Number: $PR_NUMBER"
+
+          if [ "$PRD_NUM" = "$PR_NUMBER" ]; then
+            echo "✅ Perfect alignment: PRD-$PRD_NUM ↔ PR #$PR_NUMBER"
+            echo "aligned=true" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️  Misalignment detected:"
+            echo "   PRD-$PRD_NUM ↔ PR #$PR_NUMBER"
+            echo ""
+            echo "This is not blocking, but indicates the PR wasn't created via /create-prd"
+            echo "aligned=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Post Success Comment
+        if: steps.find_prd.outputs.found == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prdId = '${{ steps.extract_prd.outputs.prd_id }}';
+            const prdFile = '${{ steps.find_prd.outputs.file }}';
+            const prdStatus = '${{ steps.find_prd.outputs.status }}';
+            const aligned = '${{ steps.check_alignment.outputs.aligned }}';
+            const prNumber = context.payload.pull_request.number;
+
+            let alignmentIcon = aligned === 'true' ? '✅' : '⚠️';
+            let alignmentText = aligned === 'true'
+              ? `Perfect alignment: ${prdId} ↔ PR #${prNumber}`
+              : `Misalignment: ${prdId} ↔ PR #${prNumber} (not blocking)`;
+
+            const body = `## ✅ PRD-PR Link Validated
+
+📋 **PRD**: \`${prdFile}\`
+📊 **Status**: ${prdStatus}
+${alignmentIcon} **Alignment**: ${alignmentText}
+
+---
+✅ This PR is linked to an approved PRD and can proceed.
+
+💡 **Note**: PRs should ideally be created via \`/create-prd\` for perfect alignment.`;
+
+            github.rest.issues.createComment({
+              issue_number: prNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+      - name: Final Status
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✅ PR-PRD ENFORCEMENT PASSED"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "PRD: ${{ steps.extract_prd.outputs.prd_id }}"
+          echo "File: ${{ steps.find_prd.outputs.file }}"
+          echo "Status: ${{ steps.find_prd.outputs.status }}"
+          echo "Aligned: ${{ steps.check_alignment.outputs.aligned }}"
+          echo ""
+          echo "This PR meets team policy: No PR without PRD ✅"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

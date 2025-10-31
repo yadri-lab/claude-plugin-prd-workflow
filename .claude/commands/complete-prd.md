@@ -210,6 +210,137 @@ Let's record some completion metrics:
    > PRD-008: Improve OAuth error messages
 ```
 
+### Step 3.5: Document Session Summary (Auto)
+
+Automatically capture work session for SESSION_CONTEXT tracking:
+
+```bash
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "📝 SESSION DOCUMENTATION"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "Quick summary for context tracking (1-2 sentences):"
+echo ""
+read -p "> " SESSION_SUMMARY
+
+# Optional: key technical decision
+echo ""
+echo "Any key technical decision? (optional, Enter to skip)"
+read -p "> " SESSION_DECISION
+
+# Optional: total time spent
+echo ""
+echo "Total time spent on PRD-${PRD_NUM}? (e.g., 12h, 3d, optional)"
+read -p "> " TOTAL_TIME
+TOTAL_TIME=${TOTAL_TIME:-""}
+
+# Prepare SESSION_CONTEXT
+SESSION_CONTEXT="docs/SESSION_CONTEXT.md"
+TODAY=$(date +%Y-%m-%d)
+
+# Create SESSION_CONTEXT if doesn't exist
+if [ ! -f "$SESSION_CONTEXT" ]; then
+  mkdir -p docs
+  cat > "$SESSION_CONTEXT" <<EOF
+# Session Context
+
+Work sessions documenting development progress, decisions, and context.
+
+**Format**: Synthetic entries (concise, actionable)
+**Archival**: Oldest sessions archived automatically when >10 sessions exist
+
+---
+
+EOF
+fi
+
+# Get next session number
+LAST_SESSION=$(grep -oP '^## Session \K\d+' "$SESSION_CONTEXT" | sort -n | tail -1)
+NEXT_SESSION=$((${LAST_SESSION:-0} + 1))
+
+# Build session entry (synthetic format)
+SESSION_ENTRY="## Session ${NEXT_SESSION}: PRD-${PRD_NUM} (${TODAY}$([ -n "$TOTAL_TIME" ] && echo ", $TOTAL_TIME"))
+- ${SESSION_SUMMARY}$([ -n "$SESSION_DECISION" ] && echo "
+- **Decision**: ${SESSION_DECISION}")
+
+"
+
+# Append to SESSION_CONTEXT
+echo "$SESSION_ENTRY" >> "$SESSION_CONTEXT"
+
+echo ""
+echo "✅ Session $NEXT_SESSION added to SESSION_CONTEXT"
+
+# Auto-archive if >10 sessions
+SESSION_COUNT=$(grep -c '^## Session' "$SESSION_CONTEXT")
+
+echo ""
+echo "🔍 Checking session count: $SESSION_COUNT sessions"
+
+if [ "$SESSION_COUNT" -gt 10 ]; then
+  echo ""
+  echo "🗄️  Auto-archiving (keeping last 10 sessions)..."
+
+  # Find oldest session (lowest number)
+  OLDEST_SESSION=$(grep -oP '^## Session \K\d+' "$SESSION_CONTEXT" | sort -n | head -1)
+
+  # Extract oldest session content
+  OLDEST_CONTENT=$(awk "/^## Session ${OLDEST_SESSION}:/{flag=1} flag; /^## Session /{if(flag && !/^## Session ${OLDEST_SESSION}:/) exit}" "$SESSION_CONTEXT")
+
+  # Determine archive file path (by month)
+  YEAR=$(date +%Y)
+  MONTH=$(date +%m)
+  ARCHIVE_DIR="docs/archives"
+  ARCHIVE_FILE="$ARCHIVE_DIR/session-history-${YEAR}-${MONTH}.md"
+
+  # Create archive directory if needed
+  mkdir -p "$ARCHIVE_DIR"
+
+  # Create or append to archive file
+  if [ ! -f "$ARCHIVE_FILE" ]; then
+    cat > "$ARCHIVE_FILE" <<EOF
+# Session History - $YEAR-$MONTH
+
+Archived sessions from SESSION_CONTEXT to keep main file manageable (≤10 sessions).
+
+---
+
+EOF
+  fi
+
+  # Append oldest session to archive
+  echo "$OLDEST_CONTENT" >> "$ARCHIVE_FILE"
+  echo "" >> "$ARCHIVE_FILE"
+
+  # Remove oldest session from SESSION_CONTEXT
+  awk "/^## Session ${OLDEST_SESSION}:/{flag=1; next} /^## Session /{flag=0} !flag" "$SESSION_CONTEXT" > "${SESSION_CONTEXT}.tmp"
+  mv "${SESSION_CONTEXT}.tmp" "$SESSION_CONTEXT"
+
+  echo "   ✅ Archived Session $OLDEST_SESSION → $ARCHIVE_FILE"
+  echo "   ✅ SESSION_CONTEXT now has $((SESSION_COUNT - 1)) sessions"
+else
+  echo "   ✅ No archival needed (≤10 sessions)"
+fi
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+```
+
+**Example session entry**:
+```markdown
+## Session 15: PRD-003 (2025-10-25, 12h)
+- Implemented OAuth2 integration with Google. Added token refresh logic and error handling.
+- **Decision**: Chose OAuth2 library v3 over v2 for better TypeScript support
+```
+
+**Behavior**:
+- Automatically captures session summary during PRD completion
+- Synthetic format (1-2 sentences + optional decision)
+- Auto-archives when >10 sessions exist
+- Non-blocking if user skips summary (Enter)
+- Creates monthly archive files in `docs/archives/`
+
 ### Step 4: Update PRD File
 
 Add completion metadata to PRD header:
@@ -353,6 +484,7 @@ Show final summary:
 - ✅ Worktree removed
 - ✅ Branches deleted
 - ✅ WORK_PLAN.md updated
+- ✅ Session documented in SESSION_CONTEXT
 
 📚 **Follow-up**:
 - PRD-008: Improve OAuth error messages
@@ -381,6 +513,12 @@ Respects `prd_workflow.completion` configuration:
       "collect_metrics": true,
       "collect_learnings": true
     }
+  },
+  "session_management": {
+    "enabled": true,
+    "max_sessions": 10,
+    "archive_path": "docs/archives",
+    "archive_format": "session-history-{YYYY}-{MM}.md"
   }
 }
 ```

@@ -6,6 +6,189 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.3.2] - 2025-10-31
+
+### 🎯 Focus: PRD-PR Alignment + Auto Session Management
+
+This release ensures **perfect alignment** between PRD IDs and PR numbers (PRD-025 ↔ PR #25) and **eliminates forgotten session documentation** through automatic capture.
+
+**What's New:**
+- **PRD-PR Alignment**: Reserve PR numbers at PRD creation for unified numbering
+- **Auto Session Management**: Document work sessions automatically in `/complete-prd`
+- **PR Enforcement**: CI workflow validates "No PR without PRD" policy
+- **Orphaned PR Cleanup**: Auto-close unused draft PRs when archiving
+
+### 🆕 New Features
+
+#### 🔗 PRD-PR ID Alignment
+
+Guarantee perfect alignment: PRD-025 ↔ PR #25.
+
+**How it works:**
+```bash
+/create-prd "Context Management MVP"
+# → Creates PRD-025
+# → Creates draft PR #25 immediately (locks the number)
+# → Updates PRD with PR link
+
+/setup-prd PRD-025
+# → Reuses existing PR #25 (no duplicate)
+```
+
+**Benefits:**
+- 🧠 Mental navigation: Same number = same feature
+- 🔍 Easy tracking: "What's the PR for PRD-025?" → PR #25
+- ⚡ Unified system: One numbering scheme across docs + code
+
+**Fallback:** If PR number diverges (race condition), clear warning + options to continue/skip/cancel.
+
+**Commands updated:**
+- `/create-prd`: Step 8 creates draft PR immediately
+- `/setup-prd`: Step 4.5 reuses existing PR instead of creating duplicate
+- `/archive-prd`: Step 4.5 auto-closes orphaned draft PRs
+
+#### 📝 Auto Session Management
+
+Session documentation **automatically captured** during PRD completion.
+
+**Old workflow (2 commands, often forgotten):**
+```bash
+/complete-prd PRD-024
+/end-session PRD-024  # ← Separate, easy to forget
+```
+
+**New workflow (1 command, automatic):**
+```bash
+/complete-prd PRD-024
+# → Prompts for session summary (1-2 sentences)
+# → Auto-adds to SESSION_CONTEXT.md
+# → Auto-archives when >10 sessions
+# → One PRD = One session entry
+```
+
+**Example session entry (synthetic format):**
+```markdown
+## Session 15: PRD-024 (2025-10-31, 12h)
+- Implemented OAuth2 integration with Google. Added token refresh logic and error handling.
+- **Decision**: Chose OAuth2 library v3 over v2 for better TypeScript support
+```
+
+**Auto-archiving:**
+- Keeps SESSION_CONTEXT.md ≤10 sessions
+- Moves oldest to `docs/archives/session-history-YYYY-MM.md`
+- Monthly archives, searchable
+
+**Commands updated:**
+- `/complete-prd`: Step 3.5 captures session summary automatically
+
+#### 🚦 PR-PRD Enforcement (CI)
+
+GitHub Actions workflow validates every PR has a linked PRD.
+
+**Checks:**
+1. ✅ PR title starts with `PRD-XXX` format
+2. ✅ PRD file exists in `product/prds/`
+3. ⚠️ Alignment check (PRD-025 ↔ PR #25) - warns if misaligned but not blocking
+
+**On success:**
+- Posts comment with PRD link, status, and alignment confirmation
+- Allows PR to proceed
+
+**On failure:**
+- Blocks PR with clear error message
+- Shows examples of correct format
+
+**File added:**
+- `.github/workflows/pr-prd-enforcement.yml`
+
+#### 🗑️ Orphaned PR Cleanup
+
+Auto-close unused draft PRs when archiving PRDs.
+
+**Auto-closes if:**
+- PR is draft (not ready for review)
+- PR has ≤1 commit (only initial branch creation)
+- PR has ≤10 lines changed (no real work)
+- PRD archived for non-completion reason (Cancelled/Blocked/Superseded)
+
+**Example:**
+```bash
+/archive-prd PRD-024
+# → Detects PR #24 is empty draft
+# → Auto-closes with explanatory comment
+# → Mentions PRD was cancelled/blocked
+```
+
+**Commands updated:**
+- `/archive-prd`: Step 4.5 detects and closes orphaned PRs
+
+#### 🔔 Stale PR Warnings
+
+Dashboard shows draft PRs that need attention.
+
+**In `/list-prds` output:**
+```markdown
+⚠️ Stale Draft PRs Detected
+| PRD     | PR  | Age  | Action     |
+|---------|-----|------|------------|
+| PRD-020 | #20 | 18d  | ⚠️ Archive? |
+| PRD-022 | #22 | 25d  | ⚠️ Archive? |
+```
+
+**Criteria:**
+- Draft status
+- Age ≥14 days
+- ≤1 commit
+
+**Commands updated:**
+- `/list-prds`: Shows stale PR warnings section
+
+### 🔄 What Changed
+
+**Commands modified:**
+- `/create-prd`: Now creates draft PR immediately (Step 8)
+- `/setup-prd`: Reuses existing PR if found (Step 4.5, Step 7.5 fallback)
+- `/complete-prd`: Captures session summary automatically (Step 3.5)
+- `/archive-prd`: Auto-closes orphaned draft PRs (Step 4.5)
+- `/list-prds`: Shows stale PR warnings
+
+**Files added:**
+- `.github/workflows/pr-prd-enforcement.yml`: PR validation CI
+
+**Config additions:**
+```json
+{
+  "session_management": {
+    "enabled": true,
+    "max_sessions": 10,
+    "archive_path": "docs/archives",
+    "archive_format": "session-history-{YYYY}-{MM}.md"
+  }
+}
+```
+
+### 💡 Migration Notes
+
+**No breaking changes.** All features are additive.
+
+**If you want to disable:**
+```json
+// Disable session management
+{
+  "session_management": { "enabled": false }
+}
+```
+
+**If GitHub CLI not authenticated:**
+- `/create-prd` will skip PR creation with warning
+- `/setup-prd` will fall back to creating PR later
+
+**Session documentation:**
+- Prompts are optional (can press Enter to skip)
+- SESSION_CONTEXT.md created automatically on first use
+
+---
+
 ## [0.3.1] - 2025-10-30
 
 ### 🎯 Focus: Faster Reviews + Better Isolation

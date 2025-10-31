@@ -129,6 +129,117 @@ done
 
 ---
 
+## 🚨 Stale PR Warnings (NEW)
+
+**Purpose**: Identify draft PRs that are dormant and may need archiving
+
+```bash
+echo "🔍 Scanning for stale draft PRs..."
+echo ""
+
+STALE_PRS=()
+STALE_AGE_DAYS=14  # Configurable threshold
+
+# Scan all PRDs for linked PRs
+for PRD_DIR in product/prds/{01-draft,02-review,03-ready}; do
+  if [ -d "$PRD_DIR" ]; then
+    for PRD_FILE in "$PRD_DIR"/PRD-*.md; do
+      if [ -f "$PRD_FILE" ]; then
+        # Extract PRD number and PR number
+        PRD_ID=$(basename "$PRD_FILE" | grep -oP '^PRD-\d+')
+        PR_NUMBER=$(grep -m1 '^\*\*PR\*\*:' "$PRD_FILE" | grep -oP '#\K\d+' || echo "")
+
+        if [ -n "$PR_NUMBER" ]; then
+          # Get PR details
+          PR_INFO=$(gh pr view "$PR_NUMBER" --json state,isDraft,createdAt,additions,deletions,commits 2>/dev/null)
+
+          if [ -n "$PR_INFO" ]; then
+            STATE=$(echo "$PR_INFO" | jq -r '.state')
+            IS_DRAFT=$(echo "$PR_INFO" | jq -r '.isDraft')
+            CREATED_AT=$(echo "$PR_INFO" | jq -r '.createdAt')
+            ADDITIONS=$(echo "$PR_INFO" | jq -r '.additions // 0')
+            DELETIONS=$(echo "$PR_INFO" | jq -r '.deletions // 0')
+            COMMITS=$(echo "$PR_INFO" | jq -r '.commits | length')
+
+            # Calculate age in days
+            CREATED_TS=$(date -d "$CREATED_AT" +%s 2>/dev/null || echo "0")
+            CURRENT_TS=$(date +%s)
+            AGE_DAYS=$(( (CURRENT_TS - CREATED_TS) / 86400 ))
+
+            # Check if stale (draft, old, no real work)
+            TOTAL_CHANGES=$((ADDITIONS + DELETIONS))
+
+            if [ "$STATE" = "OPEN" ] && [ "$IS_DRAFT" = "true" ] && [ "$AGE_DAYS" -ge "$STALE_AGE_DAYS" ] && [ "$COMMITS" -le 1 ] && [ "$TOTAL_CHANGES" -le 10 ]; then
+              STALE_PRS+=("$PRD_ID|$PR_NUMBER|$AGE_DAYS|$COMMITS|$TOTAL_CHANGES")
+            fi
+          fi
+        fi
+      fi
+    done
+  fi
+done
+
+# Display stale PRs if any
+if [ ${#STALE_PRS[@]} -gt 0 ]; then
+  echo "⚠️  **Stale Draft PRs Detected**"
+  echo ""
+  echo "These PRs were created but never developed:"
+  echo ""
+  echo "| PRD    | PR  | Age  | Commits | Changes | Action |"
+  echo "|--------|-----|------|---------|---------|--------|"
+
+  for ENTRY in "${STALE_PRS[@]}"; do
+    IFS='|' read -r PRD PR AGE COMMITS CHANGES <<< "$ENTRY"
+    echo "| $PRD | #$PR | ${AGE}d | $COMMITS | ±$CHANGES | ⚠️ Archive? |"
+  done
+
+  echo ""
+  echo "💡 **Recommendation**: Run \`/archive-prd <PRD-ID>\` to clean up"
+  echo "   This will auto-close empty draft PRs and archive unused PRDs"
+  echo ""
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+fi
+```
+
+**Example output**:
+
+```markdown
+⚠️  **Stale Draft PRs Detected**
+
+These PRs were created but never developed:
+
+| PRD    | PR  | Age  | Commits | Changes | Action |
+|--------|-----|------|---------|---------|--------|
+| PRD-023| #23 | 14d  | 0       | ±0      | ⚠️ Archive? |
+| PRD-024| #24 | 21d  | 1       | ±5      | ⚠️ Archive? |
+| PRD-026| #26 | 30d  | 0       | ±0      | ⚠️ Archive? |
+
+💡 **Recommendation**: Run `/archive-prd <PRD-ID>` to clean up
+   This will auto-close empty draft PRs and archive unused PRDs
+```
+
+**Stale PR criteria**:
+- ✅ PR is **open** and **draft**
+- ✅ PR is **≥14 days old** (configurable)
+- ✅ PR has **≤1 commit** (minimal activity)
+- ✅ PR has **≤10 lines changed** (no real work)
+
+**Configuration**:
+```json
+{
+  "prd_workflow": {
+    "pr_monitoring": {
+      "stale_threshold_days": 14,
+      "show_warnings": true,
+      "auto_cleanup_enabled": false
+    }
+  }
+}
+```
+
+---
+
 ## Error Handling & Helpful Suggestions
 
 ### When No PRDs Found
