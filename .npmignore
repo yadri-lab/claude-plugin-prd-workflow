@@ -7,6 +7,10 @@ node_modules/
 ANALYSE.md
 ANALYSIS.md
 *.backup.json
+*.backup.md
+*.bak
+.claude/settings.local.json
+.claude/prd-*-progress.json
 
 # GitHub specific
 .github/

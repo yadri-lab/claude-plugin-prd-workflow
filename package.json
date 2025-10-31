@@ -37,13 +37,8 @@
     "node": ">=18.0.0"
   },
   "files": [
-    "commands/",
-    "agents/",
-    "skills/",
-    "templates/",
-    "config/",
+    ".claude/",
     "docs/",
-    ".claude-plugin/",
     "install.js",
     "bin/",
     "README.md",
