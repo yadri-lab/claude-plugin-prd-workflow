@@ -6,6 +6,399 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.4.0] - 2025-02-11
+
+### 🎯 Focus: Workflow UX Improvements
+
+**User feedback integration** - Streamlined workflows based on real usage patterns.
+
+### ✨ Improved
+
+#### `/explore-prd` - Impact-First Discovery
+- **Changed**: Discovery questions now clarify/explore ideas instead of gathering data
+- **Changed**: Workflow order → Business Impact FIRST → Product Approaches → Technical Feasibility
+- **Added**: Product approaches comparison matrix with scope/challenges for each option
+- **Added**: Detailed challenge mitigation strategies per approach
+- **Why**: Product decisions should be impact-driven, not tech-driven
+
+#### `/debugging` - Lightweight Start + Deep Investigation
+- **Changed**: Simplified startup to 3 essential questions only (what/where/environment)
+- **Added**: Hypothesis brainstorm with likelihood ratings and test prioritization
+- **Added**: Detailed hypothesis testing loop with expected evidence, test plans, execution logs
+- **Added**: Investigation state tracking after each hypothesis test
+- **Why**: Quick to start, exhaustive where it matters (hypothesis tracking is THE CORE)
+
+#### `/code-prd` - Seamless Phase Auto-Chaining
+- **Removed**: Manual "Continue Y/N" confirmations after Phase 1 (Research) and Phase 2 (Planning)
+- **Added**: Enhanced recap displays with key findings and metrics
+- **Changed**: Phases now auto-chain: Research → Planning → Implementation → Validation
+- **Preserved**: `--manual-checkpoints` flag for users who want manual control
+- **Why**: Maintain workflow momentum while keeping visibility into each phase
+
+### 🔧 Technical
+
+- Updated `.claude/commands/explore-prd.md` - Complete workflow restructure
+- Updated `.claude/commands/debugging.md` - Balanced startup vs investigation detail
+- Updated `.claude/commands/code-prd.md` - Removed 2 manual prompts, enhanced recaps
+
+
+## [0.3.2] - 2025-01-02
+
+### 🎯 Focus: Context Engineering Workflow
+
+This release introduces **Context Engineering** principles to dramatically improve code quality, implementation confidence, and knowledge retention.
+
+**Core Innovation**: 4-Phase workflow (Research → Plan → Implement → Validate) with automatic context management that keeps AI output quality high by never exceeding 60% context capacity.
+
+**What's New:**
+- **4-Phase `/code-prd` Workflow**: Automatic research, planning, implementation, and validation with context clearing between phases
+- **Thoughts Directory**: Persistent memory system (`.prds/thoughts/`) that survives context clearing and provides team knowledge base
+- **New Commands**: `/explore-prd` for early-stage ideation, `/debugging` for structured troubleshooting
+- **Enhanced `/review-prd`**: Better decision support with scope summaries, options, and AI recommendations
+
+### ⚠️ Breaking Changes
+
+#### `/code-prd` Default Behavior Changed
+
+**Before v0.4.0** (old behavior):
+```bash
+/code-prd PRD-009
+# → Direct implementation from PRD
+```
+
+**After v0.4.0** (new default):
+```bash
+/code-prd PRD-009
+# → Phase 1: Research (auto)
+# → Phase 2: Plan (auto)
+# → Phase 3: Implementation
+# → Phase 4: Validation (auto)
+```
+
+**Migration**:
+- **Existing PRDs**: Old behavior preserved automatically (version detection)
+- **New PRDs**: 4-phase workflow by default
+- **Opt-out available**: Use `--quick` flag for old behavior
+
+**Why this change?**
+- All PRDs warrant deep analysis
+- Research phase finds patterns/issues early
+- Planning phase creates clear roadmap
+- Validation phase ensures quality
+- Simple changes should use `/quick-ship`, not PRDs
+
+### 🚀 Quick Start
+
+**Before v0.4.0**:
+```bash
+/code-prd PRD-010  # Direct implementation
+```
+
+**After v0.4.0**:
+```bash
+/code-prd PRD-010  # Now runs 4-phase workflow:
+                   # 1. Research (saves to thoughts/)
+                   # 2. Plan (saves to thoughts/)
+                   # 3. Implement (from plan)
+                   # 4. Validate (report in thoughts/)
+```
+
+**For quick changes**:
+```bash
+/code-prd PRD-011 --quick  # Old behavior restored
+```
+
+### 📋 Migration Checklist
+
+**For team leads rolling out v0.4.0**:
+
+- [ ] Update to v0.4.0: `npm install -g claude-prd-workflow@0.4.0`
+- [ ] Review breaking changes section above
+- [ ] Test with one PRD using new workflow: `/code-prd PRD-XXX`
+- [ ] If issues, use kill switch: Set `context_engineering.enabled: false` in config
+- [ ] Train team on new commands: `/explore-prd`, `/debugging`
+- [ ] Update team docs with new workflow
+- [ ] Monitor first 3 PRDs for issues
+- [ ] Full rollout after successful pilot
+
+**For individual developers**:
+
+- [ ] Existing in-progress PRDs: Use `--quick` flag to continue with old behavior
+- [ ] New PRDs: Try full 4-phase workflow and provide feedback
+- [ ] Report issues via GitHub issues
+
+### 🆕 New Features
+
+#### 🔬 4-Phase Context Engineering Workflow
+
+**Phase 1: Research** (< 2 minutes)
+- Analyze codebase for relevant files/patterns
+- Use parallel agents for speed
+- Save to `.prds/thoughts/research/PRD-XXX-research.md`
+- **Clear context after**
+
+**Phase 2: Plan** (< 3 minutes)
+- Generate implementation plan from research
+- Break into sub-phases with success criteria
+- Save to `.prds/thoughts/plans/PRD-XXX-plan.md`
+- **Clear context after**
+
+**Phase 3: Implementation**
+- Load plan (not full PRD) to save context
+- Implement according to plan
+- Monitor context throughout
+- **Clear context between sub-phases if > 60%**
+
+**Phase 4: Validation** (< 1 minute)
+- Compare implementation vs. plan vs. PRD
+- Generate validation report
+- Save to `.prds/thoughts/validation/PRD-XXX-validation.md`
+
+**Opt-out flags**:
+```bash
+/code-prd PRD-009 --quick                # Skip all phases (legacy)
+/code-prd PRD-009 --skip-research        # Skip research only
+/code-prd PRD-009 --skip-plan            # Skip planning only
+/code-prd PRD-009 --manual-checkpoints   # Pause after each phase
+```
+
+#### 📂 Thoughts Directory
+
+New persistent memory system:
+```
+.prds/thoughts/
+├── research/       # Auto-generated research documents
+├── plans/          # Auto-generated implementation plans
+├── validation/     # Auto-generated validation reports
+├── explorations/   # Feature explorations (from /explore-prd)
+└── debugging/      # Debug session logs (from /debugging)
+```
+
+**Benefits**:
+- Survives context clearing
+- Team knowledge base
+- Searchable history
+- Onboarding resource
+
+#### 💡 `/explore-prd` Command (New)
+
+Early-stage feature exploration before committing to full PRD:
+
+```bash
+/explore-prd "Add real-time collaboration"
+# → Quick feasibility assessment (technical, business, resource)
+# → Lightweight codebase research
+# → Decision support (Create PRD / Explore more / Drop)
+# → Saves to .prds/thoughts/explorations/
+```
+
+**Use case**: "I have a vague idea - is it worth a full PRD?"
+
+**Output**: Exploration document with:
+- Initial idea capture
+- Feasibility analysis
+- Similar features comparison
+- Decision recommendation
+- Next steps (PRD / more research / drop)
+
+**Integration**: `/create-prd` can reference exploration docs
+
+#### 🐛 `/debugging` Command (New)
+
+Structured debugging workflow with team knowledge capture:
+
+```bash
+/debugging "OAuth redirect fails in production"
+# → Structured investigation with hypothesis testing
+# → Root cause documentation
+# → Solution capture with prevention strategies
+# → Saves to .prds/thoughts/debugging/
+```
+
+**Use case**: "Bug found - need to investigate and document for team"
+
+**Output**: Debug session log with:
+- Symptom description
+- Investigation log (hypotheses tested)
+- Root cause analysis
+- Solution implemented
+- Prevention strategy
+- Impact assessment
+
+**Integration**: Auto-links to related PRD, builds team knowledge base
+
+#### 🎯 Enhanced `/review-prd`
+
+Three major improvements:
+
+**1. Scope Summary** (NEW):
+```markdown
+📋 SCOPE SUMMARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+**PRD**: PRD-009 - Context Engineering Workflow
+**Priority**: P1
+**Owner**: yassine
+**Estimated Effort**: 8-12 days
+
+**IN SCOPE**:
+• 4-phase workflow with context management
+• Thoughts directory with persistent artifacts
+• New commands (/explore-prd, /debugging)
+
+**OUT OF SCOPE**:
+• AI-only reviews (human judgment required)
+• Automatic exploration (user decides when to explore)
+
+**Dependencies**: None
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+Sets context before GATE questions.
+
+**2. Questions with Options + Recommendations** (ENHANCED):
+
+GATE questions (KILL/SKIP/SHRINK) now show:
+
+```markdown
+🔴 KILL Question: Should this feature exist at all?
+
+**Options**:
+A) ✅ Proceed - Feature is validated and strategic
+B) ⚠️  Revisit Scope - Good idea, wrong execution
+C) ❌ Kill - Not worth building
+
+**Claude's Recommendation**: A - Proceed
+
+**Rationale**: Strong user demand confirmed, strategic alignment clear,
+dependencies manageable. Feature solves real pain point.
+
+Your decision: (A/B/C or provide reasoning)
+> _
+```
+
+Same format for SKIP and SHRINK questions.
+
+**3. Improved Recommendations** (ENHANCED):
+
+Each recommendation now shows:
+
+```markdown
+**Recommendation 1**: Add phased rollout strategy
+
+**Options**:
+A) Feature flag approach - Enable gradually by user cohort
+   - Effort: 4 hours
+   - Impact on grade: B → A
+
+B) Percentage rollout - Enable for X% of users, increase gradually
+   - Effort: 6 hours
+   - Impact on grade: B → A
+
+C) Beta program - Invite select users to test first
+   - Effort: 3 hours
+   - Impact on grade: B → A-
+
+**Claude's Recommendation**: A - Feature flag approach
+
+**Rationale**: Most flexible, easiest to implement with existing config system,
+provides kill switch if issues discovered.
+```
+
+Better decision-making support while keeping human in control.
+
+### 🔧 Configuration Changes
+
+New section in `.claude/config.json`:
+
+```json
+{
+  "version": "0.4.0",
+  "context_engineering": {
+    "enabled": true,
+    "beta_users": ["yassine"],
+    "four_phase_workflow": {
+      "enabled": true,
+      "phases": {
+        "research": true,
+        "plan": true,
+        "implement": true,
+        "validate": true
+      },
+      "context_threshold": 60,
+      "auto_save_on_threshold": true
+    },
+    "thoughts_directory": ".prds/thoughts",
+    "performance_targets": {
+      "research_phase_minutes": 2,
+      "plan_phase_minutes": 3,
+      "validation_phase_minutes": 1
+    }
+  }
+}
+```
+
+**Feature flag**: Set `enabled: false` to revert to old behavior globally.
+
+### 🗂️ File Changes
+
+**New Files**:
+- `.claude/commands/explore-prd.md` - New command for early-stage exploration
+- `.claude/commands/debugging.md` - New command for structured debugging
+- `product/templates/research-template.md` - Research phase template
+- `product/templates/plan-template.md` - Planning phase template
+- `product/templates/validation-template.md` - Validation phase template
+- `product/templates/exploration-template.md` - Exploration document template
+- `product/templates/debug-template.md` - Debug session template
+
+**Modified Files**:
+- `.claude/commands/code-prd.md` - Complete rewrite with 4-phase workflow
+- `.claude/commands/review-prd.md` - Enhanced with scope summary and options
+- `.claude/config.json` - Added context_engineering section
+- `CHANGELOG.md` - This file
+
+**Backup Files** (safe to delete after migration):
+- `.claude/commands/code-prd-legacy.md.backup` - Old code-prd for reference
+
+### 📝 Templates Added
+
+Five new templates in `product/templates/`:
+- `research-template.md` - For Phase 1 (Research)
+- `plan-template.md` - For Phase 2 (Planning)
+- `validation-template.md` - For Phase 4 (Validation)
+- `exploration-template.md` - For `/explore-prd` command
+- `debug-template.md` - For `/debugging` command
+
+### 📚 Documentation
+
+- Updated README with Context Engineering workflow
+- Migration guide for v0.3.x → v0.4.0
+- Command documentation updated with new flags
+- Templates documented with examples
+
+### 🎯 Success Metrics (from PRD-009)
+
+**Implementation Quality** (P0):
+- Context usage during implementation < 60% average ✅
+- Fewer bugs post-implementation (track via GitHub issues)
+- Faster development due to less backtracking
+
+**Knowledge Retention** (P1):
+- Automatic generation of research/decision/debug artifacts ✅
+- Team can reference past explorations and debug sessions ✅
+- New team members understand decisions via thoughts/ ✅
+
+**Review Effectiveness** (P1):
+- Faster reviews with clear options and recommendations ✅
+- No confusion about what's being reviewed (scope summary) ✅
+
+### 🔗 Related
+
+- **PRD**: PRD-009 - Context Engineering for PRD Workflow
+- **Branch**: feature/PRD-009-context-engineering-workflow
+- **Inspired by**: [Context Engineering Article](https://humaine.substack.com/p/context-engineering) by Ashley Ha
+
+---
+
 ## [0.3.2] - 2025-10-31
 
 ### 🎯 Focus: PRD-PR Alignment + Auto Session Management
