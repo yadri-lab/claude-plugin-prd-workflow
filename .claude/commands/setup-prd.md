@@ -12,11 +12,51 @@ Prepare development environment for a PRD by creating a feature branch, auto-ass
 
 Create isolated development environment for PRD:
 - Create feature branch
-- Set up Git worktree (optional)
+- Set up Git worktree in `worktrees/` (MANDATORY)
 - Auto-assign to current user
 - Move PRD to Ready (02-ready/)
 - Update WORK_PLAN.md
+- **Keep main branch active in current window** (CRITICAL)
 - **Accept draft PRDs** (with warning) for parallel workflow
+
+## ⚠️ Critical Rules (MANDATORY)
+
+### 1. Worktree Location
+
+**ALWAYS use `worktrees/` subdirectory** for consistency:
+
+```bash
+# ✅ CORRECT (Standard as of 2025-11-02)
+git worktree add worktrees/prd-007-oauth2-integration feat/PRD-007-oauth2-integration
+
+# ❌ WRONG (Old pattern - deprecated)
+git worktree add ../watchora-prd-007 feat/PRD-007-oauth2-integration
+```
+
+**Rationale**:
+- ✅ Centralized organization (all worktrees in one place)
+- ✅ Easier to find and manage
+- ✅ Cleaner project structure
+- ✅ Consistent with modern Git worktree best practices
+
+### 2. Branch Context
+
+**ALWAYS return to `main` branch after setup**:
+
+```bash
+# After creating worktree, ensure we're on main
+git checkout main
+```
+
+**Rationale**:
+- ✅ Main window stays on `main` (free for other work)
+- ✅ Feature work happens in separate Cursor window (worktree)
+- ✅ No accidental commits to feature branch in main window
+- ✅ Parallel workflow enabled
+
+---
+
+## Step-by-Step Process
 
 ### Step 1: List Available PRDs
 
@@ -83,277 +123,65 @@ If user says "no", cancel gracefully.
 
 Read branch naming configuration from .claude/config.json or use defaults
 
-Default pattern: feature/PRD-{ID}-{slug}
+Default pattern: feat/PRD-{ID}-{slug} (or feature/PRD-{ID}-{slug})
 
 Examples:
-- feature/PRD-007-oauth2-integration
-- feature/PRD-008-dark-mode-support
+- feat/PRD-007-oauth2-integration
+- feat/PRD-008-dark-mode-support
+- feat/PRD-033-deployment-safety-gates
 
 Extract slug from PRD filename:
 ```javascript
-// From: PRD-007-oauth2-integration.md
+// From: PRD-007-oauth2-integration-v1.md
 // Extract: oauth2-integration
-const slug = filename.replace(/^PRD-\d+-/, '').replace('.md', '');
+const slug = filename.replace(/^PRD-\d+-/, '').replace(/-v\d+\.md$/, '').replace('.md', '');
 ```
 
 ### Step 4: Create Feature Branch
 
 ```bash
-# Extract PRD number and slug
-PRD_NUMBER=$(basename "$PRD_FILE" | grep -oP 'PRD-\K\d+')
-FEATURE_SLUG=$(basename "$PRD_FILE" .md | sed 's/^PRD-[0-9]*-//')
+# Ensure on main and up to date
+git checkout main
+git pull origin main
 
-# Generate branch name from config
-BRANCH_PREFIX=$(jq -r '.prd_workflow.branch_naming.prefix // "feat"' .claude/config.json)
-BRANCH_NAME="${BRANCH_PREFIX}/PRD-${PRD_NUMBER}-${FEATURE_SLUG}"
-
-# Check if branch already exists (from /create-prd)
-if git show-ref --verify --quiet "refs/heads/$BRANCH_NAME"; then
-  echo "ℹ️  Branch $BRANCH_NAME already exists (created by /create-prd)"
-  echo "   Reusing existing branch..."
-else
-  # Create branch if it doesn't exist
-  echo "🔄 Creating branch $BRANCH_NAME..."
-
-  # Ensure on main and up to date
-  git checkout main
-  git pull origin main
-
-  # Create branch
-  git branch "$BRANCH_NAME"
-
-  echo "✅ Branch created: $BRANCH_NAME"
-fi
+# Create branch
+git branch feat/PRD-007-oauth2-integration
 
 # Don't checkout yet (worktree will do that if enabled)
 ```
 
-### Step 4.5: Check for Existing PR (NEW)
+### Step 5: Create Git Worktree (MANDATORY)
 
-**Purpose**: Reuse draft PR created by `/create-prd` if it exists
-
-```bash
-echo "🔍 Checking for existing PR..."
-
-# Check if PR exists for this branch
-EXISTING_PR=$(gh pr list --head "$BRANCH_NAME" --json number,isDraft,title --jq '.[0]' 2>/dev/null)
-
-if [ -n "$EXISTING_PR" ] && [ "$EXISTING_PR" != "null" ]; then
-  PR_NUMBER=$(echo "$EXISTING_PR" | jq -r '.number')
-  IS_DRAFT=$(echo "$EXISTING_PR" | jq -r '.isDraft')
-  PR_TITLE=$(echo "$EXISTING_PR" | jq -r '.title')
-
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo "✅ EXISTING PR FOUND"
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-  echo "PR #$PR_NUMBER: $PR_TITLE"
-  echo "Status: $([ "$IS_DRAFT" = "true" ] && echo "Draft" || echo "Open")"
-  echo "Created by: /create-prd (alignment locked)"
-  echo ""
-  echo "🔄 Updating PR description to mark development started..."
-
-  # Update PR description to show development has started
-  UPDATED_BODY="📋 **PRD**: \`$PRD_FILE\`
-
-🚀 **Status**: Development started
-
-## PRD Details
-- **Priority**: $(grep -m1 '^\*\*Priority\*\*:' "$PRD_FILE" | sed 's/.*: //' || echo 'Not set')
-- **Estimated Effort**: $(grep -m1 '^\*\*Estimated Effort\*\*:' "$PRD_FILE" | sed 's/.*: //' || echo 'TBD')
-- **Grade**: $(grep -m1 '^\*\*Grade\*\*:' "$PRD_FILE" | sed 's/.*: //' || echo 'Not reviewed')
-
-## Development Progress
-- [x] PRD created and reviewed
-- [x] Development environment set up (\`/setup-prd\`)
-- [ ] Implementation in progress
-- [ ] Tests added
-- [ ] Documentation updated
-- [ ] Ready for review
-
-## Worktree
-Branch checked out in isolated worktree for parallel development
-
----
-✅ **PRD-${PRD_NUMBER} ↔ PR #${PR_NUMBER}** alignment maintained
-
-*Development started: $(date +%Y-%m-%d\ %H:%M:%S)*"
-
-  gh pr edit "$PR_NUMBER" --body "$UPDATED_BODY" 2>/dev/null
-
-  echo "✅ PR #$PR_NUMBER updated and ready for development"
-  echo ""
-  echo "🔗 PRD-${PRD_NUMBER} ↔ PR #${PR_NUMBER} alignment maintained"
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-  SKIP_PR_CREATION=true
-else
-  echo "ℹ️  No existing PR found for branch $BRANCH_NAME"
-  echo "   PR will be created after worktree setup"
-  echo ""
-  SKIP_PR_CREATION=false
-fi
-```
-
-### Step 5: Create Git Worktree (Enforced)
-
-**Pre-flight Health Checks**:
+**Always create worktree in `worktrees/` subdirectory**:
 
 ```bash
-echo "🔍 Running pre-flight checks..."
+# Worktree path based on config or default
+# Default: worktrees/prd-007-oauth2-integration/
 
-# 1. Check Git version (need 2.25+)
-GIT_VERSION=$(git --version | grep -oP '\d+\.\d+' | head -1)
-MIN_VERSION="2.25"
+git worktree add worktrees/prd-007-oauth2-integration feat/PRD-007-oauth2-integration
 
-if [ "$(printf '%s\n' "$MIN_VERSION" "$GIT_VERSION" | sort -V | head -n1)" != "$MIN_VERSION" ]; then
-  echo "❌ Git version too old: $GIT_VERSION (need ≥$MIN_VERSION)"
-  echo ""
-  echo "📖 REMEDIATION:"
-  echo "   1. Upgrade Git: https://git-scm.com/downloads"
-  echo "   2. OR set fallback_on_error=true in .claude/config.json"
-  echo ""
-  exit 1
-fi
-echo "✓ Git version $GIT_VERSION compatible"
-
-# 2. Check parent directory exists and is writable
-PARENT_DIR=$(jq -r '.prd_workflow.worktree.parent_directory // ".."' .claude/config.json)
-
-if [ ! -d "$PARENT_DIR" ]; then
-  echo "❌ Parent directory does not exist: $PARENT_DIR"
-  echo ""
-  echo "📖 REMEDIATION:"
-  echo "   1. Create directory: mkdir -p $PARENT_DIR"
-  echo "   2. OR change parent_directory in .claude/config.json"
-  echo ""
-  exit 1
-fi
-
-if [ ! -w "$PARENT_DIR" ]; then
-  echo "❌ Parent directory not writable: $PARENT_DIR"
-  echo ""
-  echo "📖 REMEDIATION:"
-  echo "   1. Fix permissions: chmod +w $PARENT_DIR"
-  echo "   2. OR change parent_directory in .claude/config.json"
-  echo ""
-  exit 1
-fi
-echo "✓ Parent directory writable: $PARENT_DIR"
-
-# 3. Check for worktree conflicts
-EXISTING_WORKTREE=$(git worktree list | grep -F "feature/PRD-007" || true)
-if [ -n "$EXISTING_WORKTREE" ]; then
-  echo "⚠️  Worktree already exists for this PRD"
-  echo "$EXISTING_WORKTREE"
-  echo ""
-  echo "Options:"
-  echo "  1. Remove existing: git worktree remove <path>"
-  echo "  2. Use existing worktree"
-  echo "  3. Cancel"
-  read -p "Choice (1-3): " choice
-
-  if [ "$choice" = "1" ]; then
-    WORKTREE_PATH=$(echo "$EXISTING_WORKTREE" | awk '{print $1}')
-    git worktree remove "$WORKTREE_PATH" --force
-    echo "✓ Removed existing worktree"
-  elif [ "$choice" = "2" ]; then
-    echo "ℹ️  Using existing worktree - skipping creation"
-    exit 0
-  else
-    exit 1
-  fi
-fi
-
-echo "✅ Pre-flight checks passed"
-echo ""
+✅ Created worktree: worktrees/prd-007-oauth2-integration/
 ```
 
-**Create Worktree**:
+### Step 6: Return to Main Branch (CRITICAL)
+
+**ALWAYS return to main after worktree creation**:
 
 ```bash
-# Build worktree path
-PROJECT_NAME=$(basename "$(git rev-parse --show-toplevel)")
-FEATURE_SLUG=$(echo "prd-007-oauth2-integration" | tr '[:upper:]' '[:lower:]')
-WORKTREE_PATH="$PARENT_DIR/${PROJECT_NAME}-${FEATURE_SLUG}"
+# Ensure we're on main (worktree creation may have switched branches)
+git checkout main
 
-echo "🌳 Creating worktree: $WORKTREE_PATH"
-
-# Create worktree
-if git worktree add "$WORKTREE_PATH" "feature/PRD-007-oauth2-integration"; then
-  echo "✅ Worktree created successfully"
-
-  # Optional: Auto-install dependencies
-  AUTO_INSTALL=$(jq -r '.prd_workflow.worktree.auto_install_dependencies // false' .claude/config.json)
-  if [ "$AUTO_INSTALL" = "true" ]; then
-    echo "📦 Installing dependencies..."
-    (cd "$WORKTREE_PATH" && npm ci 2>/dev/null || yarn install --frozen-lockfile 2>/dev/null || echo "⏭️  No package manager found, skipping")
-  fi
-
-  echo ""
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo "✅ Environment Ready"
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo "📂 Worktree: $WORKTREE_PATH"
-  echo "🌿 Branch: feature/PRD-007-oauth2-integration"
-  echo ""
-  echo "Next: cd $WORKTREE_PATH"
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-else
-  # Worktree creation failed - check if fallback allowed
-  ALLOW_FALLBACK=$(jq -r '.prd_workflow.worktree.fallback_on_error // false' .claude/config.json)
-
-  if [ "$ALLOW_FALLBACK" = "true" ]; then
-    echo ""
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "⚠️  WORKTREE CREATION FAILED"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo ""
-    echo "🔄 FALLBACK AVAILABLE: git checkout (not recommended)"
-    echo ""
-    echo "⚠️  Fallback consequences:"
-    echo "   • No workspace isolation"
-    echo "   • Main branch will be blocked"
-    echo "   • Cannot work on multiple PRDs in parallel"
-    echo ""
-    echo "Continue with fallback? (yes/no)"
-    read -r response
-
-    if [ "$response" = "yes" ]; then
-      echo ""
-      echo "🔄 Falling back to git checkout..."
-      git checkout "feature/PRD-007-oauth2-integration"
-      echo ""
-      echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-      echo "⚠️  FALLBACK MODE ACTIVE"
-      echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-      echo "🚨 You are on branch: feature/PRD-007-oauth2-integration"
-      echo "🚨 Main branch is now BLOCKED"
-      echo ""
-      echo "Fix for next time: Upgrade Git to 2.25+"
-      echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    else
-      echo "❌ Setup cancelled"
-      exit 1
-    fi
-  else
-    echo ""
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "❌ WORKTREE CREATION FAILED"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo ""
-    echo "Fallback disabled in config (fallback_on_error=false)"
-    echo ""
-    echo "📖 OPTIONS:"
-    echo "   1. Fix the issue above and retry"
-    echo "   2. Set fallback_on_error=true in .claude/config.json"
-    echo ""
-    exit 1
-  fi
-fi
+# Verify
+git branch --show-current  # Should output: main
 ```
 
-### Step 6: Auto-Assign to Current User
+**Output**:
+```
+✅ Returned to main branch
+💡 Your main window is free for other work
+```
+
+### Step 7: Auto-Assign to Current User
 
 Detect GitHub username using cascade:
 
@@ -388,7 +216,7 @@ Update PRD metadata by adding/updating these fields:
 **Assigned**: $(date +%Y-%m-%d)
 ```
 
-### Step 7: Move PRD to Ready
+### Step 8: Move PRD to Ready
 
 **Important**: `/setup-prd` moves Draft → Ready (NOT In-Progress)
 
@@ -408,113 +236,28 @@ fi
 Update PRD status field:
 ```markdown
 **Status**: Ready for Development
-**Branch**: feature/PRD-007-oauth2-integration
+**Branch**: feat/PRD-007-oauth2-integration
 **Assignee**: @yassinello
 **Setup Date**: 2025-10-28
 ```
 
-### Step 7.5: Create PR (Fallback if not exists)
-
-**Purpose**: Ensure PR exists even if `/create-prd` was skipped or failed
-
-```bash
-# Check if we need to create a PR (wasn't created in Step 4.5)
-if [ "$SKIP_PR_CREATION" = "false" ]; then
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo "🔄 Creating Draft PR (fallback)"
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-
-  # Verify gh CLI is available
-  if ! gh auth status >/dev/null 2>&1; then
-    echo "⚠️  GitHub CLI not authenticated"
-    echo "   PR creation skipped - you can create manually later"
-    echo ""
-    echo "To create PR manually:"
-    echo "  gh pr create --draft --title \"PRD-${PRD_NUMBER}: <feature>\" --head $BRANCH_NAME"
-    echo ""
-  else
-    # Extract feature name from PRD
-    FEATURE_NAME=$(grep -m1 '^# ' "$PRD_FILE" | sed 's/^# //' | sed 's/^PRD-[0-9]*: //')
-
-    # Create PR body
-    PR_BODY="📋 **PRD**: \`$PRD_FILE\`
-
-🚀 **Status**: Development environment ready
-
-## PRD Details
-- **Priority**: $(grep -m1 '^\*\*Priority\*\*:' "$PRD_FILE" | sed 's/.*: //' || echo 'Not set')
-- **Estimated Effort**: $(grep -m1 '^\*\*Estimated Effort\*\*:' "$PRD_FILE" | sed 's/.*: //' || echo 'TBD')
-- **Grade**: $(grep -m1 '^\*\*Grade\*\*:' "$PRD_FILE" | sed 's/.*: //' || echo 'Not reviewed')
-- **Assignee**: @$USERNAME
-
-## Development Progress
-- [x] PRD created and approved
-- [x] Development environment set up (\`/setup-prd\`)
-- [ ] Implementation in progress
-- [ ] Tests added
-- [ ] Documentation updated
-- [ ] Ready for review
-
-## Worktree
-Branch checked out in isolated worktree: \`$WORKTREE_PATH\`
-
----
-⚠️ **Note**: PR created as fallback by \`/setup-prd\`
-
-Ideally PRs are created in \`/create-prd\` for perfect PRD-PR alignment
-
-*Created: $(date +%Y-%m-%d\ %H:%M:%S)*"
-
-    # Create draft PR
-    gh pr create --draft \
-      --title "PRD-${PRD_NUMBER}: ${FEATURE_NAME}" \
-      --body "$PR_BODY" \
-      --head "$BRANCH_NAME" \
-      --base main 2>&1 | tee /tmp/pr_create_output.txt
-
-    # Capture PR number
-    PR_NUMBER=$(gh pr list --head "$BRANCH_NAME" --json number --jq '.[0].number' 2>/dev/null)
-
-    if [ -n "$PR_NUMBER" ]; then
-      echo "✅ Draft PR #$PR_NUMBER created"
-      echo ""
-      echo "⚠️  Note: PRD-${PRD_NUMBER} ↔ PR #$PR_NUMBER"
-      echo "    (Alignment may not match if other PRs were created)"
-      echo ""
-
-      # Update PRD with PR link
-      if ! grep -q "^\*\*PR\*\*:" "$PRD_FILE"; then
-        sed -i "/^\*\*Status\*\*:/a **PR**: #$PR_NUMBER" "$PRD_FILE"
-      fi
-    else
-      echo "⚠️  PR creation failed - check /tmp/pr_create_output.txt"
-      echo "   You can create PR manually later with gh CLI"
-    fi
-  fi
-
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-fi
-```
-
-### Step 8: Update WORK_PLAN.md
+### Step 9: Update WORK_PLAN.md
 
 Move PRD from draft to ready section:
 ```markdown
 ## Ready for Development (1 PRD)
 | PRD ID | Feature | Owner | Branch |
 |--------|---------|-------|--------|
-| PRD-007 | OAuth2 Integration | @yassinello | feature/PRD-007-oauth2-integration |
+| PRD-007 | OAuth2 Integration | @yassinello | feat/PRD-007-oauth2-integration |
 ```
 
-### Step 9: Provide Next Steps
+### Step 10: Provide Next Steps
 
 ```markdown
 🌳 **Development Environment Ready**
 
 📂 Worktree: worktrees/prd-007-oauth2-integration/
-🌿 Branch: feature/PRD-007-oauth2-integration
+🌿 Branch: feat/PRD-007-oauth2-integration
 📄 PRD: product/prds/02-ready/PRD-007-oauth2-integration.md
 👤 Assignee: @yassinello
 
@@ -536,6 +279,10 @@ Open a new Cursor window in the worktree directory:
 This allows you to:
 - Work on PRD-007 in one Cursor instance
 - Continue other work on Main in another instance
+```
+
+---
+
 ## Configuration
 
 Respects prd_workflow configuration:
@@ -543,7 +290,7 @@ Respects prd_workflow configuration:
 {
   "prd_workflow": {
     "branch_naming": {
-      "prefix": "feature",
+      "prefix": "feat",
       "separator": "/",
       "pattern": "{prefix}/{prd_id_prefix}-{prd_number}-{slug}"
     },
@@ -565,31 +312,12 @@ Respects prd_workflow configuration:
 # Specify PRD
 /setup-prd PRD-007
 
+# Skip worktree creation (not recommended)
+/setup-prd PRD-007 --no-worktree
+
 # Force draft (skip warning)
 /setup-prd PRD-007 --force
 ```
-
-## Emergency Override (Hidden)
-
-**Only for system limitations or testing** - not supported for production use:
-
-```bash
-# Bypass worktree enforcement (use git checkout instead)
-FORCE_NO_WORKTREE=1 /setup-prd PRD-007
-```
-
-This will:
-- Skip worktree creation entirely
-- Use plain `git checkout` on the feature branch
-- Block your main branch (no parallel work possible)
-- Not be recommended or supported
-
-⚠️  Use only when:
-- Testing the plugin without worktree support
-- System has filesystem limitations
-- Temporary workaround for urgent fixes
-
-**Recommended instead**: Set `fallback_on_error=true` in config for automatic fallback with proper warnings.
 
 ## Error Handling
 
@@ -597,7 +325,7 @@ This will:
 ```markdown
 ⚠️ PRD-007 is already in progress
 
-Branch: feature/PRD-007-oauth2-integration
+Branch: feat/PRD-007-oauth2-integration
 Worktree: worktrees/prd-007-oauth2-integration/
 
 Options:
@@ -622,12 +350,11 @@ Then try again.
 
 ## Best Practices
 
-- ✅ **Worktrees enforced by default** - Automatic isolation, parallel workflow enabled
-- ✅ **Create branch even for drafts** - Enables review on feature branch
+- ✅ **Create branch even for drafts** - Enables parallel workflow
+- ✅ **Use worktrees in `worktrees/`** - Centralized, organized
+- ✅ **Always return to main** - Keep main window free
 - ✅ **Review on feature branch** - Keeps Main free
-- ✅ **Open separate editor instance** - One Cursor/VSCode window per feature
-- ✅ **Auto-dependency installation** - Enable in config for faster setup
-- ⚠️ **Git 2.25+ required** - Upgrade if you see version errors
+- ✅ **Open separate Cursor** - One instance per feature
 - ⚠️ **Don't forget to review** - If starting from draft
 
 ## Integration
@@ -635,12 +362,15 @@ Then try again.
 Works seamlessly with:
 - /create-prd - Creates draft PRDs
 - /review-prd - Review on feature branch
-- /work-prd - Guided development
+- /code-prd - Guided development
 - Git worktrees - Parallel feature development
 
 ---
 
 Plugin: claude-prd-workflow
-Category: PRD Management
-Version: 0.3.1
-Requires: Git 2.25+ (enforced)
+Category: PRD Management  
+Version: 2.3.0 (Unified Cursor + Claude Code)
+Requires: Git 2.25+
+
+**Last Updated**: 2025-11-02 (Standardized worktree location + unified commands)
+
