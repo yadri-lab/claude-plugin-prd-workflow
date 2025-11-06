@@ -1,0 +1,26 @@
+{
+  "$schema": "https://claude.ai/schemas/settings.json",
+  "description": "Ultra-permissive settings for PRD Workflow Manager. Allows nearly all operations except data deletion. Apply these to your global ~/.claude-code/settings.json or merge with your existing permissions.",
+  "defaultMode": "acceptEdits",
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/yassine.hamou-tahra/AppData/Roaming/npm/**)"
+    ],
+    "deny": [],
+    "ask": []
+  },
+  "enabledMcpjsonServers": [
+    "pd",
+    "supabase",
+    "playwright",
+    "brave-search",
+    "fetch",
+    "github",
+    "puppeteer",
+    "context7",
+    "sequential-thinking",
+    "google-workspace",
+    "railway"
+  ],
+  "enableAllProjectMcpServers": true
+}

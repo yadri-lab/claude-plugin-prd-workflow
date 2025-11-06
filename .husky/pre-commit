@@ -1,0 +1,30 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Validate .claude/commands/ directory
+echo "🔍 Validating Claude commands..."
+
+# Check for backup files in commands directory
+BACKUP_FILES=$(find .claude/commands -name "*.backup.md" -o -name "*.backup" 2>/dev/null)
+
+if [ ! -z "$BACKUP_FILES" ]; then
+  echo "❌ Error: Backup files found in .claude/commands/"
+  echo "$BACKUP_FILES"
+  echo ""
+  echo "Please remove backup files before committing:"
+  echo "  mv .claude/commands/*.backup* .claude-plugin.bak/commands/"
+  exit 1
+fi
+
+# Check for duplicate command names
+DUPLICATE_NAMES=$(find .claude/commands -name "*.md" -type f -exec grep -h "^name: " {} \; | sort | uniq -d)
+
+if [ ! -z "$DUPLICATE_NAMES" ]; then
+  echo "⚠️  Warning: Duplicate command names detected:"
+  echo "$DUPLICATE_NAMES"
+  echo ""
+  echo "This may cause issues in Claude Code. Please review."
+  # Don't exit, just warn
+fi
+
+echo "✅ Claude commands validation passed"

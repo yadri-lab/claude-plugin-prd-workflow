@@ -1,6 +1,27 @@
 {
   "$comment": "Startup Preset - Fast-moving, lean workflows for startups and small teams",
-  "version": "0.3.1",
+  "version": "0.4.0",
+  "context_engineering": {
+    "enabled": true,
+    "beta_users": ["yassine"],
+    "four_phase_workflow": {
+      "enabled": true,
+      "phases": {
+        "research": true,
+        "plan": true,
+        "implement": true,
+        "validate": true
+      },
+      "context_threshold": 60,
+      "auto_save_on_threshold": true
+    },
+    "thoughts_directory": ".prds/thoughts",
+    "performance_targets": {
+      "research_phase_minutes": 2,
+      "plan_phase_minutes": 3,
+      "validation_phase_minutes": 1
+    }
+  },
   "prd_workflow": {
     "enabled": true,
     "directories": {

@@ -6,17 +6,19 @@ category: PRD Management
 
 # Complete PRD Command
 
-Mark a PRD as complete after its PR has been merged and deployed to production.
+Mark a PRD as complete - includes PR review, merge, and deployment tracking.
 
 ## Purpose
 
 Close the PRD lifecycle loop:
-- Verify PR is merged
+- **Review PR** (if still open)
+- **Merge PR** (with conflict resolution)
+- **Verify deployment**
 - Update PRD status to "Complete"
 - Move PRD to `04-complete/` directory
-- Clean up Git worktree (optional)
-- Update WORK_PLAN.md
+- Clean up Git worktree
 - Record completion metrics
+- Document session summary
 
 ## Workflow
 
@@ -25,192 +27,364 @@ Close the PRD lifecycle loop:
 Ask user which PRD to complete:
 
 ```bash
-# List in-progress PRDs
-ls -1 product/prds/03-in-progress/*.md
+# List PRDs from both ready and in-progress
+ls -1 product/prds/02-ready/*.md product/prds/03-in-progress/*.md 2>/dev/null
 ```
 
 Show table:
 ```markdown
-📋 **In-Progress PRDs**
+📋 **PRDs Ready for Completion**
 
 | # | PRD ID | Feature | Branch | PR Status |
 |---|--------|---------|--------|-----------|
 | 1 | PRD-003 | OAuth2 Integration | feature/PRD-003-oauth2 | #42 (merged ✅) |
-| 2 | PRD-005 | Dark Mode | feature/PRD-005-dark-mode | #45 (open) |
-| 3 | PRD-007 | API v2 | feature/PRD-007-api-v2 | No PR yet |
+| 2 | PRD-005 | Dark Mode | feature/PRD-005-dark-mode | #45 (open 🔄) |
+| 3 | PRD-007 | API v2 | feature/PRD-007-api-v2 | No PR yet ❌ |
 
 Which PRD to complete? (number, PRD-XXX, or filename)
 ```
 
-### Step 2: Pre-Merge Conflict Detection & Resolution
+### Step 2: Check PR Status
 
-**NEW: AI-Powered Conflict Helper**
+```bash
+# Get PR number from PRD file
+PRD_FILE="product/prds/02-ready/PRD-031-url-structure-normalization.md"
+PR_NUM=$(grep -oP 'PR: #\K\d+' "$PRD_FILE")
 
-Before attempting to merge, check for conflicts:
+if [ -z "$PR_NUM" ]; then
+  echo "⚠️  No PR found in PRD file"
+  echo ""
+  echo "Options:"
+  echo "1. Create PR now (recommended)"
+  echo "2. Add PR number manually"
+  echo "3. Complete without PR (not recommended)"
+  exit 1
+fi
+
+# Check PR status using GitHub CLI
+PR_INFO=$(gh pr view $PR_NUM --json state,mergedAt,baseRefName,reviews,checks,url)
+PR_STATE=$(echo "$PR_INFO" | jq -r '.state')
+PR_URL=$(echo "$PR_INFO" | jq -r '.url')
+```
+
+**Two paths from here**:
+- ✅ **PR already MERGED** → Skip to Step 6 (Collect Completion Metadata)
+- 🔄 **PR still OPEN** → Continue to Step 3 (PR Review & Merge)
+
+### Step 3: PR Review & Merge (if PR is OPEN)
+
+```markdown
+🔄 **PR #34 is OPEN** - Let's review and merge it
+
+📋 PR Details:
+- Title: Add URL structure normalization
+- Branch: feature/PRD-031-url-structure-normalization
+- URL: https://github.com/user/repo/pull/34
+
+📊 Status:
+- Reviews: 0 approvals, 0 changes requested
+- Checks: ✅ All passing (or ⚠️ 2 pending, ❌ 1 failed)
+
+Options:
+1. Review and merge now (recommended)
+2. Wait for merge (exit)
+3. Force complete without merge (not recommended)
+
+What would you like to do? (1-3)
+```
+
+If option 1 (review and merge):
+
+#### Step 3.1: Show PR Diff Summary
+
+```bash
+# Get PR diff stats
+gh pr diff $PR_NUM --stat
+
+# Show file changes summary
+echo ""
+echo "📝 Changed Files:"
+gh pr diff $PR_NUM --name-only | head -20
+```
+
+```markdown
+📝 **PR Changes Summary**
+
+Files changed: 8
+- src/utils/urlNormalizer.ts (+120, -0) ✨ NEW
+- src/routes/api.ts (+15, -3)
+- tests/urlNormalizer.test.ts (+200, -0) ✨ NEW
+- package.json (+2, -0)
+- README.md (+25, -5)
+
+Quick review:
+- ✅ Tests added (200 lines)
+- ✅ Documentation updated
+- ✅ Clean implementation
+- ⚠️  No breaking changes detected
+
+Ready to merge? (y/n)
+```
+
+#### Step 3.2: Pre-Merge Checks
 
 ```bash
 # Fetch latest main
 git fetch origin main
 
-# Check if merge would cause conflicts (dry-run)
-git merge-tree $(git merge-base HEAD origin/main) HEAD origin/main
+# Check if already on feature branch
+CURRENT_BRANCH=$(git branch --show-current)
+if [ "$CURRENT_BRANCH" != "feature/PRD-031-url-structure-normalization" ]; then
+  echo "⚠️  Not on feature branch, switching..."
+  git checkout feature/PRD-031-url-structure-normalization
+fi
+
+# Check for conflicts with main (dry-run)
+MERGE_BASE=$(git merge-base HEAD origin/main)
+CONFLICTS=$(git merge-tree $MERGE_BASE HEAD origin/main 2>&1 | grep -c "^<<<<<< ")
+
+if [ "$CONFLICTS" -gt 0 ]; then
+  echo "🔀 Merge conflicts detected ($CONFLICTS files)"
+else
+  echo "✅ No conflicts detected"
+fi
 ```
 
-#### If Conflicts Detected
+#### Step 3.3: Conflict Resolution (if needed)
+
+**If conflicts detected**:
 
 ```markdown
-🔀 Merge Conflict Detected
+🔀 **Merge Conflicts Detected**
 
 📂 Files with conflicts:
   - src/auth.ts (lines 45-67)
   - src/config/env.ts (lines 12-18)
 
-🤖 AI Conflict Analysis
+Let me analyze each conflict...
+```
 
-**Conflict 1: src/auth.ts**
+For each conflict:
 
-<<< Your changes (PRD-003 - OAuth):
+```markdown
+🤖 **Conflict Analysis: src/auth.ts**
+
+**Your changes** (PRD-031 - URL normalization):
 ```typescript
-function login(email, password) {
-  return OAuth.loginWithGoogle(email, password);
+function processUrl(url: string) {
+  return normalizeUrl(url);
 }
 ```
 
-=======
-
->>> Main branch (from PRD-005 - Password Reset):
+**Main branch** (from PRD-030 - Auth refactor):
 ```typescript
-function login(email, password) {
-  return db.validatePassword(email, password);
+function processUrl(url: string) {
+  return validateAndClean(url);
 }
 ```
 
-💡 **AI Recommendation**: Keep BOTH (different authentication methods)
+💡 **AI Recommendation**: Chain both operations
 
 ```typescript
-function login(email, password, method = 'password') {
-  if (method === 'oauth') {
-    return OAuth.loginWithGoogle(email, password);
-  }
-  return db.validatePassword(email, password);
+function processUrl(url: string) {
+  const validated = validateAndClean(url);
+  return normalizeUrl(validated);
 }
 ```
 
 **Why this works**:
-- Both features (OAuth + Password) can coexist
-- Method parameter allows switching
-- Backward compatible (defaults to password)
+- Both validations needed
+- Chaining preserves both features
+- Order matters: validate first, normalize second
+- Backward compatible
 
 🔧 Actions:
   [A] Accept AI suggestion (auto-resolve)
-  [M] Manual resolution (open editor)
+  [M] Manual resolution (I'll open editor)
   [S] Skip this file (resolve later)
   [C] Cancel merge
 
 > [User choice]
 ```
 
-#### If User Accepts AI Suggestion
+**If user accepts AI suggestion**:
+
+```bash
+# Apply AI-suggested resolution
+cat > src/auth.ts.resolved <<EOF
+function processUrl(url: string) {
+  const validated = validateAndClean(url);
+  return normalizeUrl(validated);
+}
+EOF
+
+mv src/auth.ts.resolved src/auth.ts
+git add src/auth.ts
+```
 
 ```markdown
-✅ Auto-resolving conflict in src/auth.ts
+✅ Auto-resolved conflict in src/auth.ts
 
-Applied fix:
-  - Merged both login methods
-  - Added method parameter
+Applied changes:
+  - Chained validation → normalization
+  - Preserved both feature requirements
   - Maintained backward compatibility
 
 ✔️ Conflict 1/2 resolved
 
-🔀 Next conflict: src/config/env.ts
-...
+🔀 Next conflict: src/config/env.ts...
 ```
 
-#### After All Conflicts Resolved
+**After all conflicts resolved**:
 
 ```markdown
-✅ All conflicts resolved!
+✅ **All conflicts resolved!**
 
-📊 Summary:
+📊 Resolution Summary:
   - 2 files had conflicts
   - 2 auto-resolved by AI
-  - 0 manual resolutions needed
+  - 0 manual edits needed
 
-🧪 Next: Run tests to verify merge
-  npm test
-
-Continue with merge? (y/n)
+🧪 **Next: Verify resolution**
+  Running tests to ensure everything works...
 ```
 
-### Step 3: Verify PR Status
-
-Check if PR is actually merged:
+#### Step 3.4: Run Tests
 
 ```bash
-# Get PR number from PRD file
-PR_NUM=$(grep -oP 'PR: #\K\d+' product/prds/03-in-progress/YYMMDD-oauth2-integration-v1.md)
+# Run test suite
+echo "🧪 Running tests..."
+npm test
 
-# Check PR status using GitHub CLI
-gh pr view $PR_NUM --json state,mergedAt,baseRefName
-
-# Example output:
-# {
-#   "state": "MERGED",
-#   "mergedAt": "2025-10-25T14:32:00Z",
-#   "baseRefName": "main"
-# }
+# Check exit code
+if [ $? -eq 0 ]; then
+  echo "✅ All tests passed"
+else
+  echo "❌ Tests failed - review needed"
+  echo ""
+  echo "Options:"
+  echo "1. Fix tests now"
+  echo "2. Cancel merge"
+  exit 1
+fi
 ```
-
-**Validation**:
-- ✅ PR must be **MERGED** (not just closed)
-- ✅ Merged into main/master branch
-- ❌ If not merged, show warning:
 
 ```markdown
-⚠️ **PR #42 is not merged yet**
+✅ **Tests Passed!**
 
-Current status: OPEN
-Reviewers: @user1, @user2
+Test Results:
+- ✅ 245 tests passed
+- ⚠️  0 tests skipped
+- ❌ 0 tests failed
+- ⏱️  Completed in 12.3s
 
-Options:
-1. Wait for merge (exit for now)
-2. Mark as complete anyway (not recommended)
-3. Check a different PR number
-
-What would you like to do? (1-3)
+Ready to merge? (y/n)
 ```
 
-### Step 3: Collect Completion Metadata
+#### Step 3.5: Perform Merge
 
-Ask user for completion details:
+```bash
+# Merge PR using GitHub CLI
+gh pr merge $PR_NUM --squash --delete-branch
+
+# Or if user prefers merge commit
+# gh pr merge $PR_NUM --merge --delete-branch
+
+# Or rebase
+# gh pr merge $PR_NUM --rebase --delete-branch
+```
 
 ```markdown
-✅ PR #42 merged successfully!
+🎉 **PR #34 Merged Successfully!**
 
-Let's record some completion metrics:
+- ✅ Merged to main
+- ✅ Remote branch deleted
+- 🔄 Pulling latest main...
 
-1. **Production deploy date** (YYYY-MM-DD or "not yet"):
-   > 2025-10-25
-
-2. **Did everything go as planned?** (y/n):
-   > y
-
-3. **Any deployment issues?** (optional):
-   > Minor issue with cache invalidation, resolved in 10 mins
-
-4. **Performance vs. targets** (optional):
-   - Expected: Response time < 200ms
-   - Actual: 150ms ✅
-
-5. **Key learnings** (optional):
-   > OAuth2 library v3 works better than v2 for our use case.
-   > Should document token refresh flow more clearly.
-
-6. **Follow-up tasks** (optional PRD IDs or descriptions):
-   > PRD-008: Improve OAuth error messages
+git checkout main
+git pull origin main
 ```
 
-### Step 3.5: Document Session Summary (Auto)
+### Step 4: Verify Deployment (Optional)
+
+```markdown
+📦 **Deployment Tracking**
+
+Is this feature deployed to production? (y/n/skip)
+> y
+
+Production deploy date (YYYY-MM-DD or "today"):
+> today
+
+Any deployment issues? (Enter to skip)
+> Minor cache invalidation, resolved in 10min
+
+Performance check (optional):
+- Expected: Response time < 200ms
+- Actual:
+> 150ms
+
+✅ Deployment verified
+```
+
+### Step 5: Structured Retrospective
+
+```markdown
+🎯 **PRD Retrospective**
+
+Let's reflect on this PRD implementation:
+
+**1. What went well?** ⭐
+   > Clean implementation, tests worked first time
+
+**2. What didn't go as planned?** 🤔
+   > URL edge cases took longer than expected (3h → 8h)
+
+**3. What surprised you?** 💡
+   > International URL support was simpler than expected
+
+**4. Confidence Score** (1-10, 10 = fully confident)
+   > 9
+
+**5. Would you do anything differently?** 🔄
+   > Start with edge cases instead of happy path
+
+**6. Tech Debt Created** (optional)
+   > TODO: Refactor URL validator to reduce duplication
+
+**7. Key Learnings** (optional)
+   > URL normalization needs encoding awareness upfront
+
+**8. Follow-up PRDs** (optional)
+   > PRD-032: Add URL schema validation
+```
+
+**Retrospective Summary**:
+```markdown
+📊 **Implementation Assessment**
+
+✅ **What Worked**:
+- Clean implementation
+- Tests worked first time
+- International URL support simpler than expected
+
+⚠️ **Challenges**:
+- URL edge cases: 3h estimated → 8h actual (+167%)
+
+💡 **Learnings**:
+- URL normalization needs encoding awareness upfront
+- Start with edge cases instead of happy path
+
+🔧 **Tech Debt**:
+- TODO: Refactor URL validator to reduce duplication
+
+🎯 **Confidence**: 9/10
+
+📋 **Follow-up**:
+- PRD-032: Add URL schema validation
+```
+
+### Step 6: Document Session Summary (Auto)
 
 Automatically capture work session for SESSION_CONTEXT tracking:
 
@@ -329,81 +503,97 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 
 **Example session entry**:
 ```markdown
-## Session 15: PRD-003 (2025-10-25, 12h)
-- Implemented OAuth2 integration with Google. Added token refresh logic and error handling.
-- **Decision**: Chose OAuth2 library v3 over v2 for better TypeScript support
+## Session 15: PRD-031 (2025-11-06, 8h)
+- Implemented URL structure normalization with edge case handling and international support.
+- **Decision**: Used WHATWG URL API over regex for better standards compliance
 ```
 
-**Behavior**:
-- Automatically captures session summary during PRD completion
-- Synthetic format (1-2 sentences + optional decision)
-- Auto-archives when >10 sessions exist
-- Non-blocking if user skips summary (Enter)
-- Creates monthly archive files in `docs/archives/`
-
-### Step 4: Update PRD File
+### Step 7: Update PRD File
 
 Add completion metadata to PRD header:
 
 ```markdown
 **Status**: Complete ✅
-**Completed Date**: 2025-10-25
-**PR**: #42
-**Production Deploy**: 2025-10-25
-**Development Duration**: 12 days
-**Estimated vs Actual**: 10 days estimated, 12 days actual (+20%)
+**Completed Date**: 2025-11-06
+**PR**: #34
+**Production Deploy**: 2025-11-06
+**Development Duration**: 8 days
+**Estimated vs Actual**: 5 days estimated, 8 days actual (+60%)
+**Confidence Score**: 9/10
 
 ---
 
-## Completion Notes
+## 🎯 Completion Retrospective
 
-### Deployment
-- Merged: 2025-10-25T14:32:00Z
-- Deployed to production: 2025-10-25T15:00:00Z
-- Deployment issues: Minor cache invalidation issue (resolved in 10 mins)
+### ✅ What Went Well
+- Clean implementation with good test coverage
+- Tests worked first time
+- International URL support simpler than expected
+
+### ⚠️ Challenges & Surprises
+- **Challenge**: URL edge cases took longer than expected (3h → 8h, +167%)
+- **Surprise**: International URL support was simpler than expected
+
+### 💡 Key Learnings
+- URL normalization needs encoding awareness upfront
+- Start with edge cases instead of happy path
+
+### 🔧 Tech Debt Created
+- TODO: Refactor URL validator to reduce duplication
+
+### 🔄 Would Do Differently
+- Start with edge cases instead of happy path
+- Add encoding tests earlier
+
+### 📋 Follow-up Tasks
+- PRD-032: Add URL schema validation
+
+---
+
+## 📊 Deployment
+
+- **Merged**: 2025-11-06T14:32:00Z
+- **Deployed to production**: 2025-11-06T15:00:00Z
+- **Deployment issues**: Minor cache invalidation (resolved in 10 mins)
 
 ### Performance
 - ✅ Response time: 150ms (target: <200ms)
-- ✅ Test coverage: 92% (target: >80%)
+- ✅ Test coverage: 95% (target: >80%)
 - ✅ Security scan: All checks passed
-
-### Learnings
-- OAuth2 library v3 works better than v2 for our use case
-- Should document token refresh flow more clearly
-- Error handling for token expiration needs better UX
-
-### Follow-up Tasks
-- PRD-008: Improve OAuth error messages
-- TODO: Add monitoring alerts for failed auth attempts
 
 ---
 ```
 
-### Step 5: Move PRD to Complete Directory
+### Step 8: Move PRD to Complete Directory
 
 ```bash
 # Get PRD filename
-PRD_FILE="product/prds/03-in-progress/250915-oauth2-integration-v1.md"
+PRD_FILE="product/prds/02-ready/PRD-031-url-structure-normalization.md"
+
+# Determine target directory
+if [ -f "product/prds/02-ready/$(basename $PRD_FILE)" ]; then
+  SRC_DIR="02-ready"
+elif [ -f "product/prds/03-in-progress/$(basename $PRD_FILE)" ]; then
+  SRC_DIR="03-in-progress"
+fi
 
 # Move to complete
-mv "$PRD_FILE" "product/prds/04-complete/250915-oauth2-integration-v1.md"
+mv "product/prds/$SRC_DIR/$(basename $PRD_FILE)" "product/prds/04-complete/$(basename $PRD_FILE)"
 
-echo "✅ Moved PRD to 04-complete/"
+echo "✅ Moved PRD from $SRC_DIR/ to 04-complete/"
 ```
 
-### Step 6: Clean Up Git Worktree (Optional)
-
-Ask user if they want to clean up the worktree:
+### Step 9: Clean Up Git Worktree
 
 ```markdown
 🌳 **Clean up Git worktree?**
 
-Current worktree: worktrees/prd-003-oauth2-integration/
-Branch: feature/PRD-003-oauth2-integration (merged ✅)
+Current worktree: worktrees/prd-031-url-structure-normalization/
+Branch: feature/PRD-031-url-structure-normalization (merged ✅, remote deleted ✅)
 
 Options:
-1. Remove worktree and delete branch (recommended)
-2. Remove worktree, keep branch
+1. Remove worktree and delete local branch (recommended)
+2. Remove worktree, keep local branch
 3. Keep worktree (not recommended)
 
 What would you like to do? (1-3)
@@ -412,82 +602,94 @@ What would you like to do? (1-3)
 If option 1 (recommended):
 ```bash
 # Remove worktree
-git worktree remove worktrees/prd-003-oauth2-integration/
+git worktree remove worktrees/prd-031-url-structure-normalization/
 
-# Delete local branch
-git branch -d feature/PRD-003-oauth2-integration
+# Delete local branch (safe since merged)
+git branch -d feature/PRD-031-url-structure-normalization
 
-# Delete remote branch (optional, ask user)
-git push origin --delete feature/PRD-003-oauth2-integration
-
-echo "✅ Cleaned up worktree and branches"
+echo "✅ Cleaned up worktree and local branch"
 ```
 
-### Step 7: Update WORK_PLAN.md
+### Step 10: Update WORK_PLAN.md
 
 Update the active pipeline table:
 
 ```bash
-# Remove from "In Progress" section
+# Remove from "Ready" or "In Progress" section
 # Add to "Completed" section with metrics
-
-# Update in WORK_PLAN.md:
 ```
 
 **Before**:
 ```markdown
 ## 📊 Active Pipeline
 
-### In Progress (3 PRDs)
+### Ready to Code (2 PRDs)
+| PRD ID | Feature | Priority | Created |
+|--------|---------|----------|---------|
+| PRD-031 | URL Structure Normalization | P1 | 2025-10-29 |
+| PRD-032 | Schema Validation | P2 | 2025-10-30 |
+
+### In Progress (1 PRDs)
 | PRD ID | Feature | Owner | Started | Days | Status |
 |--------|---------|-------|---------|------|--------|
-| PRD-003 | OAuth2 Integration | @alice | 2025-10-13 | 12 | In Dev |
-| PRD-005 | Dark Mode | @bob | 2025-10-20 | 5 | In Dev |
+| PRD-033 | Rate Limiting | @bob | 2025-11-01 | 5 | In Dev |
 ```
 
 **After**:
 ```markdown
 ## 📊 Active Pipeline
 
-### In Progress (2 PRDs)
+### Ready to Code (1 PRDs)
+| PRD ID | Feature | Priority | Created |
+|--------|---------|----------|---------|
+| PRD-032 | Schema Validation | P2 | 2025-10-30 |
+
+### In Progress (1 PRDs)
 | PRD ID | Feature | Owner | Started | Days | Status |
 |--------|---------|-------|---------|------|--------|
-| PRD-005 | Dark Mode | @bob | 2025-10-20 | 5 | In Dev |
+| PRD-033 | Rate Limiting | @bob | 2025-11-01 | 5 | In Dev |
 
 ### Recently Completed (Last 30 days)
-| PRD ID | Feature | Completed | Duration | PR | Deploy |
-|--------|---------|-----------|----------|----|----|
-| PRD-003 | OAuth2 Integration | 2025-10-25 | 12 days | #42 | 2025-10-25 |
-| PRD-001 | Project Setup | 2025-09-15 | 8 days | #12 | 2025-09-15 |
+| PRD ID | Feature | Completed | Duration | PR | Confidence | Deploy |
+|--------|---------|-----------|----------|----|-----------|----|
+| PRD-031 | URL Structure Normalization | 2025-11-06 | 8 days | #34 | 9/10 | 2025-11-06 |
+| PRD-030 | Auth Refactor | 2025-11-04 | 6 days | #33 | 8/10 | 2025-11-04 |
 ```
 
-### Step 8: Generate Completion Summary
+### Step 11: Generate Completion Summary
 
 Show final summary:
 
 ```markdown
-✅ **PRD-003 Complete!**
+✅ **PRD-031 Complete!**
 
-📝 **Feature**: OAuth2 Integration
-🗓️ **Completed**: 2025-10-25
-⏱️ **Duration**: 12 days (estimated: 10 days, +20%)
+📝 **Feature**: URL Structure Normalization
+🗓️ **Completed**: 2025-11-06
+⏱️ **Duration**: 8 days (estimated: 5 days, +60%)
 
 📊 **Metrics**:
-- PR #42: Merged ✅
-- Production: Deployed 2025-10-25
+- PR #34: Merged ✅ (today at 14:32)
+- Production: Deployed 2025-11-06
 - Performance: 150ms response time (target: <200ms) ✅
-- Test Coverage: 92% (target: >80%) ✅
-- Security: All checks passed ✅
+- Test Coverage: 95% (target: >80%) ✅
+- Confidence: 9/10
+
+🎯 **Retrospective**:
+- ✅ Clean implementation, tests worked first time
+- ⚠️  URL edge cases took longer (+167% time)
+- 💡 Start with edge cases instead of happy path next time
+- 🔧 Tech debt: Refactor URL validator
 
 🧹 **Cleanup**:
+- ✅ PR merged and remote branch deleted
 - ✅ PRD moved to 04-complete/
 - ✅ Worktree removed
-- ✅ Branches deleted
+- ✅ Local branch deleted
 - ✅ WORK_PLAN.md updated
 - ✅ Session documented in SESSION_CONTEXT
 
 📚 **Follow-up**:
-- PRD-008: Improve OAuth error messages
+- PRD-032: Add URL schema validation
 
 🎉 **Great work! Feature is live in production.**
 
@@ -506,12 +708,13 @@ Respects `prd_workflow.completion` configuration:
   "prd_workflow": {
     "completion": {
       "enabled": true,
+      "auto_merge_pr": true,
       "auto_cleanup_worktree": true,
-      "auto_delete_branches": false,
-      "require_pr_merged": true,
+      "auto_delete_branches": true,
       "require_production_deploy": false,
-      "collect_metrics": true,
-      "collect_learnings": true
+      "collect_retrospective": true,
+      "confidence_scoring": true,
+      "ai_conflict_resolution": true
     }
   },
   "session_management": {
@@ -526,72 +729,122 @@ Respects `prd_workflow.completion` configuration:
 ## Options
 
 ```bash
-# Interactive (default)
+# Interactive (default) - handles both open and merged PRs
 /complete-prd
 
 # Specify PRD
-/complete-prd PRD-003
-/complete-prd 250915-oauth2-integration-v1
+/complete-prd PRD-031
+/complete-prd PRD-031-url-structure-normalization
 
-# Quick mode (skip optional questions)
-/complete-prd PRD-003 --quick
+# Quick mode (skip optional questions, auto-merge if tests pass)
+/complete-prd PRD-031 --quick
 
-# Force complete without PR check (not recommended)
-/complete-prd PRD-003 --force
+# No merge (assume PR is already merged)
+/complete-prd PRD-031 --no-merge
+
+# Force complete without PR (not recommended)
+/complete-prd PRD-031 --force
 ```
 
 ## Error Handling
 
-**PR not merged**:
+**PR has failing checks**:
 ```
-❌ Cannot complete PRD-003: PR #42 is still OPEN
+⚠️ PR #34 has failing checks
+
+❌ Failed checks:
+  - Build (failed at 12:34)
+  - Lint (2 errors)
 
 Options:
-1. Wait for merge
-2. Complete anyway (--force)
+1. Fix checks now
+2. Wait for checks to pass
+3. Force merge anyway (not recommended)
 
-Recommendation: Wait for PR to be merged first.
+What would you like to do? (1-3)
 ```
 
 **No PR found**:
 ```
-⚠️ No PR found for PRD-003
+⚠️ No PR found for PRD-031
 
 Was a PR created? If yes:
 1. Add PR number to PRD manually
 2. Re-run /complete-prd
 
-If no PR was needed (hotfix, etc.):
-1. Run /complete-prd PRD-003 --no-pr
+If no PR was needed (hotfix, docs-only, etc.):
+1. Run /complete-prd PRD-031 --no-pr
 ```
 
 **PRD already complete**:
 ```
-ℹ️ PRD-003 is already in 04-complete/
+ℹ️ PRD-031 is already in 04-complete/
 
-Completed: 2025-10-25
-PR: #42
+Completed: 2025-11-06
+PR: #34
+Confidence: 9/10
 
 Did you mean to /archive-prd instead?
 ```
 
+**Merge conflicts can't be auto-resolved**:
+```
+🔀 Complex merge conflicts detected
+
+These conflicts need manual resolution:
+  - src/complex-logic.ts (20 lines affected)
+  - database/schema.sql (structural changes)
+
+I've started the merge process. Please:
+1. Resolve conflicts manually
+2. Run tests: npm test
+3. Complete merge: git commit
+4. Re-run: /complete-prd PRD-031
+
+Opening files with conflicts...
+```
+
 ## Best Practices
 
-- ✅ Always verify PR is merged before completing
-- ✅ Record deployment date for tracking
-- ✅ Document learnings for retrospectives
-- ✅ Clean up worktrees to avoid clutter
-- ✅ Update WORK_PLAN.md for visibility
+- ✅ Review PR changes before merging
+- ✅ Trust AI conflict resolution for simple cases
+- ✅ Always run tests after conflict resolution
+- ✅ Record honest retrospective (what worked, what didn't)
+- ✅ Use confidence scoring (be realistic)
+- ✅ Document tech debt created
+- ✅ Track "would do differently" learnings
+- ✅ Clean up worktrees immediately
 - ✅ Archive PRDs after 2-4 weeks in complete
 
 ## Integration
 
 Works seamlessly with:
-- **`/smart-pr`**: Creates PR that this command will verify
-- **`/archive-prd`**: Next step after PRD sits in complete for a while
-- **`/list-prds`**: Shows completed PRDs
-- **GitHub CLI**: Verifies PR merge status
-- **Git Worktree**: Cleans up feature worktrees
+- **`/code-prd`**: Creates worktree that this command will clean up
+- **`/smart-pr`**: Creates PR that this command will merge
+- **GitHub CLI**: Handles PR merge and checks
+- **Git Worktree**: Manages feature branch cleanup
+- **SESSION_CONTEXT**: Tracks work sessions
+- **WORK_PLAN.md**: Updates pipeline status
+
+## Key Improvements (v3.0.0)
+
+🎯 **Integrated PR Merge**:
+- No longer blocks on OPEN PRs
+- Reviews and merges PR within completion flow
+- Handles conflict detection and AI resolution
+- Runs tests before merging
+
+🎯 **Structured Retrospective**:
+- What went well / didn't / surprises
+- Confidence scoring (1-10)
+- "Would do differently" reflection
+- Tech debt tracking
+
+🎯 **Honest Assessment**:
+- Not just "done" but "how confident"
+- Captures challenges and learnings
+- Documents time estimation accuracy
+- Tracks follow-up PRDs
 
 ---
 
@@ -600,6 +853,7 @@ Works seamlessly with:
 - `/code-prd` - Start development (creates worktree)
 - `/work-prd` - Guided implementation
 - `/smart-pr` - Create pull request
+- `/review-prd` - Review PRD before coding
 - `/archive-prd` - Archive old completed PRDs
 - `/list-prds` - View all PRDs and their status
 
@@ -607,5 +861,5 @@ Works seamlessly with:
 
 **Plugin**: claude-prd-workflow
 **Category**: PRD Management
-**Version**: 2.0.0
-**Requires**: Git 2.25+, GitHub CLI (gh)
+**Version**: 3.0.0
+**Requires**: Git 2.25+, GitHub CLI (gh), Node.js (for tests)

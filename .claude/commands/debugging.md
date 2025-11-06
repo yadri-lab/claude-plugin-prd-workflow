@@ -2,30 +2,31 @@
 name: debugging
 description: Structured debugging session with team knowledge capture
 category: Development Tools
-version: 1.0.0
+version: 2.0.0
 ---
 
 # Debugging Command
 
-Structured debugging workflow that captures investigation process and builds team knowledge base.
+Fast, systematic debugging with hypothesis testing and team knowledge capture.
 
 ## Purpose
 
-Transform chaotic debugging into systematic investigation:
-- **Structured investigation** with hypothesis testing
-- **Root cause documentation** for team learning
-- **Solution capture** with prevention strategies
-- **Persistent record** in `.prds/thoughts/debugging/`
+Transform chaotic debugging into efficient investigation:
+- **Quick triage** with red flags detection
+- **Known issues check** via web search
+- **Quick wins** before deep investigation
+- **Solution confidence** with alternatives
+- **Team knowledge** in searchable format
 
-**Use case**: "Bug found - need to investigate and document for team"
+**Use case**: "Bug found - investigate fast and document for team"
 
 ---
 
 ## Workflow
 
-### Step 1: Quick Start - Essential Info Only
+### Step 1: Quick Triage (30 seconds)
 
-**Lightweight initial capture** - Just the essentials to get started.
+**Immediate assessment** - No questions, just start investigating.
 
 ```markdown
 🐛 **Debug Session Started**
@@ -33,229 +34,344 @@ Transform chaotic debugging into systematic investigation:
 You reported: "{{USER_INPUT}}"
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**In 1-2 sentences, what's broken?**
-> {{SHORT_DESCRIPTION}}
-
-**Where** (file/function if known):
-> {{LOCATION}} (or "Unknown")
-
-**Environment** (dev/staging/prod):
-> {{ENVIRONMENT}}
-
+🔍 QUICK TRIAGE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Let's investigate systematically. I'll track each hypothesis we test.
+**Symptom**: OAuth redirect fails in production with "Invalid state parameter"
+
+**Environment**: Production only (not dev/staging)
+
+**Severity**: 🔴 High
+- ❌ Blocks all new user signups
+- 💰 Revenue impact: High
+- 👥 Affected users: 100%
+
+**Initial observation**:
+- Works fine in development
+- Started happening after Redis migration (PRD-007)
+- Error message: "Invalid state parameter"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+#### Red Flags Detection (Automatic)
+
+```markdown
+🚩 **Red Flags Detected**
+
+Based on "fails in production only":
+- ⚠️  **Environment-specific** issue (config/infra difference)
+- ⚠️  Possible **secrets/env vars** mismatch
+- ⚠️  Could be **infrastructure** (Redis, DB, external APIs)
+- ⚠️  **Timing differences** (prod load vs dev)
+
+Based on "OAuth redirect fails" + "Invalid state":
+- ⚠️  **Session/state management** issue (most likely)
+- ⚠️  CSRF token validation failure
+- ⚠️  Redirect URI mismatch
+- ⚠️  **State parameter expiration** (timing issue)
+
+Based on "after Redis migration":
+- ⚠️  **Session storage** changed (in-memory → Redis)
+- ⚠️  TTL/expiration settings
+- ⚠️  Serialization issues
+
+**Pattern match**: Environment-specific session timeout (common OAuth bug)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ---
 
-### Step 2: Hypothesis-Driven Investigation Loop
+### Step 2: Known Issues Check (Web Search)
 
-**THIS IS THE CORE** - Iterative hypothesis testing with detailed tracking.
-
-#### Initial Hypotheses Brainstorm
+**Before reinventing the wheel** - Check if it's a known problem.
 
 ```markdown
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🧠 BRAINSTORM: POSSIBLE CAUSES
+🌐 KNOWN ISSUES CHECK
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Based on "{{SYMPTOM}}", here are possible root causes:
+Searching: "OAuth invalid state parameter production Redis session"
 
-**Hypothesis 1**: {{THEORY_1}}
-- Likelihood: High / Medium / Low
-- Quick to test: Yes / No
+**Found**:
 
-**Hypothesis 2**: {{THEORY_2}}
-- Likelihood: High / Medium / Low
-- Quick to test: Yes / No
+📄 **Stack Overflow** (42 upvotes)
+- Title: "OAuth state parameter invalid after production deploy"
+- Answer: "Check session TTL - OAuth flow takes 2-5min, default session = 5min"
+- Link: [stackoverflow.com/...](https://...)
 
-**Hypothesis 3**: {{THEORY_3}}
-- Likelihood: High / Medium / Low
-- Quick to test: Yes / No
+🐛 **GitHub Issue** (redis-session #234)
+- Title: "Session expires during long OAuth flows"
+- Solution: Increase session maxAge to 15min minimum
+- Status: Closed (fixed in v2.1.0)
 
-**Hypothesis 4**: {{THEORY_4}}
-- Likelihood: High / Medium / Low
-- Quick to test: Yes / No
+📝 **Blog Post** (auth0.com)
+- Title: "Common OAuth Pitfalls in Production"
+- Issue #3: "Session timeout during OAuth callback"
+- Recommendation: Set session TTL > longest OAuth flow + 5min buffer
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**Testing Order** (highest likelihood + easiest to test first):
-1. Hypothesis {{N}} - {{THEORY}}
-2. Hypothesis {{N}} - {{THEORY}}
-3. ...
+💡 **Quick Insight**:
+This is a **known pattern** - session expires before OAuth completes.
+Likely cause: Redis TTL too short for OAuth flow duration.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ---
 
-#### Hypothesis Testing Loop
+### Step 3: Quick Wins (< 5 minutes)
 
-For **each** hypothesis, create a detailed test record:
+**Try obvious checks first** - Often faster than hypothesis testing.
 
 ```markdown
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔬 HYPOTHESIS {{N}}: {{THEORY}}
+🎯 QUICK WINS CHECK
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-**Started**: {{TIMESTAMP}}
+**Quick Win #1: Check Logs** (might already show the issue)
 
-**Theory**: {{DETAILED_EXPLANATION}}
+```bash
+# Production logs
+tail -100 logs/production.log | grep -i "oauth\|session\|state"
+```
 
-**Why I think this**: {{REASONING}}
-- Observation 1: {{WHAT_I_SAW}}
-- Observation 2: {{WHAT_I_SAW}}
-- Similar to: {{PAST_EXPERIENCE_OR_PATTERN}}
+Output:
+```
+[ERROR] Session not found for state: abc123
+[ERROR] OAuth callback failed: Invalid state parameter
+[WARN]  Session expired: user_session_xyz (age: 6m 12s)
+```
+
+**Observation**:
+- ✅ **CLUE**: Sessions expiring (~6min)
+- ✅ **CLUE**: "Session not found" errors
+- 💡 Sessions lasting longer than expected
+
+---
+
+**Quick Win #2: Compare Configs** (prod vs dev)
+
+```bash
+diff .env.production .env.development | grep -i session
+```
+
+Output:
+```diff
+- SESSION_TTL=300000    # 5 minutes (production)
++ SESSION_TTL=900000    # 15 minutes (development)
+```
+
+**Observation**:
+- ✅ **SMOKING GUN**: SESSION_TTL is 5min in prod, 15min in dev
+- 💡 OAuth flow takes 6min average (from logs)
+- 🎯 **Root cause likely found!**
+
+---
+
+**Quick Win #3: Recent Changes** (git blame)
+
+```bash
+git log --oneline --since="2 weeks ago" -- src/auth/
+git show HEAD:src/auth/session.ts | grep -A5 maxAge
+```
+
+Output:
+```
+commit abc123 - PRD-007: Migrate to Redis sessions
+- const maxAge = 5 * 60 * 1000; // Changed from 15min to 5min
+```
+
+**Observation**:
+- ✅ **CONFIRMED**: TTL changed in PRD-007
+- 💡 Dev config not updated to match prod
+- 🎯 **Root cause verified**
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎉 **Quick Wins Success!**
+
+Found root cause in **3 minutes** without deep investigation:
+- Session TTL = 5min in production
+- OAuth flow = 6min average duration
+- Session expires before OAuth callback completes
+
+Proceeding to solution analysis...
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+---
+
+### Step 4: Investigation Paths (if Quick Wins fail)
+
+**Only if quick wins don't find the issue** - Systematic hypothesis testing.
+
+```markdown
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🗺️ INVESTIGATION PATHS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Since quick wins didn't solve it, let's investigate systematically.
+
+**Path A: Session Management** (Likelihood: 🔴 High, Effort: 🟢 Low)
+├─ H1: Redis session expires too quickly
+│  Test: Check TTL in Redis vs OAuth flow duration
+│  Expected: TTL < flow duration
+│
+├─ H2: Session cookie not persisting across redirects
+│  Test: Inspect cookies during OAuth flow (browser DevTools)
+│  Expected: Cookie missing or changed
+│
+└─ H3: State parameter not stored correctly in Redis
+   Test: Redis MONITOR during OAuth flow
+   Expected: State key not found or expired
+
+**Path B: Configuration** (Likelihood: 🟡 Medium, Effort: 🟢 Low)
+├─ H4: OAuth redirect URI mismatch in production
+│  Test: Compare GitHub app settings vs .env.production
+│  Expected: URI mismatch
+│
+└─ H5: OAuth client secret incorrect
+   Test: Check GitHub app credentials vs env vars
+   Expected: Secret mismatch or expired
+
+**Path C: External Services** (Likelihood: 🟢 Low, Effort: 🟡 Medium)
+├─ H6: GitHub API slow response causing timeout
+│  Test: Measure API response times in production
+│  Expected: >5min response time
+│
+└─ H7: Network timeout between prod server and GitHub
+   Test: Check network logs, ping times
+   Expected: Packet loss or high latency
+
+**Recommended order**: Path A → Path B → Path C
+
+Starting with Path A (highest likelihood, easiest to test)...
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+#### Hypothesis Testing (Detailed)
+
+For each hypothesis that needs testing:
+
+```markdown
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔬 HYPOTHESIS A1: Redis Session Expires Too Quickly
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**Started**: 14:32
+
+**Theory**:
+Session TTL is shorter than OAuth flow duration, causing state parameter to be lost.
+
+**Why I think this**:
+- Logs show "Session not found" errors
+- OAuth callback happens 6min after initiation
+- Redis default TTL might be too short
+- Similar pattern in Stack Overflow post
 
 **If TRUE, I expect to see**:
-- {{EXPECTED_EVIDENCE_1}}
-- {{EXPECTED_EVIDENCE_2}}
+- Redis TTL < 6 minutes
+- Session key missing when callback arrives
+- Different behavior in dev (longer TTL)
 
 **If FALSE, I expect to see**:
-- {{DISPROVING_EVIDENCE_1}}
-- {{DISPROVING_EVIDENCE_2}}
+- Redis TTL > 6 minutes
+- Session key still exists when callback arrives
+- Same failure in dev environment
 
 ---
 
 **Test Plan**:
-1. {{WHAT_TO_CHECK_FIRST}}
-   - Tool/Command: {{HOW}}
-   - Expected result if hypothesis true: {{RESULT}}
 
-2. {{WHAT_TO_CHECK_SECOND}}
-   - Tool/Command: {{HOW}}
-   - Expected result if hypothesis true: {{RESULT}}
+1. Check current Redis TTL setting
+   ```bash
+   redis-cli CONFIG GET maxmemory-policy
+   grep -r "maxAge\|ttl" src/auth/
+   ```
+
+2. Measure actual OAuth flow duration
+   ```bash
+   # Add timing logs
+   console.log('[OAuth] Flow started:', Date.now())
+   console.log('[OAuth] Callback received:', Date.now())
+   ```
+
+3. Monitor Redis session during OAuth flow
+   ```bash
+   redis-cli MONITOR | grep session
+   ```
 
 ---
 
 **Execution Log**:
 
-Test 1: {{WHAT_I_CHECKED}}
+**Test 1**: Check Redis TTL
 ```bash
-# Commands run
-{{COMMAND_1}}
-{{COMMAND_2}}
+cat src/auth/session.ts | grep maxAge
+```
+
+Output:
+```typescript
+cookie: { maxAge: 5 * 60 * 1000 } // 5 minutes
+```
+
+**Observation**: TTL is 5 minutes (300 seconds)
+
+---
+
+**Test 2**: Measure OAuth flow duration
+```bash
+tail -f logs/production.log | grep "OAuth"
 ```
 
 Output:
 ```
-{{ACTUAL_OUTPUT}}
+[14:30:00] OAuth flow started
+[14:36:12] OAuth callback received
+# Duration: 6 minutes 12 seconds
 ```
 
-Observation: {{WHAT_THIS_MEANS}}
+**Observation**: Flow takes 6min 12s, exceeds 5min TTL ✅
 
 ---
 
-Test 2: {{WHAT_I_CHECKED}}
+**Test 3**: Verify session expiration
 ```bash
-{{COMMAND}}
+redis-cli
+> TTL session:abc123
+(integer) -2  # Key expired
 ```
 
-Output:
-```
-{{ACTUAL_OUTPUT}}
-```
-
-Observation: {{WHAT_THIS_MEANS}}
+**Observation**: Session key expired before callback ✅
 
 ---
 
-**Result**: ❌ Disproved | ✅ Confirmed | 🤔 Inconclusive
+**Result**: ✅ **CONFIRMED**
 
 **Detailed Findings**:
-{{WHAT_I_LEARNED_FROM_THIS_TEST}}
+- Session TTL: 5 minutes
+- OAuth flow: 6+ minutes average
+- Session expires before callback completes
+- State parameter lost → "Invalid state" error
 
-Key insights:
-- {{INSIGHT_1}}
-- {{INSIGHT_2}}
+**Key insights**:
+- Production uses shorter TTL than development
+- GitHub OAuth API response is slow (4-5min)
+- No buffer time in TTL setting
 
-**Time Invested**: {{MINUTES}} minutes
+**Time Invested**: 8 minutes
 
-**Next**: {{IF_DISPROVED_WHAT_NEXT}} / {{IF_CONFIRMED_WHAT_NEXT}}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
----
-
-#### After Each Hypothesis: Update Investigation State
-
-```markdown
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📊 INVESTIGATION STATE UPDATE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**Hypotheses Tested**: {{N}}
-
-**Status**:
-- ❌ Hypothesis 1: {{THEORY}} - Disproved
-- ❌ Hypothesis 2: {{THEORY}} - Disproved
-- ✅ Hypothesis 3: {{THEORY}} - **CONFIRMED** ← Root cause found!
-- ⏸️  Hypothesis 4: {{THEORY}} - Not tested yet
-
-**What we now know**:
-- {{LEARNED_FACT_1}}
-- {{LEARNED_FACT_2}}
-- {{LEARNED_FACT_3}}
-
-**What we can rule out**:
-- ❌ NOT a {{DISPROVED_THEORY}}
-- ❌ NOT caused by {{DISPROVED_CAUSE}}
-
-{{#if ROOT_CAUSE_FOUND}}
-**Root Cause Identified**: {{THE_ACTUAL_PROBLEM}}
-
-Proceeding to Step 3: Root Cause Analysis
-{{else}}
-**Still investigating...**
-
-Next hypothesis to test: {{NEXT_THEORY}}
-{{/if}}
+**Next**: Root cause confirmed, proceed to solution
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ---
-
-### Step 3: Root Cause Analysis
-
-Once root cause confirmed:
-
-```markdown
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔬 HYPOTHESIS {{N}}: {{THEORY}}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**Reasoning**: {{WHY_THIS_THEORY}}
-
-**Test Plan**: {{HOW_TO_VERIFY}}
-
-**Commands/Steps to test**:
-```bash
-{{COMMANDS}}
-```
-
-Running tests...
-
-**Result**: ❌ Disproved | ✅ Confirmed | 🤔 Inconclusive
-
-**Findings**: {{WHAT_WE_LEARNED}}
-
-**Time invested**: {{MINUTES}} minutes
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Test another hypothesis? (y/n)
-> _
-```
 
 ### Step 5: Root Cause Analysis
-
-Once confirmed:
 
 ```markdown
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -263,332 +379,652 @@ Once confirmed:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 **What was actually wrong?**
-{{DETAILED_EXPLANATION}}
 
-**Category**:
-[ ] Logic error
-[ ] Race condition
-[ ] Null/undefined handling
-[ ] Type mismatch
-[ ] Configuration issue
-[ ] Dependency bug
-[ ] Environment issue
-[ ] Other: {{SPECIFY}}
+Redis session expires (5min TTL) before OAuth flow completes (~6min average).
+
+When user returns from GitHub OAuth approval:
+1. OAuth callback arrives with state parameter
+2. Server looks up state in Redis session
+3. Session has expired (TTL exceeded)
+4. State parameter not found → "Invalid state parameter" error
+5. User sees error page instead of successful login
+
+**Category**: ⚠️ Configuration issue
 
 **Why did this happen?**
-**Primary cause**: {{IMMEDIATE_CAUSE}}
+
+**Primary cause**:
+TTL set too short (5min) without considering OAuth flow duration
 
 **Contributing factors**:
-1. {{FACTOR1}}
-2. {{FACTOR2}}
+1. **GitHub API slowness**: OAuth approval takes 4-5min (slow API)
+2. **No buffer time**: TTL exactly matches typical flow time
+3. **Dev/prod mismatch**: Dev has 15min TTL, prod has 5min
+4. **No monitoring**: No alerts for slow OAuth flows
 
 **When introduced**:
-- Commit: {{SHA}} (if known)
-- PR: {{LINK}} (if known)
-- Date: {{DATE}}
+- Commit: `abc123` (PRD-007: Migrate to Redis sessions)
+- PR: #234
+- Date: 2025-12-15
+- Change: Moved from in-memory (no expiration) to Redis (5min TTL)
+
+**Why not caught earlier**:
+- Dev environment has longer TTL (15min)
+- OAuth in dev is faster (local network)
+- No load testing for OAuth flows
+- No production monitoring for session expiration
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-### Step 6: Implement Solution
+---
+
+### Step 6: Solution Analysis (with Alternatives)
 
 ```markdown
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ SOLUTION
+✅ SOLUTION ANALYSIS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-**Fix approach**: {{APPROACH_NAME}}
+**Root Cause**: Session TTL (5min) < OAuth flow duration (6min avg)
 
-**Why this fix**: {{RATIONALE}}
+Let me compare solution approaches:
 
-**Code changes**:
+---
+
+**Approach A: Increase Session TTL** ⭐ **Recommended**
+
+**Change**:
+```diff
+- cookie: { maxAge: 5 * 60 * 1000 }  // 5 minutes
++ cookie: { maxAge: 15 * 60 * 1000 } // 15 minutes
+```
+
+**Pros**:
+- ✅ Simple fix (1 line change)
+- ✅ Immediate deployment (< 5min)
+- ✅ Handles slow OAuth flows (up to 15min)
+- ✅ Matches dev environment
+- ✅ Low risk
+
+**Cons**:
+- ⚠️  Slightly more Redis memory (~0.2% increase)
+- ⚠️  Longer session = small security trade-off
+
+**Effort**: 🟢 5 minutes
+**Risk**: 🟢 Very Low
+**Confidence**: 9/10
+
+---
+
+**Approach B: Optimize OAuth Flow Performance**
+
+**Change**:
+- Cache GitHub API responses
+- Reduce OAuth redirects
+- Use GitHub API v4 (GraphQL, faster)
+
+**Pros**:
+- ✅ Addresses root performance issue
+- ✅ Improves overall auth speed
+- ✅ Better user experience
+
+**Cons**:
+- ❌ Complex implementation (multiple files)
+- ❌ Needs extensive testing
+- ❌ Takes days to implement
+- ⚠️  May not fully solve issue (GitHub API still slow)
+
+**Effort**: 🔴 2-3 days
+**Risk**: 🟡 Medium
+**Confidence**: 7/10
+
+---
+
+**Approach C: Store OAuth State in Database**
+
+**Change**:
+- Move state parameter from session to dedicated DB table
+- No TTL expiration (manual cleanup)
+
+**Pros**:
+- ✅ No expiration issues ever
+- ✅ Persistent across server restarts
+- ✅ Can track OAuth attempts
+
+**Cons**:
+- ⚠️  Extra DB calls on each OAuth flow
+- ⚠️  Needs migration + cleanup job
+- ⚠️  More complex code
+
+**Effort**: 🟡 4 hours
+**Risk**: 🟡 Medium
+**Confidence**: 8/10
+
+---
+
+**Approach D: Separate OAuth State Storage**
+
+**Change**:
+- Use Redis with separate key/TTL for OAuth state
+- Keep session TTL at 5min
+- OAuth state TTL = 20min
+
+**Pros**:
+- ✅ Decouples OAuth from session management
+- ✅ Fine-grained control
+- ✅ Best of both worlds
+
+**Cons**:
+- ⚠️  More complex architecture
+- ⚠️  Two Redis keys per OAuth flow
+
+**Effort**: 🟡 2 hours
+**Risk**: 🟢 Low
+**Confidence**: 8/10
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**Recommendation**: **Approach A now** + **Approach B later**
+
+**Why**:
+- Fix production immediately (5min deployment)
+- Address root cause later when time permits
+- Create PRD-XXX for performance optimization
+
+**Confidence in fix**: 9/10
+- 10% risk: GitHub API could be even slower (15min+)
+- Mitigation: Add monitoring, increase to 20min if needed
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+---
+
+### Step 7: Implementation & Verification
+
+```markdown
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚡ FIX IMPLEMENTATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**Solution**: Increase session TTL to 15 minutes
+
+**Code Changes**:
+
+**File**: `src/auth/session.ts`
 
 Before:
-```{{LANGUAGE}}
-{{BAD_CODE}}
+```typescript
+const sessionConfig = {
+  store: new RedisStore({ client: redis }),
+  cookie: {
+    maxAge: 5 * 60 * 1000,  // 5 minutes
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production'
+  }
+}
 ```
 
 After:
-```{{LANGUAGE}}
-{{FIXED_CODE}}
+```typescript
+const sessionConfig = {
+  store: new RedisStore({ client: redis }),
+  cookie: {
+    maxAge: 15 * 60 * 1000,  // 15 minutes - allows for slow OAuth flows
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production'
+  }
+}
+```
+
+**File**: `tests/auth/oauth.test.ts` (NEW)
+
+```typescript
+describe('OAuth flow with slow response', () => {
+  it('should handle OAuth callback after 10 minutes', async () => {
+    const state = await startOAuthFlow();
+
+    // Simulate slow GitHub API (10 min delay)
+    await delay(10 * 60 * 1000);
+
+    const result = await handleOAuthCallback(state);
+    expect(result.success).toBe(true);
+  });
+});
 ```
 
 **Files modified**:
-- `path/to/file1.ts` - Fixed {{WHAT}}
-- `path/to/file2.ts` - Added validation for {{WHAT}}
-- `path/to/test.ts` - Added regression test
+- `src/auth/session.ts` - Increased TTL
+- `tests/auth/oauth.test.ts` - Added timeout regression test
+- `.env.production` - Updated SESSION_TTL=900000 (documentation)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
 
-### Step 7: Verification
-
-```markdown
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🧪 VERIFICATION
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧪 **VERIFICATION**
 
 **Testing**:
-- [x] Bug no longer reproduces locally
+- [x] Bug no longer reproduces in staging
 - [x] Regression test added and passing
-- [x] All existing tests still pass
-- [x] Manual testing in affected flows
-
-**Code Review**:
-- [ ] Code review requested
-- [ ] Security implications reviewed
-- [ ] Performance implications reviewed
+- [x] All existing tests still pass (245/245)
+- [x] Manual testing: OAuth flow with 8min delay ✅
 
 **Deployment**:
-- [ ] Deployed to staging
-- [ ] Verified in staging
-- [ ] Ready for production
+- [x] Deployed to staging (14:45)
+- [x] Verified in staging (14:50)
+- [x] Deployed to production (15:00)
+- [x] Monitoring active (15:05)
 
-**Time to fix**: {{HOURS}} hours
+**Production Verification** (15 minutes after deploy):
+```bash
+# Check OAuth success rate
+grep "OAuth success" logs/production.log | wc -l
+# Before: 45% success rate
+# After:  98% success rate ✅
+```
+
+**Time to fix**: 40 minutes total
+- Investigation: 20 min
+- Implementation: 5 min
+- Testing: 10 min
+- Deployment: 5 min
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚡ **FIX IMPACT & ROLLBACK**
+
+**Impact Analysis**:
+
+**Memory**:
+- Before: 500 sessions × 5min = 2,500 session-minutes
+- After: 500 sessions × 15min = 7,500 session-minutes
+- Increase: +5,000 session-minutes (+200%)
+- Redis memory: 2MB → 6MB (+4MB, negligible)
+
+**Security**:
+- Longer session = slightly higher hijacking risk
+- Mitigation: httpOnly + secure flags still active
+- Acceptable trade-off for functionality
+
+**Performance**:
+- No change (session lookup time unchanged)
+
+**Breaking Changes**:
+- None (backward compatible)
+
+---
+
+**Rollback Plan**:
+
+If fix doesn't work or causes issues:
+
+```bash
+# Quick rollback (< 1 minute)
+cd /app
+git revert HEAD
+npm run build
+pm2 restart app
+
+# Or manual config change:
+sed -i 's/15 \* 60/5 \* 60/' src/auth/session.ts
+npm run build
+pm2 restart app
+```
+
+**Rollback triggers**:
+- OAuth success rate < 90% after 1 hour
+- Redis memory > 50MB (unlikely)
+- User complaints about security
+
+**Monitoring** (next 24 hours):
+- OAuth success rate (target: >95%)
+- Session expiration timing
+- Redis memory usage
+- GitHub API response times
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
+
+---
 
 ### Step 8: Prevention Strategy
 
 ```markdown
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🛡️ PREVENTION
+🛡️ PREVENTION STRATEGY
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 **How to avoid this in future?**
 
-**Immediate actions**:
-1. Add validation for {{CASE}}
-   - Location: `path/to/file.ts`
-   - Implementation: {{LOGIC}}
+**Immediate Actions** (done today):
 
-2. Update tests to cover {{SCENARIO}}
-   - Test file: `path/to/test.ts`
-   - Coverage: {{WHAT}}
+1. ✅ **Add regression test**
+   - File: `tests/auth/oauth.test.ts`
+   - Tests OAuth flows with 10min delay
+   - Prevents TTL being reduced again
 
-3. Document {{EDGE_CASE}} in {{LOCATION}}
-   - Type: README / inline comments
-   - Warning: {{WHAT_TO_KNOW}}
+2. ✅ **Document TTL requirement**
+   - File: `src/auth/session.ts`
+   - Comment: "// Must be > max OAuth flow time (10min) + 5min buffer"
+   - Prevents accidental reduction
 
-**Systemic improvements**:
-- [ ] Add linting rule to catch this pattern
-- [ ] Update error handling guidelines
-- [ ] Improve logging for similar issues
-- [ ] Add monitoring/alerting
+3. ✅ **Sync dev/prod configs**
+   - Updated `.env.development` to match `.env.production`
+   - Catches issues in dev before prod
 
-**Lessons learned**:
-- Technical: {{LESSON1}}
-- Process: {{LESSON2}}
+---
+
+**Systemic Improvements** (next 2 weeks):
+
+- [ ] **Add monitoring dashboard** (PRD-XXX)
+  - Track OAuth flow duration (p50, p95, p99)
+  - Alert if flow > 10min
+  - Alert if session expiration during OAuth
+
+- [ ] **Load testing for OAuth** (PRD-XXX)
+  - Test with slow API responses
+  - Test with high concurrent OAuth flows
+  - Catch timing issues before production
+
+- [ ] **Improve GitHub API performance** (PRD-XXX)
+  - Cache user profile data
+  - Use GraphQL API (faster)
+  - Reduce number of API calls
+
+- [ ] **Config validation on startup**
+  - Check SESSION_TTL > 10min
+  - Fail fast if misconfigured
+  - Prevents deployment with bad config
+
+---
+
+**Lessons Learned**:
+
+**Technical**:
+- Always set TTL > longest expected operation + buffer
+- OAuth flows are slow (4-10min typical)
+- Environment-specific configs must be documented
+- Session expiration needs monitoring
+
+**Process**:
+- Quick wins (logs + config diff) are faster than hypothesis testing
+- Web search for known issues saves time
+- Dev/prod parity critical for timing-sensitive features
+- Monitoring should exist before production deploy
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-### Step 9: Impact Assessment
+---
+
+### Step 9: Synthèse & Mon Feeling
 
 ```markdown
-📊 **Impact Assessment**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 SYNTHÈSE & MON FEELING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-**User Impact**:
-- Severity: Critical / High / Medium / Low
-- Affected users: {{NUMBER}} or {{PERCENTAGE}}
-- Data loss: Yes / No
-- Workaround available: Yes / No
+**Debug Difficulty**: 3/10 ⭐ (quick wins worked perfectly)
 
-**Business Impact**:
-- Revenue impact: {{IMPACT}}
-- Reputation impact: {{IMPACT}}
-- SLA breach: Yes / No
+**Time Invested**:
+- 🔍 Investigation: 20 min (expected: 2h) ✅ **Much faster**
+  - Quick wins: 3 min ⚡
+  - Web search: 2 min
+  - Log analysis: 5 min
+  - Hypothesis testing: 10 min
+- 🔧 Fix implementation: 5 min
+- 🧪 Testing: 10 min
+- 🚀 Deployment: 5 min
+- **Total**: 40 min (expected: 3h)
 
-**Downtime**:
-- Duration: {{TIME}} from discovery to fix
-- Affected services: {{SERVICES}}
+---
+
+**What worked well**:
+- ✅ **Quick wins found issue immediately** (config diff)
+- ✅ Web search confirmed known pattern (not unique bug)
+- ✅ Logs were clear and helpful (showed timing)
+- ✅ Simple fix (1 line change)
+- ✅ Fast deployment (production fixed in 40min)
+
+**What was tricky**:
+- ⚠️  Initially suspected OAuth config, not session timing
+- ⚠️  Prod-only issue made reproduction harder
+- ⚠️  GitHub API slowness not documented anywhere
+- ⚠️  No monitoring for session expiration
+
+**What surprised me**:
+- 💡 OAuth flow takes 6+ minutes (expected: 1-2min)
+- 💡 GitHub API is really slow (4-5min for profile fetch)
+- 💡 Dev had different config than prod (should be identical)
+
+---
+
+**Would I do differently next time**:
+- 🔄 **Check configs first** before investigating code
+- 🔄 Compare dev vs prod configs at start of debug
+- 🔄 Always check logs immediately (not after hypothesis)
+- 🔄 Web search for error message before deep investigation
+- 🔄 Add session TTL to monitoring dashboard upfront
+
+---
+
+**Confidence in fix**: 9/10
+
+**Why 9/10**:
+- Fix addresses root cause directly ✅
+- Tested in staging successfully ✅
+- Simple change with low risk ✅
+
+**Why not 10/10**:
+- 10% risk: GitHub API could be even slower (>15min)
+- Monitoring will catch this if it happens
+- Can increase to 20min if needed
+
+---
+
+**Follow-up PRDs**:
+- **PRD-XXX**: Optimize OAuth flow performance (reduce from 6min to <2min)
+- **PRD-XXX**: Add session expiration monitoring dashboard
+- **PRD-XXX**: Load testing for OAuth flows with slow API responses
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-### Step 10: Save Debug Session
-
-```bash
-# Generate filename
-DEBUG_ID=$(date +%Y%m%d-%H%M%S)
-ISSUE_SLUG=$(echo "$ISSUE_DESCRIPTION" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | cut -c1-50)
-DEBUG_FILE=".prds/thoughts/debugging/${DEBUG_ID}-${ISSUE_SLUG}.md"
-
-# Save using template
-echo "✅ Debug session saved: $DEBUG_FILE"
-
-# Link to PRD if applicable
-if [ "$RELATED_PRD" != "Standalone" ]; then
-  echo "🔗 Linked to PRD: $RELATED_PRD"
-  # Add reference in PRD metadata
-fi
-```
-
 ---
 
-## Output Example
+### Step 10: Team Knowledge Capture
 
 ```markdown
-# Debug Session: OAuth Redirect Fails in Production
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📚 TEAM KNOWLEDGE ENTRY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-**Date**: 2025-01-02
-**Debugger**: yassine
-**Related PRD**: PRD-009
-**Status**: 🟢 Resolved
+**Searchable Tags**:
+#oauth #session #production #redis #timeout #configuration
 
-## 🐛 Symptom
-### What's Broken?
-OAuth redirect fails after GitHub authorization in production only.
+**Bug Pattern**: Environment-specific session timeout
 
-### Expected Behavior
-After GitHub OAuth approval, user redirected to /dashboard
+**TL;DR**:
+OAuth redirect fails in production with "Invalid state parameter" because Redis session expires (5min) before OAuth callback completes (~6min).
 
-### Actual Behavior
-User redirected to /error with "Invalid state parameter"
+**Root Cause**:
+- Session TTL: 5 minutes
+- OAuth flow: 6+ minutes (slow GitHub API)
+- Session expires → state parameter lost → error
 
-### Reproducibility
-- [x] Always reproduces in production
-- [ ] Never reproduces in development
+**Solution**:
+Increase session TTL to 15 minutes (allows for slow OAuth flows + buffer)
 
-## 📍 Context
-**Location**:
-- File: `src/auth/oauth.ts`
-- Function: `validateOAuthCallback()`
-- Lines: 45-67
+**Files Changed**:
+- `src/auth/session.ts`: maxAge 5min → 15min
+- `tests/auth/oauth.test.ts`: Added regression test
 
-**Environment**: Production only (not dev/staging)
+**Prevention**:
+- Monitor OAuth flow duration
+- Set TTL > longest operation + 5min buffer
+- Sync dev/prod configs
+- Document timing requirements
 
-## 🔬 Investigation Log
+**Related**:
+- PRD-007: Introduced Redis sessions (root cause)
+- Similar to Stack Overflow #12345678
 
-### Hypothesis 1: State parameter mismatch
-**Reasoning**: Error mentions "invalid state" - could be session issue
+**Time to Resolve**: 40 minutes
 
-**Test**: Check session storage in prod vs dev
+**Confidence**: 9/10
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ **Debug session saved**
+
+File: `.prds/thoughts/debugging/20250106-143000-oauth-session-timeout.md`
+
+You can search past debugs with:
 ```bash
-# Production uses Redis, dev uses in-memory
-cat .env.production | grep SESSION_
+grep -r "#oauth" .prds/thoughts/debugging/
+grep -r "session timeout" .prds/thoughts/debugging/
 ```
 
-**Result**: ✅ Confirmed
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-**Findings**: Production Redis has 5-minute TTL, OAuth flow takes 6 minutes
+🎉 **Debug Complete!**
 
-### Hypothesis 2: [Disproved - skip for brevity]
+**Summary**:
+- 🐛 Bug: OAuth redirect fails in production
+- 💡 Cause: Session timeout (5min < 6min flow)
+- ✅ Fix: Increase TTL to 15min
+- ⏱️  Time: 40 minutes (expected: 3h)
+- 🎯 Confidence: 9/10
 
-## 💡 Root Cause
-**What**: Redis session expires before OAuth callback completes
+**Next steps**:
+- ✅ Production is fixed and stable
+- 📊 Monitor OAuth metrics for 24h
+- 🚀 Create PRD-XXX for performance optimization
+- 📚 Share debug session with team
 
-**Why**:
-- Primary: TTL too short (5 min) for OAuth flow
-- Contributing: Slow GitHub API responses (4-5 min average)
+Great work! 🎉
 
-**When introduced**: PRD-007 (moved to Redis sessions)
-
-## ✅ Solution
-**Fix**: Increase session TTL to 15 minutes
-
-Before:
-```typescript
-const sessionConfig = {
-  store: new RedisStore({ client: redis }),
-  cookie: { maxAge: 5 * 60 * 1000 } // 5 minutes
-}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
-
-After:
-```typescript
-const sessionConfig = {
-  store: new RedisStore({ client: redis }),
-  cookie: { maxAge: 15 * 60 * 1000 } // 15 minutes
-}
-```
-
-**Files modified**:
-- `src/auth/session.ts` - Increased TTL
-- `tests/auth/oauth.test.ts` - Added timeout test
-
-## 🛡️ Prevention
-**Immediate**:
-1. Add test for slow OAuth flows
-2. Document minimum TTL in README
-3. Add monitoring for OAuth timing
-
-**Systemic**:
-- Add alerting when OAuth > 10 minutes
-
-**Lessons**:
-- Environment differences matter (Redis vs in-memory)
-- OAuth flows need generous timeouts
-
-## 📊 Impact Assessment
-**User Impact**: High (all OAuth users affected)
-**Affected users**: 100% of new signups
-**Downtime**: 2 hours (discovery to deploy)
-```
-
----
-
-## Integration
-
-**With PRDs**:
-- Debug sessions can reference PRD that introduced bug
-- PRD validation reports can reference related debug sessions
-
-**With Team**:
-- Searchable knowledge base in `.prds/thoughts/debugging/`
-- Similar bugs findable via grep/search
-- New team members learn from past investigations
 
 ---
 
 ## Configuration
 
 No special configuration needed. Uses:
-- `context_engineering.thoughts_directory` from config
-- Template: `product/templates/debug-template.md`
+- `context_engineering.thoughts_directory` from `.claude/config.json`
+- Web search enabled for known issues check
+- Template: `product/templates/debug-template.md` (optional)
+
+---
+
+## Options
+
+```bash
+# Interactive mode (recommended)
+/debugging "OAuth redirect fails in production"
+
+# Quick mode (skip optional questions, minimal output)
+/debugging "Webhook delivery fails randomly" --quick
+
+# With PRD context
+/debugging "Dashboard loads slowly" --prd PRD-007
+
+# Save without team knowledge capture (private debug)
+/debugging "Security issue in auth" --private
+```
 
 ---
 
 ## Examples
 
-**Bug investigation**:
+### Example 1: Environment-specific bug
 ```bash
-/debugging "OAuth redirect fails in production"
+/debugging "Feature works in dev but fails in production"
 ```
 
-**Performance issue**:
+**Expected flow**:
+1. Quick triage → Red flags (environment-specific)
+2. Quick wins → Config diff shows mismatch
+3. Solution → Sync configs
+4. Time: < 10 minutes
+
+---
+
+### Example 2: Performance issue
 ```bash
-/debugging "Dashboard loads slowly for large datasets"
+/debugging "Dashboard loads slowly for users with >1000 items"
 ```
 
-**Intermittent failure**:
+**Expected flow**:
+1. Quick triage → Red flags (N+1 query suspected)
+2. Web search → Known pattern (pagination needed)
+3. Investigation → Query profiling
+4. Solution → Add pagination + caching
+5. Time: 1-2 hours
+
+---
+
+### Example 3: Intermittent failure
 ```bash
-/debugging "Webhook delivery fails randomly"
+/debugging "Webhook delivery fails randomly (20% failure rate)"
 ```
+
+**Expected flow**:
+1. Quick triage → Red flags (race condition suspected)
+2. Quick wins → Logs show timeout errors
+3. Investigation → Network timing analysis
+4. Solution → Add retry mechanism + increase timeout
+5. Time: 2-3 hours
+
+---
+
+## Key Improvements (v2.0.0)
+
+🎯 **Faster Investigation**:
+- Quick wins before hypothesis testing
+- Web search for known issues
+- Red flags detection (automatic pattern matching)
+
+🎯 **Honest Assessment**:
+- Confidence scoring (not just "fixed")
+- "Would do differently" reflection
+- Debug difficulty rating (1-10)
+
+🎯 **Team Learning**:
+- Searchable tags (#oauth, #session, etc.)
+- TL;DR format (scan in 10 seconds)
+- Related PRDs/issues linked
+
+🎯 **Solution Quality**:
+- Multiple approaches compared
+- Confidence + effort + risk for each
+- Rollback plan included
+
+---
+
+## Related Commands
+
+- `/explore-prd` - Explore feature before building
+- `/review-prd` - Review PRD before coding
+- `/code-prd` - Start implementation
+- `/complete-prd` - Complete PRD with retrospective
 
 ---
 
 ## Tips
 
-- **Be systematic** - test one hypothesis at a time
-- **Document failures** - disproved hypotheses teach us too
-- **Time-box investigation** - set a limit before escalating
-- **Share findings** - even if not fixed, document what you learned
-- **Link to PRD** - helps trace regressions
-- **Prevention matters** - how to avoid this in future?
+- ✅ **Try quick wins first** - Often faster than hypothesis testing
+- ✅ **Web search error messages** - Many bugs are known patterns
+- ✅ **Check logs immediately** - Usually show the issue
+- ✅ **Compare configs** (dev vs prod) - Common source of bugs
+- ✅ **Document with confidence** - Be honest about uncertainty
+- ✅ **Add regression tests** - Prevent recurrence
+- ✅ **Share learnings** - Help team avoid same bug
 
 ---
 
-## Related
-
-- **When bug found**: Use `/debugging` to investigate
-- **After fix**: Reference debug session in commit message
-- **In PR**: Link debug session for context
-- **Team onboarding**: Review past debug sessions
-
----
-
-**Version**: 1.0.0
+**Version**: 2.0.0
 **Plugin**: claude-prd-workflow v0.4.0
-**Category**: Context Engineering
+**Category**: Development Tools
+**Requires**: Web search enabled, git, redis-cli (optional)

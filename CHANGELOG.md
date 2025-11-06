@@ -6,6 +6,52 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.4.1] - 2025-11-06
+
+### 🎯 Focus: Command Cleanup & Pragmatic Utilities
+
+**Streamlined workflow** - Removed redundant commands and added lightweight bash utilities.
+
+### 🗑️ Removed
+
+- **Deleted `/smart-commit`** - Redundant with `/complete-prd` which handles commits
+- **Deleted `/smart-pr`** - Redundant with `/complete-prd` v3.0.0 which handles PRs
+- **Removed `/work-prd`** - Duplicate functionality with `/code-prd`
+
+### 🔄 Changed
+
+- **Renamed `/quick-ship` → `/ship`** - Simpler name for fast-track feature workflow
+  - Unchanged functionality: Fast-track small features (<4h) without full PRD
+  - Auto-creates `quickship/*` branch, auto-commit, auto-PR, auto-merge if checks pass
+
+### ✨ Added - Pragmatic Skills
+
+New lightweight bash scripts for daily workflow:
+
+- **`status`** - Quick PRD overview (counts by status, active PRDs with branches)
+  - Usage: `bash .claude/scripts/prd-status.sh`
+  - Shows: In Progress/Review/Completed counts, active PRDs with branches
+
+- **`check`** - Branch status check (uncommitted changes, ahead/behind remote)
+  - Usage: `bash .claude/scripts/branch-check.sh`
+  - Shows: Current branch, uncommitted files, commits to push/pull
+
+- **`pr`** - PR check for current branch (requires `gh` CLI)
+  - Usage: `bash .claude/scripts/pr-check.sh`
+  - Shows: PR number, state, URL or suggestion to create PR
+
+- **`clean`** - Session cleanup (archives old session files >7 days)
+  - Usage: `bash .claude/scripts/session-clean.sh`
+  - Archives to: `.claude/archives/sessions/`
+
+### 🔧 Technical
+
+- Created `.claude/scripts/` directory for bash utilities
+- Created lightweight skill wrappers in `.claude/skills/`
+- All scripts are safe to run (archive-only, no deletions)
+- Scripts require standard Git + optionally `gh` CLI for PR checks
+
+
 ## [0.4.0] - 2025-02-11
 
 ### 🎯 Focus: Workflow UX Improvements

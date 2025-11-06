@@ -29,12 +29,16 @@ jspm_packages/
 .env
 .env.test
 
+# MCP configuration with secrets
+.mcp.json
+
 # Claude - Exclude user-generated files but keep plugin source
 # Ignore user-generated Claude files
 .claude/prd-*-progress.json
 .claude/*.backup
 .prd-config.json
 .claude/commands/*.backup
+.claude/commands/*.backup.md
 
 # PRD Workflow - User's PRDs (not part of plugin source)
 product/prds/
@@ -44,6 +48,8 @@ product/decisions/
 # Development files
 dev/
 *.md.backup
+*.backup.md
+.claude-plugin.bak/
 
 # Security audit reports (may contain sensitive info)
 .claude/security-audit-*.md
