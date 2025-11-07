@@ -79,6 +79,11 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# Ensure artifact directories exist
+mkdir -p .prds/thoughts/research
+mkdir -p .prds/thoughts/plans
+mkdir -p .prds/thoughts/validation
+
 # Quick mode skips all phases
 if [ "$QUICK_MODE" = "true" ]; then
   echo "⚡ Quick mode: Skipping all phases (legacy behavior)"
@@ -149,7 +154,8 @@ fi
 # Extract PRD ID from argument or branch
 if [ -z "$PRD_ARG" ]; then
   BRANCH=$(git branch --show-current)
-  PRD_ID=$(echo "$BRANCH" | grep -oP 'PRD-\d+' || echo "")
+  # Portable grep (works on macOS and Linux)
+  PRD_ID=$(echo "$BRANCH" | grep -oE 'PRD-[0-9]+' || echo "")
 
   if [ -z "$PRD_ID" ]; then
     echo "❌ Could not detect PRD from branch: $BRANCH"
@@ -157,7 +163,8 @@ if [ -z "$PRD_ARG" ]; then
     exit 1
   fi
 else
-  PRD_ID=$(echo "$PRD_ARG" | grep -oP 'PRD-\d+' || echo "$PRD_ARG")
+  # Portable grep (works on macOS and Linux)
+  PRD_ID=$(echo "$PRD_ARG" | grep -oE 'PRD-[0-9]+' || echo "$PRD_ARG")
 fi
 
 echo "📋 Working on: $PRD_ID"
@@ -168,7 +175,7 @@ echo "📋 Working on: $PRD_ID"
 ```bash
 # Search for PRD in ready/ or in-progress/
 PRD_FILE=""
-for dir in "product/prds/03-ready" "product/prds/04-in-progress"; do
+for dir in "product/prds/02-ready" "product/prds/03-in-progress"; do
   FOUND=$(find "$dir" -name "${PRD_ID}*.md" 2>/dev/null | head -1)
   if [ -n "$FOUND" ]; then
     PRD_FILE="$FOUND"
@@ -189,16 +196,22 @@ echo "✅ Found: $PRD_FILE"
 
 ```bash
 # Move from ready/ to in-progress/ if needed
-if [[ "$PRD_FILE" == *"/03-ready/"* ]]; then
+if [[ "$PRD_FILE" == *"/02-ready/"* ]]; then
   echo "📦 Moving PRD to in-progress..."
 
-  NEW_PATH=$(echo "$PRD_FILE" | sed 's/03-ready/04-in-progress/')
+  NEW_PATH=$(echo "$PRD_FILE" | sed 's/02-ready/03-in-progress/')
   mv "$PRD_FILE" "$NEW_PATH"
   PRD_FILE="$NEW_PATH"
 
-  # Update metadata
-  sed -i 's/Status: Ready for Development/Status: In Progress/' "$PRD_FILE"
-  sed -i "/\*\*Status\*\*/a **Started**: $(date +%Y-%m-%d)" "$PRD_FILE"
+  # Update metadata (portable sed for macOS/Linux)
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    sed -i '' 's/Status: Ready for Development/Status: In Progress/' "$PRD_FILE"
+    sed -i '' "/\*\*Status\*\*/a\\
+**Started**: $(date +%Y-%m-%d)" "$PRD_FILE"
+  else
+    sed -i 's/Status: Ready for Development/Status: In Progress/' "$PRD_FILE"
+    sed -i "/\*\*Status\*\*/a **Started**: $(date +%Y-%m-%d)" "$PRD_FILE"
+  fi
 
   echo "✅ PRD moved to in-progress/"
 fi
@@ -215,26 +228,14 @@ fi
 🎯 PHASE 0: CONTEXT CHECK
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Context Engineering Rule: Never exceed 60% context for quality outputs
+💡 **Context Engineering Tip**: Keep context focused for quality outputs
 
-Current context: {{CONTEXT_PERCENT}}%
+**Best Practices**:
+- Focus on one sub-phase at a time
+- Save artifacts frequently (auto-saved to .prds/thoughts/)
+- Use checkpoints to resume if context gets too large
 
-{{#if CONTEXT_PERCENT > 60}}
-⚠️  **WARNING**: Context already at {{CONTEXT_PERCENT}}% (threshold: 60%)
-
-**Recommendation**:
-1. Save current work
-2. Clear context with /clear
-3. Resume from saved state
-
-Continue anyway? (not recommended) (y/n)
-> _
-{{/if}}
-
-{{#if CONTEXT_PERCENT <= 60}}
-✅ Context healthy ({{CONTEXT_PERCENT}}% < 60%)
-   Proceeding with 4-phase workflow
-{{/if}}
+✅ Proceeding with 4-phase workflow
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
@@ -592,11 +593,7 @@ Ready to implement? (y/n)
 **Validation**:
 {{Run tests, linting, etc.}}
 
-Context check: {{CONTEXT_PERCENT}}%
-
-{{#if CONTEXT_PERCENT > 60}}
-⚠️  Context at {{CONTEXT_PERCENT}}% - clearing before next sub-phase
-{{/if}}
+💡 **Tip**: Artifacts auto-saved to `.prds/thoughts/` for context persistence
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
@@ -613,8 +610,7 @@ cat > ".claude/prd-${PRD_ID}-progress.json" <<EOF
   "phase": "implementation",
   "completed_subphases": $N,
   "total_subphases": $TOTAL,
-  "last_checkpoint": "$(date -Iseconds)",
-  "context_percent": $CONTEXT_PERCENT
+  "last_checkpoint": "$(date -Iseconds)"
 }
 EOF
 ```

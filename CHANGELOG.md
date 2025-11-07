@@ -6,6 +6,107 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.4.2] - 2025-11-07
+
+### 🔥 Critical Fixes (Sprint 0)
+
+**P0 Bugs Fixed**:
+- **Directory Inconsistency** (`/code-prd`):
+  - Fixed incorrect directory references (`03-ready` → `02-ready`, `04-in-progress` → `03-in-progress`)
+  - Now consistent with all other commands and documented configuration
+  - **Impact**: Plugin was moving PRDs to wrong directories, causing workflow confusion
+
+- **macOS Portability** (`/code-prd`):
+  - Replaced `grep -P` (Perl regex) with `grep -E` (Extended regex) for macOS compatibility
+  - Fixed `sed -i` with OS detection (macOS requires `sed -i ''`, Linux/Git Bash `sed -i`)
+  - **Impact**: Plugin now works on macOS, not just Linux/Windows Git Bash
+
+- **Missing Directory Creation**:
+  - Added `mkdir -p .prds/thoughts/{research,plans,validation}` before artifact writes
+  - **Impact**: Prevented silent failures when saving research/plan/validation artifacts
+
+- **Context Percent Removal**:
+  - Removed non-implemented `{{CONTEXT_PERCENT}}` blocking prompts
+  - Replaced with static best practices guidance
+  - **Impact**: No more confusing template variables, clearer UX
+
+### ✨ New Features (Sprint 1)
+
+**New Skills**:
+- **`/context`** - Display current development context
+  - Shows: current PRD, branch, progress (X/Y tasks), next task, Git status
+  - Handles: worktree detection, edge cases (on main, no PRD, completed PRD)
+  - Modes: standard and verbose (`--verbose` / `-v`)
+  - **ROI**: 4h/day saved for team of 5 devs (reduces context switching friction)
+
+- **`/cleanup`** - Intelligent cleanup of workspace
+  - Cleans: merged branches, obsolete worktrees, temporary .md files
+  - Patterns: `*.tmp.md`, `*temp*.md`, `draft-*`, `scratch-*`, `test-*`, `backup-*`, Vim swap files
+  - Safety: confirmation required, protected branches, dry-run mode, age thresholds
+  - Modes: `--dry-run`, `--yes`, `--branches-only`, `--worktrees-only`, `--files-only`, `--aggressive`
+  - **ROI**: Project hygiene + disk space optimization
+
+- **`/guard`** - Pre-merge quality checks
+  - Checks: TypeScript (`tsc --noEmit`), ESLint, unit tests, secrets scan, critical TODOs
+  - Output: Single-line status + actionable quick fixes (no essays)
+  - Modes: `--fix` (auto-fix lint), `--skip-tests`, `--skip-lint`, check-specific flags
+  - Integration: Git hooks, CI/CD, pre-commit workflow
+  - **Philosophy**: Prevent stupid mistakes, not build bureaucracy
+
+**PRD Parsing Library** (`.claude/lib/parse-prd.sh`):
+- Flexible PRD metadata extraction for consistent parsing across all commands
+- Supports multiple ID formats: `PRD-XXX`, `ABC-PRD-XXX`, `FEAT_XXX`, `RFC-XXX`
+- Functions: `extract_prd_id`, `find_prd_file`, `extract_prd_title`, `extract_prd_status`, `extract_prd_priority`, `extract_prd_grade`, `extract_prd_assignee`, `extract_prd_branch`, `extract_prd_metadata`, `extract_p0_criteria`, `validate_prd_structure`
+- **Impact**: Eliminates rigid parsing, enables enterprise PRD formats
+
+### 📚 Documentation
+
+- Added `README-SKILLS.md` - Skills usage guide, configuration, and roadmap
+- Added this `CHANGELOG.md` section for v0.4.2
+- Updated `.claude/commands/code-prd.md` with portable shell best practices
+
+### 🔧 Technical Improvements
+
+- **Portability**: All shell commands now work on Windows Git Bash, macOS, and Linux
+- **Consistency**: Unified directory structure references across all commands
+- **Safety**: Auto-creation of required directories prevents silent failures
+- **Performance**: Shared parsing library reduces code duplication
+
+### 🎯 Upcoming (Backlog)
+
+Planned for next releases:
+- `/switch` - Quick PRD context switching (2 days effort)
+- `/notify` - Slack/Discord/Teams notifications (1 day effort)
+- `/standup` - Auto-generate daily standup reports (2 days effort)
+- `/metrics` - PRD velocity dashboard (2 days effort)
+- `/changelog` - Auto-generate release notes from PRDs (1 day effort)
+
+### 📦 Migration Guide
+
+**From 0.4.1 → 0.4.2**:
+
+No breaking changes. All fixes and features are additive.
+
+**If you have misplaced PRDs** (from previous directory bug):
+```bash
+# Check for PRDs in wrong locations
+find product/prds/03-ready -name "*.md" 2>/dev/null
+find product/prds/04-in-progress -name "*.md" 2>/dev/null
+
+# Move to correct locations
+mv product/prds/03-ready/* product/prds/02-ready/ 2>/dev/null
+mv product/prds/04-in-progress/* product/prds/03-in-progress/ 2>/dev/null
+```
+
+**Try new skills**:
+```bash
+/context              # See where you are
+/cleanup --dry-run    # See what can be cleaned
+/guard                # Run pre-merge checks
+```
+
+---
+
 ## [0.4.1] - 2025-11-06
 
 ### 🎯 Focus: Command Cleanup & Pragmatic Utilities
