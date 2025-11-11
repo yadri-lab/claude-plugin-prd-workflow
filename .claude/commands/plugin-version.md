@@ -100,4 +100,4 @@ Changelog: https://github.com/Yassinello/claude-prd-workflow/blob/main/CHANGELOG
 
 **Plugin**: claude-prd-workflow
 **Category**: Utility
-**Version**: 1.2.0
+**Version**: 0.4.2

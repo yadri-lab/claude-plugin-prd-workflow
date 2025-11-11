@@ -343,7 +343,7 @@ Works seamlessly with:
 
 Plugin: claude-prd-workflow
 Category: PRD Management
-Version: 2.6.0 (Unified Cursor + Claude Code)
+Version: 0.4.2 (Unified Cursor + Claude Code)
 Requires: Git 2.0+
 
 **Last Updated**: 2025-11-02 (Unified commands + template support)

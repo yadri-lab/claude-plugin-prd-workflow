@@ -365,5 +365,5 @@ Add project-specific instructions below (they will be preserved on regeneration)
 
 **Plugin**: claude-prd-workflow
 **Category**: Project Setup
-**Version**: 2.6.0
+**Version**: 0.4.2
 **Requires**: Git repo with package.json or similar

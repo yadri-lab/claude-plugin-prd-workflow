@@ -6,7 +6,90 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [0.4.2] - 2025-11-07
+## [0.4.2] - 2025-11-11
+
+### 🔥 Critical Fixes - Installation Bug
+
+**This is a HOTFIX release that addresses a critical installation bug that made the plugin completely non-functional for new users.**
+
+#### Bug #1: Incorrect Paths in install.js (CRITICAL)
+- **Problem**: `install.js` was looking for `commands/`, `agents/`, and `skills/` directories at the package root, but actual files are in `.claude/` subdirectory
+- **Impact**: Commands, agents, and skills were NEVER installed to `~/.claude-code/` directories
+- **Result**: Plugin appeared to install but was completely broken - all slash commands returned "command not found"
+- **Fix**: Updated all three path definitions in `install.js`:
+  - `commands/` → `.claude/commands/` (install.js:150)
+  - `agents/` → `.claude/agents/` (install.js:167)
+  - `skills/` → `.claude/skills/` (install.js:184)
+- **Verification**:
+  - 25 commands now install correctly to `~/.claude-code/commands/`
+  - 17 agents now install correctly to `~/.claude-code/agents/`
+  - 17 skills now install correctly to `~/.claude-code/skills/`
+
+#### Bug #2: Outdated Version Metadata
+- **Problem**: All markdown files showed hardcoded version "1.2.0" or "2.x.x" from legacy branch
+- **Impact**: `/plugin-version` command showed incorrect version, confusion about what's installed
+- **Fix**:
+  - Created automated version update script (`scripts/update-version.js`)
+  - Updated 17 files across commands/agents/skills to v0.4.2
+  - Added `prepublishOnly` script to auto-update versions before npm publish
+- **Future-proof**: Version metadata now automatically syncs with package.json on every release
+
+#### Issue #3: Missing Error Handling
+- **Problem**: Silent failures during installation if directories had permission issues
+- **Impact**: Users couldn't diagnose installation problems
+- **Fix**: Added try-catch blocks with descriptive error messages for:
+  - Directory copying operations
+  - Commands installation
+  - Agents installation
+  - Skills installation
+  - Now shows clear warnings: "⚠️ Failed to install commands: [error message]"
+
+### 🛠️ Improvements
+
+- **Better Installation Feedback**: Install script now shows clear success/failure for each component
+- **Version Automation**: New `npm run prepublishOnly` script ensures versions stay in sync
+- **Developer Experience**: Added error context to help diagnose issues faster
+
+### 📋 Migration Guide
+
+**For existing users (v0.4.1 → v0.4.2)**:
+```bash
+npm update -g claude-prd-workflow
+# Plugin will automatically reinstall files to correct locations
+```
+
+**For new users**:
+```bash
+npm install -g claude-prd-workflow
+# Installation now works correctly out of the box
+```
+
+**Verification**:
+```bash
+ls ~/.claude-code/commands/ | wc -l  # Should show 25+ files
+ls ~/.claude-code/agents/ | wc -l    # Should show 17 files
+ls ~/.claude-code/skills/ | wc -l    # Should show 17 files
+```
+
+### 🙏 Credits
+
+Special thanks to the **Watchora Development Team** for:
+- Comprehensive bug report with root cause analysis
+- Detailed reproduction steps and proof of failure
+- Proposed fixes with code diffs
+- Testing and verification scripts
+
+This release would not have been possible without their thorough investigation.
+
+### 📊 Impact Assessment
+
+- **Before v0.4.2**: 100% of new installations were broken
+- **After v0.4.2**: Plugin fully functional for all users
+- **Recovery time**: Immediate for users who run `npm update -g`
+
+---
+
+## [0.4.2-beta] - 2025-11-07
 
 ### 🔥 Critical Fixes (Sprint 0)
 

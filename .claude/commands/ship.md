@@ -273,5 +273,4 @@ STATUS: COMPLETE
 
 Plugin: claude-prd-workflow
 Category: Git Workflow
-Version: 2.2.0
-Requires: Git 2.0+
+Version: 0.4.2

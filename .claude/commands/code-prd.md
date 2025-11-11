@@ -2,834 +2,283 @@
 name: code-prd
 description: 4-phase Context Engineering workflow with guided implementation
 category: PRD Management
-version: 2.0.0
+version: 0.4.2
 ---
 
-# Code PRD Command (v2.0 - Context Engineering)
+# Code PRD Command
 
-**NEW**: Now includes 4-phase workflow (Research → Plan → Implement → Validate) with automatic context management.
-
-## Breaking Changes
-
-⚠️ **Default behavior changed in v0.4.0**:
-- `/code-prd PRD-XXX` now runs full 4-phase workflow by default
-- Use `--quick` flag for old behavior (direct implementation)
-- Use `--skip-research` or `--skip-plan` to skip individual phases
+Guided implementation using 4-phase Context Engineering workflow.
 
 ## Purpose
 
-Bridge PRD to implementation using Context Engineering principles:
-- **Never exceed 60% context** for quality outputs
-- **4-Phase workflow** with automatic context clearing
-- **Persistent memory** via thoughts/ directory
-- **Guided implementation** with task breakdown
-- **Continuous validation** against acceptance criteria
+Bridge PRD to implementation with:
+- **Context management**: Never exceed 60% context for quality
+- **4-Phase workflow**: Research → Plan → Implement → Validate
+- **Persistent memory**: Thoughts saved in `.prds/thoughts/`
+- **Incremental progress**: Clear checkpoints and validation
+- **Quality assurance**: Continuous alignment with PRD
 
----
+## Workflow
 
-## Pre-Flight Checks
+### Phase 1: Research (Context Gathering)
 
-### Check 1: Feature Flag
+**Goal**: Deep codebase understanding before writing code.
 
+**Activities**:
+- Read PRD acceptance criteria and technical design
+- Explore relevant codebase areas
+- Identify existing patterns and conventions
+- Find dependencies and integration points
+- Note architectural constraints
+- Document unknowns and questions
+
+**Output**: Research summary saved in `.prds/thoughts/research/PRD-XXX-research.md`
+
+**Key questions**:
+- Where does this feature fit in the codebase?
+- What patterns/conventions should I follow?
+- What dependencies exist?
+- What could go wrong?
+
+### Phase 2: Plan (Task Breakdown)
+
+**Goal**: Detailed implementation plan with tasks and estimates.
+
+**Activities**:
+- Break down PRD into concrete tasks
+- Identify task dependencies
+- Estimate effort per task
+- Plan testing strategy
+- Define validation checkpoints
+- Risk mitigation planning
+
+**Output**: Implementation plan saved in `.prds/thoughts/plans/PRD-XXX-plan.md`
+
+**Plan structure**:
+- Task list with estimates
+- Dependency graph
+- Critical path identified
+- Testing approach
+- Validation criteria
+
+### Phase 3: Implement (Guided Development)
+
+**Goal**: Execute plan incrementally with continuous validation.
+
+**Activities**:
+- Work task-by-task from plan
+- Checkpoint after each major task
+- Validate against acceptance criteria
+- Adapt plan based on learnings
+- Document decisions and trade-offs
+- Keep context under 60%
+
+**Checkpoints**:
+- After each task: Does it work? Tests pass? Aligned with PRD?
+- Before next task: Context cleanup if needed
+- Major milestones: User validation opportunity
+
+**Best practices**:
+- Small commits with clear messages
+- Test as you go
+- Document non-obvious decisions
+- Ask user if stuck or uncertain
+
+### Phase 4: Validate (Quality Assurance)
+
+**Goal**: Ensure implementation meets all PRD requirements.
+
+**Activities**:
+- Run full test suite
+- Verify all acceptance criteria met
+- Check code quality and patterns
+- Security review
+- Performance check
+- Documentation updated
+
+**Output**: Validation report in `.prds/thoughts/validation/PRD-XXX-validation.md`
+
+**Validation checklist**:
+- ✅ All acceptance criteria met
+- ✅ Tests passing (unit, integration, e2e)
+- ✅ No security issues
+- ✅ Performance acceptable
+- ✅ Code quality good
+- ✅ Documentation complete
+
+### Final: Create PR
+
+**After validation passes**:
+- Commit all changes
+- Create pull request
+- Link to PRD
+- Add PR number to PRD metadata
+- Move PRD to `03-in-progress/`
+
+## Flags & Options
+
+**Quick mode** (`--quick`):
+- Skip research and planning phases
+- Direct implementation (legacy behavior)
+- Use for: Tiny changes, bug fixes
+
+**Skip phases**:
+- `--skip-research`: Start with planning
+- `--skip-plan`: Direct implementation with research
+- `--manual-checkpoints`: User approves each checkpoint
+
+**Examples**:
 ```bash
-# Check if context engineering is enabled
-if [ -f ".claude/config.json" ]; then
-  CE_ENABLED=$(jq -r '.context_engineering.enabled // false' .claude/config.json)
-
-  if [ "$CE_ENABLED" != "true" ]; then
-    echo "ℹ️  Context Engineering disabled in config"
-    echo "   Using legacy workflow"
-    # Fall back to old behavior
-    exit 0
-  fi
-fi
+/code-prd PRD-007                    # Full 4-phase workflow
+/code-prd PRD-007 --quick            # Legacy quick mode
+/code-prd PRD-007 --skip-research    # Plan + Implement + Validate
+/code-prd PRD-007 --manual-checkpoints  # User approval at each phase
 ```
 
-### Check 2: Parse Flags
+## Context Engineering Principles
 
-```bash
-# Parse command line flags
-QUICK_MODE=false
-SKIP_RESEARCH=false
-SKIP_PLAN=false
-MANUAL_CHECKPOINTS=false
+**60% Rule**:
+- Never let context exceed 60% capacity
+- Clear context between phases
+- Persist learnings in thoughts/ directory
+- Quality degrades beyond 60%
 
-while [[ $# -gt 0 ]]; do
-  case $1 in
-    --quick)
-      QUICK_MODE=true
-      shift
-      ;;
-    --skip-research)
-      SKIP_RESEARCH=true
-      shift
-      ;;
-    --skip-plan)
-      SKIP_PLAN=true
-      shift
-      ;;
-    --manual-checkpoints)
-      MANUAL_CHECKPOINTS=true
-      shift
-      ;;
-    *)
-      PRD_ARG="$1"
-      shift
-      ;;
-  esac
-done
+**Incremental Progress**:
+- Small, validated steps
+- Checkpoint frequently
+- Adapt plan based on reality
+- User can jump in anytime
 
-# Ensure artifact directories exist
-mkdir -p .prds/thoughts/research
-mkdir -p .prds/thoughts/plans
-mkdir -p .prds/thoughts/validation
+**Persistent Memory**:
+- Research findings saved
+- Plan documented
+- Decisions recorded
+- Learnings preserved for team
 
-# Quick mode skips all phases
-if [ "$QUICK_MODE" = "true" ]; then
-  echo "⚡ Quick mode: Skipping all phases (legacy behavior)"
-  # Jump to old implementation workflow
-  SKIP_RESEARCH=true
-  SKIP_PLAN=true
-  SKIP_VALIDATION=true
-fi
+**Validation First**:
+- Test continuously
+- Validate against PRD
+- Catch issues early
+- User feedback integrated
 
-# Show confirmation if phases are being skipped
-if [ "$SKIP_RESEARCH" = "true" ] || [ "$SKIP_PLAN" = "true" ]; then
-  echo ""
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo "⚠️  PHASE SKIP CONFIRMATION"
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
+## Directory Structure
 
-  if [ "$SKIP_RESEARCH" = "true" ]; then
-    echo "Skipping Phase 1: Research"
-    echo ""
-    echo "You will miss:"
-    echo "  • Codebase analysis and pattern discovery"
-    echo "  • Identification of similar implementations"
-    echo "  • Architectural constraint detection"
-    echo "  • Dependency mapping"
-    echo ""
-    echo "Risk: Higher chance of:"
-    echo "  • Missing existing solutions to reuse"
-    echo "  • Breaking changes to dependencies"
-    echo "  • Architectural conflicts"
-    echo ""
-  fi
-
-  if [ "$SKIP_PLAN" = "true" ]; then
-    echo "Skipping Phase 2: Planning"
-    echo ""
-    echo "You will miss:"
-    echo "  • Structured implementation roadmap"
-    echo "  • Sub-phase breakdown with clear boundaries"
-    echo "  • Success criteria per step"
-    echo "  • Context management strategy"
-    echo ""
-    echo "Risk: Higher chance of:"
-    echo "  • Implementation drift from PRD"
-    echo "  • Context bloat during implementation"
-    echo "  • Missing edge cases"
-    echo ""
-  fi
-
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-  read -p "Continue with skipped phases? (y/n) " -n 1 -r
-  echo ""
-
-  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo "❌ Aborted. Remove skip flags to run full 4-phase workflow."
-    exit 1
-  fi
-
-  echo "✅ Proceeding with skipped phases"
-  echo ""
-fi
 ```
-
-### Check 3: Detect PRD
-
-```bash
-# Extract PRD ID from argument or branch
-if [ -z "$PRD_ARG" ]; then
-  BRANCH=$(git branch --show-current)
-  # Portable grep (works on macOS and Linux)
-  PRD_ID=$(echo "$BRANCH" | grep -oE 'PRD-[0-9]+' || echo "")
-
-  if [ -z "$PRD_ID" ]; then
-    echo "❌ Could not detect PRD from branch: $BRANCH"
-    echo "Usage: /code-prd PRD-XXX"
-    exit 1
-  fi
-else
-  # Portable grep (works on macOS and Linux)
-  PRD_ID=$(echo "$PRD_ARG" | grep -oE 'PRD-[0-9]+' || echo "$PRD_ARG")
-fi
-
-echo "📋 Working on: $PRD_ID"
+.prds/
+├── thoughts/
+│   ├── research/
+│   │   └── PRD-XXX-research.md    # Phase 1 output
+│   ├── plans/
+│   │   └── PRD-XXX-plan.md        # Phase 2 output
+│   └── validation/
+│       └── PRD-XXX-validation.md  # Phase 4 output
 ```
-
-### Check 4: Find PRD File
-
-```bash
-# Search for PRD in ready/ or in-progress/
-PRD_FILE=""
-for dir in "product/prds/02-ready" "product/prds/03-in-progress"; do
-  FOUND=$(find "$dir" -name "${PRD_ID}*.md" 2>/dev/null | head -1)
-  if [ -n "$FOUND" ]; then
-    PRD_FILE="$FOUND"
-    break
-  fi
-done
-
-if [ -z "$PRD_FILE" ]; then
-  echo "❌ PRD not found in ready/ or in-progress/"
-  echo "Run: /setup-prd $PRD_ID"
-  exit 1
-fi
-
-echo "✅ Found: $PRD_FILE"
-```
-
-### Check 5: Move to In-Progress (First Run)
-
-```bash
-# Move from ready/ to in-progress/ if needed
-if [[ "$PRD_FILE" == *"/02-ready/"* ]]; then
-  echo "📦 Moving PRD to in-progress..."
-
-  NEW_PATH=$(echo "$PRD_FILE" | sed 's/02-ready/03-in-progress/')
-  mv "$PRD_FILE" "$NEW_PATH"
-  PRD_FILE="$NEW_PATH"
-
-  # Update metadata (portable sed for macOS/Linux)
-  if [[ "$OSTYPE" == "darwin"* ]]; then
-    sed -i '' 's/Status: Ready for Development/Status: In Progress/' "$PRD_FILE"
-    sed -i '' "/\*\*Status\*\*/a\\
-**Started**: $(date +%Y-%m-%d)" "$PRD_FILE"
-  else
-    sed -i 's/Status: Ready for Development/Status: In Progress/' "$PRD_FILE"
-    sed -i "/\*\*Status\*\*/a **Started**: $(date +%Y-%m-%d)" "$PRD_FILE"
-  fi
-
-  echo "✅ PRD moved to in-progress/"
-fi
-```
-
----
-
-## Phase 0: Context Check (Automatic)
-
-**Always runs before starting work**
-
-```markdown
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎯 PHASE 0: CONTEXT CHECK
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-💡 **Context Engineering Tip**: Keep context focused for quality outputs
-
-**Best Practices**:
-- Focus on one sub-phase at a time
-- Save artifacts frequently (auto-saved to .prds/thoughts/)
-- Use checkpoints to resume if context gets too large
-
-✅ Proceeding with 4-phase workflow
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
----
-
-## Phase 1: Research (Default ON)
-
-**Skipped if**: `--quick` or `--skip-research` flag provided
-
-**Purpose**: Deep codebase analysis before planning
-
-**Output**: `.prds/thoughts/research/{{PRD_ID}}-research.md`
-
-```markdown
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔬 PHASE 1: RESEARCH
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**Goal**: Understand codebase before planning implementation
-
-**Tasks**:
-1. Find relevant files and patterns
-2. Analyze current architecture
-3. Identify similar implementations
-4. Document dependencies and impact
-
-**Output**: Research document in thoughts/research/
-
-⏱️  Target time: < 2 minutes
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-### Research Steps
-
-**Step 1: Spawn Parallel Agents** (Optional - P1)
-
-```bash
-# If parallel agents enabled in config
-if [ "$(jq -r '.context_engineering.parallel_agents // false' .claude/config.json)" = "true" ]; then
-  echo "🚀 Spawning parallel research agents..."
-
-  # Agent 1: File locator
-  claude task --agent=Explore --thoroughness=quick \
-    "Find files related to: {{FEATURE_NAME}}" \
-    > /tmp/agent1.txt &
-  PID1=$!
-
-  # Agent 2: Pattern finder
-  claude task --agent=Explore --thoroughness=quick \
-    "Find similar patterns for: {{FEATURE_DESCRIPTION}}" \
-    > /tmp/agent2.txt &
-  PID2=$!
-
-  # Wait for agents
-  wait $PID1 $PID2
-
-  echo "✅ Parallel agents complete"
-fi
-```
-
-**Step 2: Conduct Research**
-
-Use Explore agent or direct analysis:
-
-```markdown
-I need to conduct research for {{PRD_ID}}: {{FEATURE_NAME}}
-
-Please analyze the codebase and create a research document following this structure:
-
-# Research: {{PRD_ID}} - {{FEATURE_NAME}}
-
-**Date**: {{DATE}}
-**PRD**: {{PRD_PATH}}
-
-## Summary
-[2-3 sentence overview]
-
-## Relevant Files
-[List files that will need modification]
-
-## Current Architecture
-[How the system currently works]
-
-## Similar Patterns
-[Examples of similar implementations]
-
-## Dependencies & Impact
-[What we depend on, what depends on us]
-
-## Recommendations
-[Suggested approaches with pros/cons]
-
-**Save to**: `.prds/thoughts/research/{{PRD_ID}}-research.md`
-
-Use template: `product/templates/research-template.md`
-```
-
-**Step 3: Validate Research**
-
-```bash
-# Check research file was created
-RESEARCH_FILE=".prds/thoughts/research/${PRD_ID}-research.md"
-
-if [ ! -f "$RESEARCH_FILE" ]; then
-  echo "❌ Research file not created"
-  exit 1
-fi
-
-echo "✅ Research saved: $RESEARCH_FILE"
-echo "📊 File size: $(wc -l < "$RESEARCH_FILE") lines"
-```
-
-**Step 4: Phase 1 Complete - Auto-Chaining to Phase 2**
-
-```markdown
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ PHASE 1 COMPLETE: RESEARCH
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-✅ Research saved: {{RESEARCH_FILE}}
-📊 Research size: {{LINES}} lines
-
-**Key findings**:
-- Relevant files: {{FILE_COUNT}}
-- Similar patterns: {{PATTERN_COUNT}}
-- Dependencies: {{DEP_COUNT}}
-
-🗑️  Context will now be cleared
-
-**Auto-chaining to Phase 2: Planning**
-- Will load: Research document
-- Will NOT load: Full PRD (saves context)
-- Planning uses: Research + PRD metadata only
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
----
-
-## Phase 2: Plan (Default ON)
-
-**Skipped if**: `--quick` or `--skip-plan` flag provided
-
-**Purpose**: Generate implementation plan from research
-
-**Input**: Research document + PRD metadata
-**Output**: `.prds/thoughts/plans/{{PRD_ID}}-plan.md`
-
-```markdown
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 PHASE 2: PLANNING
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**Goal**: Create detailed implementation plan
-
-**Inputs**:
-- Research document: {{RESEARCH_FILE}}
-- PRD metadata: {{PRD_FILE}} (high-level only)
-
-**Tasks**:
-1. Break into sub-phases with clear boundaries
-2. Define success criteria per sub-phase
-3. Identify critical path
-4. Estimate effort per sub-phase
-
-**Output**: Implementation plan in thoughts/plans/
-
-⏱️  Target time: < 3 minutes
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-### Planning Steps
-
-**Step 1: Load Research (Not Full PRD)**
-
-```bash
-# Load research document for context
-RESEARCH_FILE=".prds/thoughts/research/${PRD_ID}-research.md"
-
-echo "📖 Loading research: $RESEARCH_FILE"
-# Research file is now in context
-```
-
-**Step 2: Extract PRD Metadata**
-
-```bash
-# Extract only key metadata from PRD (not full content)
-PRD_TITLE=$(grep "^# PRD-" "$PRD_FILE" | head -1 | sed 's/# //')
-PRD_P0=$(grep -A 50 "### P0" "$PRD_FILE" | grep "^- \[" | head -10)
-
-echo "📄 PRD: $PRD_TITLE"
-echo "🎯 P0 Criteria: $(echo "$PRD_P0" | wc -l) items"
-```
-
-**Step 3: Generate Plan**
-
-```markdown
-I need to create an implementation plan for {{PRD_ID}}: {{FEATURE_NAME}}
-
-**Context loaded**:
-- ✅ Research document (full context)
-- ✅ PRD metadata (title, P0 criteria only)
-
-Please create a plan following this structure:
-
-# Implementation Plan: {{PRD_ID}} - {{FEATURE_NAME}}
-
-**Date**: {{DATE}}
-**Based on Research**: {{RESEARCH_FILE}}
-**Estimated Effort**: [Hours/Days]
-
-## Overview
-[What we're building - 2-3 sentences]
-
-## Sub-Phase 1: [Name]
-### What to Change
-### Implementation Steps
-### Success Criteria
-**Estimated Time**: [X hours]
-
-## Sub-Phase 2: [Name]
-[Repeat structure...]
-
-## Final Validation Checklist
-[All P0 criteria from PRD]
-
-**Save to**: `.prds/thoughts/plans/{{PRD_ID}}-plan.md`
-
-Use template: `product/templates/plan-template.md`
-```
-
-**Step 4: Validate Plan**
-
-```bash
-# Check plan file was created
-PLAN_FILE=".prds/thoughts/plans/${PRD_ID}-plan.md"
-
-if [ ! -f "$PLAN_FILE" ]; then
-  echo "❌ Plan file not created"
-  exit 1
-fi
-
-echo "✅ Plan saved: $PLAN_FILE"
-echo "📊 Sub-phases: $(grep "^## Sub-Phase" "$PLAN_FILE" | wc -l)"
-```
-
-**Step 5: Phase 2 Complete - Auto-Chaining to Phase 3**
-
-```markdown
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ PHASE 2 COMPLETE: PLANNING
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-✅ Plan saved: {{PLAN_FILE}}
-📊 Sub-phases: {{SUBPHASE_COUNT}}
-
-**Plan overview**:
-- Total estimated effort: {{ESTIMATED_HOURS}} hours
-- Critical path: {{CRITICAL_SUBPHASES}}
-- Context strategy: Clear between sub-phases if > 60%
-
-🗑️  Context will now be cleared
-
-**Auto-chaining to Phase 3: Implementation**
-- Will load: Implementation plan only
-- Will NOT load: Research, PRD (saves context)
-- Implementation: Follows plan sub-phases sequentially
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
----
-
-## Phase 3: Implementation (Always ON)
-
-**Purpose**: Implement according to plan
-
-**Input**: Plan document
-**Output**: Code changes
-
-```markdown
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚙️  PHASE 3: IMPLEMENTATION
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**Goal**: Implement feature according to plan
-
-**Input**: Implementation plan (not PRD, not research)
-
-**Strategy**:
-- Follow plan sub-phases sequentially
-- Monitor context throughout
-- Clear context between sub-phases if > 60%
-- Validate each sub-phase before continuing
-
-⏱️  Target: Stay below 60% context throughout
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-### Implementation Steps
-
-**Step 1: Load Plan (Not PRD/Research)**
-
-```bash
-# Load plan document for context
-PLAN_FILE=".prds/thoughts/plans/${PRD_ID}-plan.md"
-
-echo "📖 Loading plan: $PLAN_FILE"
-# Plan file is now in context
-# Research and PRD are NOT loaded (saves context)
-```
-
-**Step 2: Extract Sub-Phases**
-
-```bash
-# Parse plan for sub-phases
-SUBPHASES=$(grep "^## Sub-Phase" "$PLAN_FILE" | sed 's/## Sub-Phase //')
-NUM_SUBPHASES=$(echo "$SUBPHASES" | wc -l)
-
-echo "📋 Found $NUM_SUBPHASES sub-phases to implement"
-echo "$SUBPHASES" | nl
-```
-
-**Step 3: Implement Sub-Phases**
-
-For each sub-phase:
-
-```markdown
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚙️  SUB-PHASE {{N}}/{{TOTAL}}: {{SUBPHASE_NAME}}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**From plan**:
-{{SUBPHASE_DESCRIPTION}}
-
-**Implementation steps**:
-{{SUBPHASE_STEPS}}
-
-**Success criteria**:
-{{SUBPHASE_CRITERIA}}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Ready to implement? (y/n)
-> y
-
-[Implement according to steps...]
-
-✅ Sub-phase {{N}} complete
-
-**Validation**:
-{{Run tests, linting, etc.}}
-
-💡 **Tip**: Artifacts auto-saved to `.prds/thoughts/` for context persistence
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-**Step 4: Progress Tracking**
-
-```bash
-# Save progress after each sub-phase
-echo "💾 Saving progress..."
-
-cat > ".claude/prd-${PRD_ID}-progress.json" <<EOF
-{
-  "prd_id": "$PRD_ID",
-  "phase": "implementation",
-  "completed_subphases": $N,
-  "total_subphases": $TOTAL,
-  "last_checkpoint": "$(date -Iseconds)"
-}
-EOF
-```
-
----
-
-## Phase 4: Validation (Default ON)
-
-**Skipped if**: `--quick` flag provided
-
-**Purpose**: Compare implementation vs plan vs PRD
-
-**Output**: `.prds/thoughts/validation/{{PRD_ID}}-validation.md`
-
-```markdown
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ PHASE 4: VALIDATION
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**Goal**: Validate implementation against plan and PRD
-
-**Tasks**:
-1. Compare implementation vs plan
-2. Check all P0 acceptance criteria met
-3. Identify deviations (beneficial or problematic)
-4. Generate validation report
-
-**Output**: Validation report in thoughts/validation/
-
-⏱️  Target time: < 1 minute
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-### Validation Steps
-
-**Step 1: Load All Context**
-
-```bash
-# Load plan, research, and PRD for validation
-PLAN_FILE=".prds/thoughts/plans/${PRD_ID}-plan.md"
-RESEARCH_FILE=".prds/thoughts/research/${PRD_ID}-research.md"
-PRD_FILE="$(find product/prds/04-in-progress -name "${PRD_ID}*.md" | head -1)"
-
-echo "📖 Loading for validation:"
-echo "   - Plan: $PLAN_FILE"
-echo "   - Research: $RESEARCH_FILE"
-echo "   - PRD: $PRD_FILE"
-```
-
-**Step 2: Generate Validation Report**
-
-```markdown
-Please generate a validation report for {{PRD_ID}}:
-
-**Compare**:
-1. Implementation vs Plan (what was implemented vs what was planned)
-2. Plan vs PRD (was the plan aligned with PRD goals)
-3. Implementation vs PRD (do we meet acceptance criteria)
-
-**Structure**:
-
-# Validation Report: {{PRD_ID}} - {{FEATURE_NAME}}
-
-## ✅ Implemented Correctly
-[What matches plan and PRD]
-
-## ⚠️ Deviations from Plan
-**Beneficial Changes**: [Improvements made]
-**Unplanned Omissions**: [What was skipped]
-
-## ❌ Issues Found
-**Critical**: [Must fix]
-**Non-Critical**: [Nice to fix]
-
-## 📊 Acceptance Criteria Review
-[Check each P0/P1 criterion]
-
-## 🎯 Recommendation
-**Status**: ✅ Ready to Merge / ⚠️ Needs Fixes / ❌ Not Ready
-
-**Save to**: `.prds/thoughts/validation/{{PRD_ID}}-validation.md`
-
-Use template: `product/templates/validation-template.md`
-```
-
-**Step 3: Display Results**
-
-```bash
-# Show validation summary
-VALIDATION_FILE=".prds/thoughts/validation/${PRD_ID}-validation.md"
-
-echo "✅ Validation complete: $VALIDATION_FILE"
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-cat "$VALIDATION_FILE" | grep "^## 🎯 Recommendation" -A 5
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-```
-
----
-
-## Final Summary
-
-```markdown
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎉 IMPLEMENTATION COMPLETE: {{PRD_ID}}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**Phases Completed**:
-✅ Phase 1: Research ({{RESEARCH_TIME}} min)
-✅ Phase 2: Planning ({{PLAN_TIME}} min)
-✅ Phase 3: Implementation ({{IMPL_TIME}} min)
-✅ Phase 4: Validation ({{VALIDATION_TIME}} min)
-
-**Artifacts Created**:
-- 📄 Research: {{RESEARCH_FILE}}
-- 📄 Plan: {{PLAN_FILE}}
-- 📄 Validation: {{VALIDATION_FILE}}
-
-**Context Management**:
-- Average context: {{AVG_CONTEXT}}% (Target: <60%)
-- Context cleared: {{CLEAR_COUNT}} times
-
-**Validation Status**: {{STATUS}}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**Next Steps**:
-
-{{#if STATUS == "Ready to Merge"}}
-1. ✅ Create PR: `gh pr create --title "feat({{PRD_ID}}): {{FEATURE_NAME}}"`
-2. ✅ Link validation report in PR description
-3. ✅ Run `/complete-prd {{PRD_ID}}` after merge
-{{/if}}
-
-{{#if STATUS == "Needs Fixes"}}
-1. ⚠️ Address issues in validation report
-2. ⚠️ Re-run validation: `/code-prd {{PRD_ID}} --skip-research --skip-plan`
-3. ⚠️ Update validation report
-{{/if}}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
----
 
 ## Configuration
-
-Respects these settings from `.claude/config.json`:
 
 ```json
 {
   "context_engineering": {
     "enabled": true,
-    "four_phase_workflow": {
-      "enabled": true,
-      "phases": {
-        "research": true,
-        "plan": true,
-        "implement": true,
-        "validate": true
-      },
-      "context_threshold": 60
-    },
-    "thoughts_directory": ".prds/thoughts"
+    "max_context_threshold": 0.60,
+    "checkpoint_frequency": "per_task",
+    "auto_save_thoughts": true
+  },
+  "prd_workflow": {
+    "directories": {
+      "ready": "product/prds/02-ready",
+      "in_progress": "product/prds/03-in-progress"
+    }
   }
 }
 ```
 
+## Success Criteria
+
+- ✅ All 4 phases completed (or skipped intentionally)
+- ✅ Implementation aligns with PRD
+- ✅ All acceptance criteria met
+- ✅ Tests passing
+- ✅ PR created and linked
+- ✅ Context stayed under 60% throughout
+- ✅ Thoughts documented for team
+
+## Example Output
+
+```markdown
+🚀 Starting PRD-007: OAuth2 Integration
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📚 PHASE 1: RESEARCH (15 min)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Exploring codebase...
+✓ Found auth/ directory with Passport.js setup
+✓ Identified user model in models/User.js
+✓ Existing local strategy pattern to follow
+
+Research saved → .prds/thoughts/research/PRD-007-research.md
+Context: 45% ✓
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 PHASE 2: PLAN (20 min)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Breaking down into tasks...
+
+1. Configure Passport Google strategy (2h)
+2. Add OAuth routes (1h)
+3. Update User model (1h)
+4. Add OAuth buttons to UI (2h)
+5. Write tests (3h)
+
+Total: ~9h (1.2 days)
+
+Plan saved → .prds/thoughts/plans/PRD-007-plan.md
+Context: 38% ✓
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚡ PHASE 3: IMPLEMENT (6h)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Task 1/5: Configure Passport Google strategy
+✓ Created auth/strategies/google.js
+✓ Tests passing
+Context: 52% ✓
+
+Task 2/5: Add OAuth routes
+✓ Created routes/auth/oauth.js
+✓ Tests passing
+Context: 59% ⚠️
+
+[Context cleanup before next task...]
+Context: 41% ✓
+
+[... continue through all tasks ...]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ PHASE 4: VALIDATE (30 min)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Running validation...
+✓ All acceptance criteria met (12/12)
+✓ Tests passing (24 tests, 96% coverage)
+✓ No security issues
+✓ Performance acceptable (<200ms)
+
+Validation saved → .prds/thoughts/validation/PRD-007-validation.md
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎉 IMPLEMENTATION COMPLETE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Created PR: #42 - OAuth2 Integration
+PRD moved: 02-ready → 03-in-progress
+
+Next: Review PR, merge, /complete-prd
+```
+
 ---
 
-## Examples
-
-**Full workflow** (default):
-```bash
-/code-prd PRD-009
-# Runs: Research → Plan → Implement → Validate
-```
-
-**Quick mode** (legacy):
-```bash
-/code-prd PRD-009 --quick
-# Skips all phases, direct implementation
-```
-
-**Skip research** (have existing knowledge):
-```bash
-/code-prd PRD-009 --skip-research
-# Runs: Plan → Implement → Validate
-```
-
-**Skip plan** (simple change):
-```bash
-/code-prd PRD-009 --skip-plan
-# Runs: Research → Implement → Validate
-```
-
-**Manual checkpoints** (interactive):
-```bash
-/code-prd PRD-009 --manual-checkpoints
-# Pauses after each phase for review
-```
-
----
-
-## Migration Guide
-
-**For existing PRDs** (created before v0.4.0):
-- Old behavior preserved automatically
-- Version detected from PRD metadata
-- No action required
-
-**For new PRDs** (created after v0.4.0):
-- 4-phase workflow by default
-- Use `--quick` if you want old behavior
-- Thoughts/ directory auto-created
-
----
-
-**Version**: 2.0.0
-**Plugin**: claude-prd-workflow v0.4.0
-**Context Engineering**: Enabled
+**Version**: 0.4.2
+**Plugin**: claude-prd-workflow v0.4.2

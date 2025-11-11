@@ -369,7 +369,4 @@ Last 3 commits:
 
 Plugin: claude-prd-workflow
 Category: PRD Management
-Version: 0.4.0
-Author: CTO Mindset - Pragmatic Tools
-
-**Last Updated**: 2025-11-07
+Version: 0.4.2

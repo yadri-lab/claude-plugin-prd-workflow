@@ -275,5 +275,5 @@ Automatic migration available. Continue? (y/n)
 ---
 
 **Plugin**: claude-prd-workflow  
-**Version**: 0.3.0  
+**Version**: 0.4.2  
 **Category**: PRD Management

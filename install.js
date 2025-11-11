@@ -106,8 +106,13 @@ function install() {
       const dest = path.join(targetDir, dir);
 
       if (fs.existsSync(src)) {
-        copyDir(src, dest);
-        console.log(`   ✅ Copied ${dir}/`);
+        try {
+          copyDir(src, dest);
+          console.log(`   ✅ Copied ${dir}/`);
+        } catch (error) {
+          console.error(`   ⚠️  Failed to copy ${dir}/: ${error.message}`);
+          // Continue with other directories
+        }
       }
     }
 
@@ -147,54 +152,72 @@ function install() {
     const claudeBaseDir = getClaudeBaseDir();
 
     // Copy commands to ~/.claude-code/commands/
-    const commandsSrc = path.join(sourceDir, 'commands');
+    const commandsSrc = path.join(sourceDir, '.claude', 'commands');
     const commandsDest = path.join(claudeBaseDir, 'commands');
     if (fs.existsSync(commandsSrc)) {
-      if (!fs.existsSync(commandsDest)) {
-        fs.mkdirSync(commandsDest, { recursive: true });
+      try {
+        if (!fs.existsSync(commandsDest)) {
+          fs.mkdirSync(commandsDest, { recursive: true });
+        }
+        const commandFiles = fs.readdirSync(commandsSrc).filter(f => f.endsWith('.md'));
+        for (const file of commandFiles) {
+          fs.copyFileSync(
+            path.join(commandsSrc, file),
+            path.join(commandsDest, file)
+          );
+        }
+        console.log(`   ✅ Installed ${commandFiles.length} slash commands to ${commandsDest}`);
+      } catch (error) {
+        console.error(`   ⚠️  Failed to install commands: ${error.message}`);
       }
-      const commandFiles = fs.readdirSync(commandsSrc).filter(f => f.endsWith('.md'));
-      for (const file of commandFiles) {
-        fs.copyFileSync(
-          path.join(commandsSrc, file),
-          path.join(commandsDest, file)
-        );
-      }
-      console.log(`   ✅ Installed ${commandFiles.length} slash commands to ${commandsDest}`);
+    } else {
+      console.error(`   ⚠️  Commands directory not found at: ${commandsSrc}`);
     }
 
     // Copy agents to ~/.claude-code/agents/
-    const agentsSrc = path.join(sourceDir, 'agents');
+    const agentsSrc = path.join(sourceDir, '.claude', 'agents');
     const agentsDest = path.join(claudeBaseDir, 'agents');
     if (fs.existsSync(agentsSrc)) {
-      if (!fs.existsSync(agentsDest)) {
-        fs.mkdirSync(agentsDest, { recursive: true });
+      try {
+        if (!fs.existsSync(agentsDest)) {
+          fs.mkdirSync(agentsDest, { recursive: true });
+        }
+        const agentFiles = fs.readdirSync(agentsSrc).filter(f => f.endsWith('.md'));
+        for (const file of agentFiles) {
+          fs.copyFileSync(
+            path.join(agentsSrc, file),
+            path.join(agentsDest, file)
+          );
+        }
+        console.log(`   ✅ Installed ${agentFiles.length} AI agents to ${agentsDest}`);
+      } catch (error) {
+        console.error(`   ⚠️  Failed to install agents: ${error.message}`);
       }
-      const agentFiles = fs.readdirSync(agentsSrc).filter(f => f.endsWith('.md'));
-      for (const file of agentFiles) {
-        fs.copyFileSync(
-          path.join(agentsSrc, file),
-          path.join(agentsDest, file)
-        );
-      }
-      console.log(`   ✅ Installed ${agentFiles.length} AI agents to ${agentsDest}`);
+    } else {
+      console.error(`   ⚠️  Agents directory not found at: ${agentsSrc}`);
     }
 
     // Copy skills to ~/.claude-code/skills/
-    const skillsSrc = path.join(sourceDir, 'skills');
+    const skillsSrc = path.join(sourceDir, '.claude', 'skills');
     const skillsDest = path.join(claudeBaseDir, 'skills');
     if (fs.existsSync(skillsSrc)) {
-      if (!fs.existsSync(skillsDest)) {
-        fs.mkdirSync(skillsDest, { recursive: true });
+      try {
+        if (!fs.existsSync(skillsDest)) {
+          fs.mkdirSync(skillsDest, { recursive: true });
+        }
+        const skillFiles = fs.readdirSync(skillsSrc).filter(f => f.endsWith('.md'));
+        for (const file of skillFiles) {
+          fs.copyFileSync(
+            path.join(skillsSrc, file),
+            path.join(skillsDest, file)
+          );
+        }
+        console.log(`   ✅ Installed ${skillFiles.length} skills to ${skillsDest}`);
+      } catch (error) {
+        console.error(`   ⚠️  Failed to install skills: ${error.message}`);
       }
-      const skillFiles = fs.readdirSync(skillsSrc).filter(f => f.endsWith('.md'));
-      for (const file of skillFiles) {
-        fs.copyFileSync(
-          path.join(skillsSrc, file),
-          path.join(skillsDest, file)
-        );
-      }
-      console.log(`   ✅ Installed ${skillFiles.length} skills to ${skillsDest}`);
+    } else {
+      console.error(`   ⚠️  Skills directory not found at: ${skillsSrc}`);
     }
 
     console.log('\n✨ Installation complete!\n');

@@ -145,6 +145,6 @@ Les skills respectent la configuration dans `.claude/config.json`:
 
 ---
 
-**Version**: 0.4.0  
+**Version**: 0.4.2  
 **Date**: 2025-11-07  
 **Auteur**: CTO Mindset - Pragmatic Tools

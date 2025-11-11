@@ -326,4 +326,4 @@ Which is primary? [1/2]
 **Skill**: claude-md-generator
 **Model**: haiku (fast, pattern-based)
 **Temperature**: 0.3 (consistent output)
-**Version**: 2.6.0
+**Version**: 0.4.2

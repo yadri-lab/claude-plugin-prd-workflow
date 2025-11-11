@@ -1,13 +1,14 @@
 {
   "name": "claude-prd-workflow",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "The complete Claude Code plugin for Product-Driven Development. Ship features faster with AI-powered PRD review, Git worktree support, and automated quality gates.",
   "main": "install.js",
   "bin": {
     "claude-prd-install": "./bin/install.js"
   },
   "scripts": {
-    "postinstall": "node install.js"
+    "postinstall": "node install.js",
+    "prepublishOnly": "node scripts/update-version.js"
   },
   "keywords": [
     "claude-code",
