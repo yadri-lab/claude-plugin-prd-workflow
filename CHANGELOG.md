@@ -6,6 +6,61 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.4.3] - 2025-01-14
+
+### ✨ Added - Worktree Hybrides
+
+**Major Feature**: Flexible worktree system for parallel development with intelligent sync.
+
+#### New Commands
+- **`/worktree`** - Centralized worktree management (setup, sync, status, prune)
+- **`/hotfix`** - Alias for `/ship --worktree` (always uses worktree isolation)
+
+#### Enhanced Commands
+- **`/ship`** - Now supports `--worktree` flag for optional isolation
+  - Default: Works on Main (quick, simple)
+  - With `--worktree`: Uses permanent `worktrees/hotfix/` (isolation)
+  - New options: `--to-worktree`, `--complete`, `--pause`, `--resume`, `--status`, `--abort`
+  - Smart warnings: Suggests worktree migration if fix grows (>5 files, >100 lines, >30 min)
+
+- **`/debugging`** - Now supports `--worktree` flag for debug sessions with modifications
+  - Default: Investigation on Main (read-only)
+  - With `--worktree`: Uses permanent `worktrees/debug/` (with modifications)
+  - New options: `--to-worktree`, `--resolve`, `--pause`, `--resume`, `--list`
+  - Session documentation: `.prds/debug-sessions/`
+
+#### Infrastructure
+- **Permanent Worktrees**: `worktrees/hotfix/` and `worktrees/debug/` for reusable isolation
+- **Intelligent Sync**: Auto-sync with main before each use (Option C hybrid strategy)
+  - 0 commits behind: ✅ No action
+  - 1-10 commits: 🔄 Silent auto-sync
+  - 10-50 commits: ⚠️ Propose sync with preview
+  - 50+ commits: ❌ Force sync (required)
+- **Lock Files**: Prevents concurrent fixes in same worktree (one fix at a time = simple)
+- **Configuration**: `.claude/config-worktrees.json` for customization
+- **Sync Scripts**: `.claude/scripts/worktree-sync.sh` for reusable sync logic
+
+### 📚 Documentation
+- `CHANGELOG-v0.4.3.md` - Detailed release notes
+- `docs/WORKTREE-WORKFLOW-v0.4.3.md` - Complete workflow guide with 7 scenarios
+
+### 🎯 Philosophy
+**"Start simple (Main), scale up (Worktree) when needed"**
+- Flexibility: Choose Main or Worktree for each task
+- Migration: Easy transition from Main to Worktree if fix grows
+- Parallelization: 4 contexts (Main + hotfix + debug + PRD worktrees)
+- Simplicity: One fix at a time per worktree
+
+### 🔧 Configuration
+New configuration file: `.claude/config-worktrees.json`
+- Sync thresholds customization
+- Warning thresholds (files, lines, time)
+- Auto-complete behavior
+- Collision handling strategy
+
+See `CHANGELOG-v0.4.3.md` for full details and migration guide.
+
+
 ## [0.4.2] - 2025-11-11
 
 ### 🔥 Critical Fixes - Installation Bug

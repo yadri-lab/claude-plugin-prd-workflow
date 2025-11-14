@@ -1,12 +1,14 @@
 ---
-name: quick-ship
+name: ship
 description: Fast-track small features without full PRD process
 category: Git Workflow
+version: 0.4.3
+aliases: [quick-ship]
 ---
 
 # Quick Ship Command
 
-Ship small features/fixes fast without full PRD overhead.
+Ship small features/fixes fast without full PRD overhead, with optional worktree isolation.
 
 ## Purpose
 
@@ -17,260 +19,441 @@ For small changes that don't need full PRD:
 - Minor refactors
 - Quick experiments
 
-Creates minimal tracking log instead of full PRD.
+**NEW in v0.4.3**: Support for worktree isolation with `--worktree` flag.
 
 ## When to Use
 
-Use Quick Ship for:
+**Use Quick Ship for**:
 - Features < 4 hours
 - Single developer work
 - Clear scope, no unknowns
 - Low risk changes
 
-Use Full PRD for:
+**Use Full PRD for**:
 - Features > 1 day
 - Multiple developers
 - Unclear requirements
 - High-risk changes
 - Customer-facing features
 
-## Workflow (Ultra-Simple - Option B)
-
-### Step 1: Describe Change
-
-```markdown
-What are you shipping?
-
-Example: "Fix dark mode toggle on iOS Safari"
-
-> [User input]
-```
-
-### Step 2: AI Quick Analysis & Auto-Setup
-
-AI analyzes in ONE step and auto-creates everything:
-
-```markdown
-🚀 Quick Ship: Fix dark mode toggle on iOS Safari
-
-📊 Analysis:
-  Type: Bug Fix
-  Time: ~1 hour
-  Risk: Low
-  Files: src/styles/theme.css, src/components/ThemeToggle.tsx
-
-💡 Plan:
-  1. Root cause: CSS variables not supported in iOS <15
-  2. Solution: Add fallback using media queries
-  3. Testing: iOS Safari 14.5+
-
-✅ Auto-created:
-  - Branch: quickship/fix-dark-mode-ios
-  - Log: .claude/quick-ships/2025-10-26-dark-mode-ios.md
-
-Ready to code! Here's what to do next...
-```
-
-**No user confirmation needed** - AI is confident, just go!
-
-### Step 3: Guided Implementation (Inline)
+## Usage
 
 ```bash
-# Create quick-ship branch
-git checkout -b quickship/fix-dark-mode-ios
+# Default: Work on Main (quick, simple)
+/ship "Fix login button alignment"
 
-# Create minimal log
-mkdir -p .claude/quick-ships/
-cat > .claude/quick-ships/2025-10-26-dark-mode-ios.md
+# With worktree isolation (safer, larger fixes)
+/ship "Refactor auth module" --worktree
+
+# Manage active fix
+/ship --complete           # Finish and merge
+/ship --abort              # Cancel fix
+/ship --status             # Show current status
+/ship --pause              # Pause current fix
+/ship --resume             # Resume paused fix
+
+# Migrate from Main to worktree
+/ship --to-worktree        # Move current fix to worktree
 ```
 
-Log format:
-```markdown
-# Fix: Dark Mode Toggle on iOS Safari
+## Options
 
-**Date**: 2025-10-26
-**Type**: Bug Fix
-**Estimated Time**: 1 hour
+| Option | Description |
+|--------|-------------|
+| `--worktree` | Use hotfix worktree for isolation |
+| `--to-worktree` | Migrate current fix from Main to worktree |
+| `--complete` | Complete current fix (commit + PR + merge) |
+| `--abort` | Abort current fix without merging |
+| `--status` | Show current fix status |
+| `--pause` | Pause fix and save state |
+| `--resume` | Resume paused fix |
 
-## Problem
-Dark mode toggle not working on iOS Safari <15
+## Workflow: Default (Main)
 
-## Solution
-Add CSS fallback using media queries instead of CSS variables
+### Step 1: Start Fix on Main
 
-## Files
-- src/styles/theme.css
-- src/components/ThemeToggle.tsx
+```bash
+$ /ship "Fix dark mode toggle"
 
-## Testing Plan
-- iOS Safari 14.5
-- iOS Safari 15+
-- Chrome/Firefox (regression check)
+✅ Quick fix on Main
+📝 Branch: quickship/fix-dark-mode-toggle
+
+💡 Working on Main - keep it small!
 ```
 
-AI provides inline guidance:
-```markdown
-📝 Task 1/3: Update CSS fallback
+### Step 2: Guided Implementation
 
-Edit: src/styles/theme.css
+AI provides inline guidance for the fix:
+- File locations
+- Code changes
+- Testing approach
 
-Add this code:
-```css
-/* Fallback for iOS <15 */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-color: #1a1a1a;
-    --text-color: #ffffff;
-  }
+### Step 3: Smart Warnings
+
+As you work, smart detection monitors:
+
+```bash
+# After 20 minutes, 8 files, 150 lines...
+
+⚠️  LARGE FIX DETECTED
+- 8 files changed
+- 150 lines modified
+- 22 minutes elapsed
+
+💡 This is getting large. Consider:
+  1. /ship --complete (finish on Main)
+  2. /ship --to-worktree (migrate to worktree)
+  3. Continue on Main (suppress warning)
+
+Choose: _
+```
+
+**Thresholds**:
+- Files: > 5 files
+- Lines: > 100 lines
+- Time: > 30 minutes
+
+### Step 4: Complete Fix
+
+```bash
+$ /ship --complete
+
+✅ Committed: fix: Dark mode toggle improvements
+📤 PR #234 created
+⏳ Waiting for checks...
+✅ Checks passed, auto-merged
+🎉 Merged to main
+🧹 Cleaned up branch
+```
+
+## Workflow: With Worktree
+
+### Step 1: Start Fix in Worktree
+
+```bash
+$ /ship "Refactor authentication module" --worktree
+
+🔍 Checking worktree hotfix/...
+
+# AUTO-SYNC (Intelligent)
+🔄 Syncing worktree (3 commits behind)...
+
+Recent changes:
+  - a3f2c1d fix: OAuth timeout
+  - 8d4e2a9 feat: Better logging
+  - 1c8f3b2 refactor: API cleanup
+
+✅ Synced with main
+
+# START FIX
+✅ Started in worktrees/hotfix/
+📝 Branch: hotfix/refactor-auth-module
+🔒 Locked worktree (one fix at a time)
+
+💻 Open in new window: code worktrees/hotfix/
+```
+
+**Auto-sync thresholds**:
+- 0 commits: ✅ No sync needed
+- 1-10 commits: 🔄 Silent auto-sync
+- 10-50 commits: ⚠️ Propose sync with preview
+- 50+ commits: ❌ Force sync (required)
+
+### Step 2: Isolated Development
+
+Work in `worktrees/hotfix/`:
+- No size limits
+- No time warnings
+- Complete isolation
+- Can open in separate Cursor window
+
+### Step 3: Complete Fix
+
+```bash
+$ /ship --complete
+
+✅ Committed & pushed
+📤 PR #235 created
+⏳ Waiting for checks...
+✅ Checks passed, auto-merging
+🎉 Merged to main
+
+# AUTO-CLEANUP
+🔄 Returning to parking branch...
+🧹 Deleted branch hotfix/refactor-auth-module
+🔄 Syncing with main...
+✅ Worktree ready for next fix
+🔓 Unlocked worktree
+
+↩️  Returned to Main
+```
+
+## Collision Handling
+
+**One fix at a time** in hotfix worktree:
+
+```bash
+$ /ship "Fix autre" --worktree
+
+❌ Fix already in progress in worktrees/hotfix/
+
+Current fix: hotfix/refactor-auth-module
+Started: 25 minutes ago
+Files: 7 modified
+
+⚠️  Only ONE fix at a time in hotfix worktree
+
+Options:
+1. Finish current fix: /ship --complete
+2. Work on Main instead: /ship "Fix autre"
+3. Abort current fix: /ship --abort
+
+💡 For urgent small fixes, use Main:
+  /ship "Fix autre"
+
+Choose: _
+```
+
+## Migration: Main → Worktree
+
+Started on Main but fix is growing:
+
+```bash
+# Working on Main...
+⚠️  LARGE FIX DETECTED (warning appears)
+
+$ /ship --to-worktree
+
+🔄 Migrating to worktree...
+
+# Process:
+1. ✅ Commit WIP on Main
+   git add .
+   git commit -m "WIP: Large fix"
+
+2. ✅ Setup worktree hotfix/
+   Auto-sync if needed
+
+3. ✅ Cherry-pick WIP to worktree
+   cd worktrees/hotfix/
+   git checkout -b hotfix/large-fix
+   git cherry-pick <wip-commit>
+
+4. ✅ Reset Main
+   cd main-repo/
+   git reset --hard HEAD~1
+
+5. ✅ Continue in worktree
+   💻 Open: code worktrees/hotfix/
+
+Migration complete!
+Continue working in worktrees/hotfix/
+```
+
+## State Management
+
+### Lock File
+
+`.claude-lock` in `worktrees/hotfix/`:
+
+```json
+{
+  "status": "in_progress",
+  "type": "hotfix",
+  "branch": "hotfix/refactor-auth",
+  "started_at": "2025-01-13T10:30:00Z",
+  "started_by": "/ship --worktree",
+  "description": "Refactor authentication module",
+  "files_changed": 7,
+  "lines_changed": 234,
+  "commits": 3,
+  "last_commit": "a3f2c1d Improve auth flow"
 }
 ```
 
-When done, type: next
+### Status Check
+
+```bash
+$ /ship --status
+
+📊 Current Fix Status
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📍 Location: worktrees/hotfix/
+📝 Branch: hotfix/refactor-auth-module
+⏱️  Started: 25 minutes ago
+📊 Progress:
+  - Files: 7 modified
+  - Lines: +234 -87
+  - Commits: 3
+
+Recent commits:
+  - a3f2c1d Improve auth flow
+  - 8d4e2a9 Add tests
+  - 1c8f3b2 Refactor middleware
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Actions:
+  - /ship --complete (finish)
+  - /ship --pause (save for later)
+  - /ship --abort (cancel)
 ```
 
-### Step 4: Auto-Commit & Auto-PR (Integrated)
+## Pause & Resume
 
-**No separate commands needed!** When user finishes coding:
+### Pause Fix
 
-```markdown
-✅ Changes detected in src/styles/theme.css, src/components/ThemeToggle.tsx
+```bash
+$ /ship --pause
 
-🔍 Running checks:
-  - Linting... ✅
-  - Tests... ✅
-  - Security... ✅
+💾 Pausing fix...
 
-🤖 Auto-committing:
-  Message: "fix(ui): Add iOS Safari fallback for dark mode toggle"
+✅ Committed WIP state
+📝 Updated lock file (status: paused)
+🔄 Returned to parking branch
 
-📤 Auto-creating PR #89:
-  Title: "Fix: Dark mode toggle on iOS Safari"
-  Description: Auto-generated from quick-ship log
-
-🔀 PR checks passing... Auto-merging to main...
+Fix paused. Resume with: /ship --resume
 ```
 
-**All automatic - zero manual steps!**
+### Resume Fix
 
-### Step 5: Auto-Completion
+```bash
+$ /ship --resume
 
-```markdown
-✅ MERGED to main
-🚀 Deployed to production
+📋 Paused fixes:
 
-🧹 Auto-cleanup:
-  - Branch deleted: quickship/fix-dark-mode-ios
-  - Log updated with metrics
+1. hotfix/refactor-auth-module
+   Started: 2 hours ago
+   Files: 7 modified
+   Last: Improve auth flow
 
-🎉 Quick Ship Complete!
-  Duration: 47 min (estimated: 1h)
-  Files: 2 changed (+20 -5)
-  Tests: +2% coverage
-```
+Resume which fix? (1): 1
 
-### Step 6: Updated Log (Automatic)
+🔄 Resuming fix...
+✅ Checked out branch: hotfix/refactor-auth-module
+📊 Fix status loaded
 
-```markdown
-# Fix: Dark Mode Toggle on iOS Safari
-
-**Date**: 2025-10-26  
-**Duration**: 47 minutes (estimated: 1 hour)
-**PR**: #89 (auto-merged)
-
-## Problem  
-Dark mode toggle not working on iOS Safari <15
-
-## Solution
-Added CSS fallback using media queries
-
-## Files Changed
-- src/styles/theme.css (+12 -3)
-- src/components/ThemeToggle.tsx (+8 -2)
-
-## Testing
-- iOS Safari 14.5: PASS
-- iOS Safari 15+: PASS
-- Chrome/Firefox: PASS (no regression)
-
-## Metrics
-- Build size: +0.2KB
-- Performance: No impact
-- Test coverage: +2%
-
-STATUS: COMPLETE
+Continue working!
 ```
 
 ## Configuration
 
+Respects `.claude/config-worktrees.json`:
+
 ```json
 {
-  "prd_workflow": {
-    "quick_ship": {
-      "enabled": true,
-      "auto_merge": true,
-      "log_directory": ".claude/quick-ships",
-      "branch_prefix": "quickship",
-      "max_estimated_time": 4
+  "worktrees": {
+    "hotfix": {
+      "path": "worktrees/hotfix",
+      "branch_parking": "hotfix"
     }
+  },
+  "warnings": {
+    "files_threshold": 5,
+    "lines_threshold": 100,
+    "time_threshold_minutes": 30
+  },
+  "auto_complete": {
+    "auto_merge_if_checks_pass": true,
+    "cleanup_after_merge": true
   }
 }
 ```
 
-## Usage Examples
+## Examples
+
+### Example 1: Simple Fix on Main
 
 ```bash
-# Interactive (asks for description)
-/quick-ship
+$ /ship "Fix typo in error message"
 
-# Direct (one command, done)
-/quick-ship "Fix login button alignment"
+# Small fix, 1 file, 2 lines
+# No warnings
+# Complete quickly
 
-# Risky change (manual merge)
-/quick-ship "Refactor auth module" --manual-merge
+$ /ship --complete
+
+✅ Done!
 ```
 
-## Key Features (Option B - Ultra Simple)
+### Example 2: Fix Grows, Migrate to Worktree
 
-✅ **One command, zero friction**
-- No separate /smart-commit or /smart-pr needed
-- Everything automated from description to deployment
+```bash
+$ /ship "Fix dark mode issues"
 
-✅ **Intelligent auto-detection**
-- AI detects files to change
-- AI generates commit message
-- AI creates PR description
-- AI decides safe to auto-merge
+# Start on Main
+# After 20 min: 8 files, 150 lines
 
-✅ **Inline guidance**
-- Code examples shown directly
-- Task-by-task breakdown
-- No context switching
+⚠️  LARGE FIX DETECTED
 
-✅ **Safe defaults**
-- Auto-merge only if all checks pass
-- Manual flag for risky changes
-- Complete rollback if issues detected
+$ /ship --to-worktree
 
-## Quick Ships vs PRDs
+# Migrated to worktree
+# Continue safely
+```
 
-| Aspect | Quick Ship | Full PRD |
-|--------|-----------|----------|
-| Duration | <4 hours | >1 day |
-| Documentation | Minimal log | Full PRD |
-| Review | Auto (AI) | Manual + AI |
-| Tracking | Log file | PRD file |
-| Workflow | Single branch | Worktree |
-| Best for | Fixes, tweaks | Features |
+### Example 3: Direct Worktree Usage
+
+```bash
+$ /ship "Large refactor" --worktree
+
+# Starts in worktree
+# No limits
+# Complete isolation
+```
+
+### Example 4: Urgent Fix During Active Fix
+
+```bash
+# Fix in progress in worktree
+$ /ship "Critical bug" --worktree
+
+❌ Worktree busy
+
+# Use Main instead
+$ /ship "Critical bug"
+
+# Quick fix on Main
+# Worktree unaffected
+```
 
 ## Best Practices
 
-- Use for truly small changes
-- Still write tests
-- Update log after completion
-- Review logs monthly for patterns
+### When to Use Main
+
+✅ **Typos, small text changes**
+✅ **1-2 file modifications**
+✅ **< 50 lines changed**
+✅ **< 15 minutes work**
+✅ **Low risk, obvious fix**
+
+### When to Use Worktree
+
+✅ **Refactors**
+✅ **Multiple files (5+)**
+✅ **> 100 lines changed**
+✅ **> 30 minutes work**
+✅ **Need isolation**
+✅ **Want separate Cursor window**
+
+### Tips
+
+- 💡 Start on Main, migrate if it grows
+- 💡 Use worktree for anything "refactor"
+- 💡 One worktree fix at a time = simple
+- 💡 Urgent fixes on Main = no blocking
+
+## Integration
+
+Works seamlessly with:
+- `/worktree` - Manage worktrees
+- `/context` - Shows current fix
+- `/cleanup` - Cleans up after merge
+- `/hotfix` - Alias for `/ship --worktree`
 
 ---
 
-Plugin: claude-prd-workflow
-Category: Git Workflow
-Version: 0.4.2
+**Version**: 0.4.3
+**Plugin**: claude-prd-workflow v0.4.3
+**Changes**: Added worktree support, intelligent sync, collision handling

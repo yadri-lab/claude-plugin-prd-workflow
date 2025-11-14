@@ -1,0 +1,55 @@
+{
+  "version": "0.4.3",
+  "worktrees": {
+    "hotfix": {
+      "enabled": true,
+      "path": "worktrees/hotfix",
+      "branch_parking": "hotfix",
+      "branch_prefix": "hotfix/",
+      "lock_file": ".claude-lock",
+      "max_concurrent_fixes": 1,
+      "auto_cleanup_after_merge": true,
+      "description": "Quick fixes and UI tweaks"
+    },
+    "debug": {
+      "enabled": true,
+      "path": "worktrees/debug",
+      "branch_parking": "debug",
+      "branch_prefix": "debug/",
+      "lock_file": ".claude-lock",
+      "max_concurrent_sessions": 1,
+      "auto_cleanup_after_resolve": true,
+      "session_dir": ".prds/debug-sessions",
+      "description": "Debugging sessions with modifications"
+    }
+  },
+  "sync": {
+    "strategy": "intelligent",
+    "auto_sync_on_start": true,
+    "thresholds": {
+      "silent_sync_max_commits": 10,
+      "warn_sync_max_commits": 50,
+      "force_sync_min_commits": 100
+    },
+    "show_recent_changes": true,
+    "recent_changes_count": 5,
+    "skip_locked_worktrees": true
+  },
+  "warnings": {
+    "enabled": true,
+    "files_threshold": 5,
+    "lines_threshold": 100,
+    "time_threshold_minutes": 30,
+    "suggest_worktree_migration": true
+  },
+  "auto_complete": {
+    "auto_merge_if_checks_pass": true,
+    "cleanup_after_merge": true,
+    "return_to_main_after_complete": true
+  },
+  "collision_handling": {
+    "max_concurrent_per_worktree": 1,
+    "on_collision_suggest_main": true,
+    "on_collision_show_options": true
+  }
+}
