@@ -6,6 +6,79 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.4.4] - 2025-01-14
+
+### ✨ Added - Automatic Context Detection
+
+**Major Enhancement**: Run `/ship`, `/debugging`, and `/hotfix` directly from worktree directories - no more orchestration from Main required!
+
+#### Problem Solved
+Previously (v0.4.3), developers with dedicated Cursor windows on worktrees had to constantly switch back to Main for orchestration:
+```bash
+# ❌ v0.4.3 workflow
+~/watchora$ /ship "Fix" --worktree           # From Main
+~/watchora$ cd worktrees/hotfix/             # Switch to worktree
+~/watchora/worktrees/hotfix$ # Code...       # Work
+~/watchora/worktrees/hotfix$ cd ~/watchora   # Switch back
+~/watchora$ /ship --complete                 # From Main again
+```
+
+Now (v0.4.4), everything works seamlessly from the worktree:
+```bash
+# ✅ v0.4.4 workflow
+~/watchora/worktrees/hotfix$ /ship "Fix"     # Auto-detects worktree!
+~/watchora/worktrees/hotfix$ # Code...       # Work
+~/watchora/worktrees/hotfix$ /ship --complete # Complete here too!
+```
+
+#### New Infrastructure
+- **Context Detection Script**: `.claude/scripts/context-detection.sh`
+  - Automatically detects if running from Main or worktree
+  - Supports `worktrees/hotfix/` and `worktrees/debug/`
+  - Handles Windows and Unix paths
+
+#### Enhanced Commands
+- **`/ship`** - Auto-detects worktree context
+  - From Main: Default behavior unchanged
+  - From `worktrees/hotfix/`: Automatically uses worktree mode (no `--worktree` flag needed)
+  - All operations stay in current directory
+
+- **`/debugging`** - Auto-detects worktree context
+  - From Main: Default behavior unchanged
+  - From `worktrees/debug/`: Automatically uses worktree mode (no `--worktree` flag needed)
+  - Session management works from current directory
+
+- **`/hotfix`** - Works seamlessly from anywhere
+  - Can now be called from Main OR from `worktrees/hotfix/` directly
+  - Same isolation guarantees, simpler workflow
+
+#### Benefits
+- ✅ **No more directory switching** - Stay in worktree window entire time
+- ✅ **Natural two-window workflow** - Main for PRDs, Worktree for fixes
+- ✅ **100% backward compatible** - All v0.4.3 workflows still work
+- ✅ **Parallel work** - Main and worktree windows work independently
+
+#### Documentation
+- All command docs updated with new "Context Detection" sections
+- New examples showing worktree-first workflow
+- See `CHANGELOG-v0.4.4.md` for detailed migration guide
+
+### 🎯 Use Case: Dedicated Worktree Window
+```bash
+# One-time: Open Cursor on worktree
+cd ~/watchora/worktrees/hotfix/
+code .
+
+# Daily workflow - never leave this window!
+~/watchora/worktrees/hotfix$ /ship "Fix A"
+~/watchora/worktrees/hotfix$ /ship --complete
+~/watchora/worktrees/hotfix$ /ship "Fix B"
+~/watchora/worktrees/hotfix$ /ship --complete
+# Repeat...
+```
+
+---
+
 ## [0.4.3] - 2025-01-14
 
 ### ✨ Added - Worktree Hybrides

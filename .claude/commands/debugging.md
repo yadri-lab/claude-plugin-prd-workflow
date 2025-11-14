@@ -2,7 +2,7 @@
 name: debugging
 description: Structured debugging session with team knowledge capture
 category: Development Tools
-version: 0.4.3
+version: 0.4.4
 ---
 
 # Debugging Command
@@ -17,18 +17,45 @@ Transform chaotic debugging into efficient investigation with:
 - Hypothesis-driven testing
 - Team knowledge documentation
 
-**NEW in v0.4.3**: Support for worktree isolation with `--worktree` flag for debugging sessions requiring code modifications.
+**NEW in v0.4.4**: Automatic context detection - run from Main OR from worktree directly!
+**v0.4.3**: Support for worktree isolation with `--worktree` flag for debugging sessions requiring code modifications.
+
+## Context Detection (Auto)
+
+The `/debugging` command **automatically detects** where you run it from:
+
+### From Main Repository
+```bash
+# Working directory: ~/Documents/watchora
+$ /debugging "Check API timeout"
+→ Behavior: Read-only investigation on Main (default)
+→ Optional: Add --worktree for code modifications
+```
+
+### From Debug Worktree
+```bash
+# Working directory: ~/Documents/watchora/worktrees/debug
+$ /debugging "Check API timeout"
+→ Behavior: Automatically uses worktree (no --worktree needed!)
+→ Syncs, locks, creates branch, works in current directory
+```
+
+**Key Point**: If you have a dedicated Cursor window open on `worktrees/debug/`, you can use `/debugging` directly from there!
 
 ## Usage
 
 ```bash
-# Default: Investigate on Main (read-only, quick)
+# From Main: Investigate on Main (read-only, quick)
 /debugging "Check why API returns 500"
 
-# With worktree isolation (modifications needed)
+# From Main: With worktree isolation (modifications needed)
 /debugging "Memory leak in WebSocket handler" --worktree
 
-# Manage active session
+# From Worktree: Auto-detects worktree context
+cd worktrees/debug/
+/debugging "Memory leak issue"  # Automatically uses worktree!
+
+# Manage active session (works from anywhere)
 /debugging --resolve          # Complete and document
 /debugging --abort            # Cancel session
 /debugging --status           # Show current status
@@ -135,7 +162,7 @@ Solution: Updated production config (no code changes)
 Session closed.
 ```
 
-## Workflow: With Worktree
+## Workflow: With Worktree (from Main)
 
 ### Step 1: Start Session in Worktree
 
@@ -208,6 +235,82 @@ Choose: 1
 
 ↩️  Returned to Main
 ```
+
+## Workflow: From Worktree Directly (NEW in v0.4.4)
+
+### Setup: Open Cursor Window on Worktree
+
+```bash
+# One-time setup: Open dedicated Cursor window
+cd ~/Documents/watchora/worktrees/debug/
+code .  # Opens Cursor in worktree directory
+```
+
+### Step 1: Start Session (from Worktree)
+
+```bash
+# You're already in worktrees/debug/
+$ pwd
+~/Documents/watchora/worktrees/debug
+
+# Run /debugging directly - no --worktree flag needed!
+$ /debugging "Memory leak in WebSocket handler"
+
+🔍 Detected: Running from worktree debug/
+🎯 Auto-enabling worktree mode
+
+# AUTO-SYNC (Intelligent)
+🔄 Checking sync status...
+✅ Synced with main (or auto-sync if needed)
+
+# START SESSION
+✅ Started in current directory
+📝 Branch: debug/memory-leak-websocket
+📄 Session: .prds/debug-sessions/2025-01-14-memory-leak-websocket.md
+🔒 Locked worktree (one session at a time)
+
+💡 Working in worktree - full debugging power!
+```
+
+### Step 2: Investigation (Same Directory)
+
+You work in the **same directory** where you launched `/debugging`:
+- Already in `worktrees/debug/`
+- Add debug logging
+- Reproduce bugs
+- Test hypotheses
+- All your tools work normally
+
+### Step 3: Resolve (from Worktree)
+
+```bash
+# Still in worktrees/debug/
+$ /debugging --resolve
+
+💬 Resolution status?
+1. Resolved with fix → Create PR
+2. Resolved without fix → Document only
+3. Workaround → Document + TODO
+4. Not resolved → Save state
+
+Choose: 1
+
+# Fix found - create PR
+✅ Committed fix
+📤 PR #237: fix: Memory leak in WebSocket close handler
+📝 Updated session doc
+
+# AUTO-CLEANUP
+🔄 Returning to parking branch...
+🧹 Deleted branch debug/memory-leak-websocket
+🔄 Syncing with main...
+✅ Worktree ready for next session
+🔓 Unlocked worktree
+
+📍 Still in: worktrees/debug/ (ready for next session)
+```
+
+**Advantage**: You stay in the same Cursor window the entire time!
 
 ## Collision Handling
 
@@ -495,7 +598,7 @@ $ /debugging --resolve
 # Documented, session closed
 ```
 
-### Example 2: Investigation Needs Code Changes
+### Example 2: Investigation Needs Code Changes (from Main)
 
 ```bash
 $ /debugging "Performance degradation" --worktree
@@ -508,7 +611,21 @@ $ /debugging --resolve
 # PR created, session documented
 ```
 
-### Example 3: Migration to Worktree
+### Example 3: Investigation from Worktree - NEW!
+
+```bash
+# Cursor window open on worktrees/debug/
+$ pwd
+~/Documents/watchora/worktrees/debug
+
+$ /debugging "Performance degradation"
+
+# Auto-detects worktree context
+# No --worktree flag needed
+# Works in current directory
+```
+
+### Example 4: Migration to Worktree
 
 ```bash
 $ /debugging "Bug in production"
@@ -522,7 +639,7 @@ $ /debugging --to-worktree
 # Testing fix in isolation
 ```
 
-### Example 4: Long Investigation with Pause
+### Example 5: Long Investigation with Pause
 
 ```bash
 $ /debugging "Complex race condition" --worktree
@@ -574,6 +691,8 @@ Works seamlessly with:
 
 ---
 
-**Version**: 0.4.3
-**Plugin**: claude-prd-workflow v0.4.3
-**Changes**: Added worktree support, intelligent sync, session management, collision handling
+**Version**: 0.4.4
+**Plugin**: claude-prd-workflow v0.4.4
+**Changes**:
+- v0.4.4: Added automatic context detection - run from Main OR worktree directly
+- v0.4.3: Added worktree support, intelligent sync, session management, collision handling

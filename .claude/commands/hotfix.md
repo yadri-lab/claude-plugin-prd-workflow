@@ -2,12 +2,14 @@
 name: hotfix
 description: Quick fix with worktree isolation (alias for /ship --worktree)
 category: Git Workflow
-version: 0.4.3
+version: 0.4.4
 ---
 
 # Hotfix Command
 
 Alias for `/ship --worktree` - always uses worktree isolation for quick fixes.
+
+**NEW in v0.4.4**: Works seamlessly from Main OR from worktree directly thanks to automatic context detection!
 
 ## Purpose
 
@@ -15,17 +17,22 @@ For developers who prefer worktree isolation by default:
 - Shorter to type than `/ship --worktree`
 - Always works in dedicated worktree
 - Same workflow as `/ship` but with guaranteed isolation
+- Can be launched from Main OR from worktree directly
 
 ## Usage
 
 ```bash
-# Basic usage
+# From Main: Basic usage
 /hotfix "Fix login button alignment"
 
 # Equivalent to:
 /ship "Fix login button alignment" --worktree
 
-# All /ship options work
+# From Worktree: Auto-detects context (NEW!)
+cd worktrees/hotfix/
+/hotfix "Fix login button"  # Works seamlessly!
+
+# All /ship options work (from anywhere)
 /hotfix --complete    # Finish fix
 /hotfix --abort       # Cancel fix
 /hotfix --status      # Check status
@@ -116,7 +123,21 @@ $ /hotfix --status
 ⏱️  Started: 25 minutes ago
 ```
 
-### Example 3: Collision
+### Example 3: From Worktree Directly (NEW!)
+
+```bash
+# Cursor window open on worktrees/hotfix/
+$ pwd
+~/Documents/watchora/worktrees/hotfix
+
+$ /hotfix "Refactor API endpoints"
+
+# Auto-detects worktree
+# Works in current directory
+# No --worktree flag needed
+```
+
+### Example 4: Collision
 
 ```bash
 # Fix already in progress
@@ -144,6 +165,8 @@ $ /ship "Another fix"
 
 ---
 
-**Version**: 0.4.3
-**Plugin**: claude-prd-workflow v0.4.3
+**Version**: 0.4.4
+**Plugin**: claude-prd-workflow v0.4.4
 **Alias for**: `/ship --worktree`
+**Changes**:
+- v0.4.4: Works from Main OR worktree directly (automatic context detection)

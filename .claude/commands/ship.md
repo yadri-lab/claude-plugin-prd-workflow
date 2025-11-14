@@ -2,7 +2,7 @@
 name: ship
 description: Fast-track small features without full PRD process
 category: Git Workflow
-version: 0.4.3
+version: 0.4.4
 aliases: [quick-ship]
 ---
 
@@ -19,7 +19,30 @@ For small changes that don't need full PRD:
 - Minor refactors
 - Quick experiments
 
-**NEW in v0.4.3**: Support for worktree isolation with `--worktree` flag.
+**NEW in v0.4.4**: Automatic context detection - run from Main OR from worktree directly!
+**v0.4.3**: Support for worktree isolation with `--worktree` flag.
+
+## Context Detection (Auto)
+
+The `/ship` command **automatically detects** where you run it from:
+
+### From Main Repository
+```bash
+# Working directory: ~/Documents/watchora
+$ /ship "Fix auth bug"
+→ Behavior: Works on Main (default)
+→ Optional: Add --worktree to use hotfix worktree
+```
+
+### From Hotfix Worktree
+```bash
+# Working directory: ~/Documents/watchora/worktrees/hotfix
+$ /ship "Fix auth bug"
+→ Behavior: Automatically uses worktree (no --worktree needed!)
+→ Syncs, locks, creates branch, works in current directory
+```
+
+**Key Point**: If you have a dedicated Cursor window open on `worktrees/hotfix/`, you can use `/ship` directly from there!
 
 ## When to Use
 
@@ -39,13 +62,17 @@ For small changes that don't need full PRD:
 ## Usage
 
 ```bash
-# Default: Work on Main (quick, simple)
+# From Main: Work on Main (quick, simple)
 /ship "Fix login button alignment"
 
-# With worktree isolation (safer, larger fixes)
+# From Main: With worktree isolation (safer, larger fixes)
 /ship "Refactor auth module" --worktree
 
-# Manage active fix
+# From Worktree: Auto-detects worktree context
+cd worktrees/hotfix/
+/ship "Fix auth bug"       # Automatically uses worktree!
+
+# Manage active fix (works from anywhere)
 /ship --complete           # Finish and merge
 /ship --abort              # Cancel fix
 /ship --status             # Show current status
@@ -126,7 +153,7 @@ $ /ship --complete
 🧹 Cleaned up branch
 ```
 
-## Workflow: With Worktree
+## Workflow: With Worktree (from Main)
 
 ### Step 1: Start Fix in Worktree
 
@@ -187,6 +214,73 @@ $ /ship --complete
 
 ↩️  Returned to Main
 ```
+
+## Workflow: From Worktree Directly (NEW in v0.4.4)
+
+### Setup: Open Cursor Window on Worktree
+
+```bash
+# One-time setup: Open dedicated Cursor window
+cd ~/Documents/watchora/worktrees/hotfix/
+code .  # Opens Cursor in worktree directory
+```
+
+### Step 1: Start Fix (from Worktree)
+
+```bash
+# You're already in worktrees/hotfix/
+$ pwd
+~/Documents/watchora/worktrees/hotfix
+
+# Run /ship directly - no --worktree flag needed!
+$ /ship "Fix authentication bug"
+
+🔍 Detected: Running from worktree hotfix/
+🎯 Auto-enabling worktree mode
+
+# AUTO-SYNC (Intelligent)
+🔄 Checking sync status...
+✅ Synced with main (or auto-sync if needed)
+
+# START FIX
+✅ Started in current directory
+📝 Branch: hotfix/fix-authentication-bug
+🔒 Locked worktree (one fix at a time)
+
+💡 Working in worktree - no limits!
+```
+
+### Step 2: Development (Same Directory)
+
+You work in the **same directory** where you launched `/ship`:
+- Already in `worktrees/hotfix/`
+- All your tools/extensions work normally
+- Commit as you go
+- No need to switch directories
+
+### Step 3: Complete Fix (from Worktree)
+
+```bash
+# Still in worktrees/hotfix/
+$ /ship --complete
+
+✅ Committed & pushed
+📤 PR #236 created
+⏳ Waiting for checks...
+✅ Checks passed, auto-merging
+🎉 Merged to main
+
+# AUTO-CLEANUP
+🔄 Returning to parking branch...
+🧹 Deleted branch hotfix/fix-authentication-bug
+🔄 Syncing with main...
+✅ Worktree ready for next fix
+🔓 Unlocked worktree
+
+📍 Still in: worktrees/hotfix/ (ready for next fix)
+```
+
+**Advantage**: You stay in the same Cursor window the entire time!
 
 ## Collision Handling
 
@@ -393,7 +487,7 @@ $ /ship --to-worktree
 # Continue safely
 ```
 
-### Example 3: Direct Worktree Usage
+### Example 3: Direct Worktree Usage (from Main)
 
 ```bash
 $ /ship "Large refactor" --worktree
@@ -403,7 +497,21 @@ $ /ship "Large refactor" --worktree
 # Complete isolation
 ```
 
-### Example 4: Urgent Fix During Active Fix
+### Example 4: Direct Worktree Usage (from Worktree) - NEW!
+
+```bash
+# Cursor window open on worktrees/hotfix/
+$ pwd
+~/Documents/watchora/worktrees/hotfix
+
+$ /ship "Large refactor"
+
+# Auto-detects worktree context
+# No --worktree flag needed
+# Works in current directory
+```
+
+### Example 5: Urgent Fix During Active Fix
 
 ```bash
 # Fix in progress in worktree
@@ -454,6 +562,8 @@ Works seamlessly with:
 
 ---
 
-**Version**: 0.4.3
-**Plugin**: claude-prd-workflow v0.4.3
-**Changes**: Added worktree support, intelligent sync, collision handling
+**Version**: 0.4.4
+**Plugin**: claude-prd-workflow v0.4.4
+**Changes**:
+- v0.4.4: Added automatic context detection - run from Main OR worktree directly
+- v0.4.3: Added worktree support, intelligent sync, collision handling
